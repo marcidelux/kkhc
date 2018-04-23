@@ -1,0 +1,27 @@
+{
+  "name": "kkhc",
+  "version": "1.0.0",
+  "description": "kkhc site",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DonBattery/kkhc.git"
+  },
+  "author": "kkhc",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DonBattery/kkhc/issues"
+  },
+  "homepage": "https://github.com/DonBattery/kkhc#readme",
+  "dependencies": {
+    "endpointz": "^1.0.2",
+    "express": "^4.16.3",
+    "express3-handlebars": "^0.5.2",
+    "handlebars": "^4.0.11",
+    "huli-hb": "^1.0.0",
+    "serve-favicon": "^2.5.0"
+  }
+}
