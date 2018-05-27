@@ -5,9 +5,13 @@ services:
     image: mongo:latest
     volumes:
       - ./data/db:/data/db
+      - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     environment:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null
+      - MONGO_INITDB_ROOT_USERNAME=karma
+      - MONGO_INITDB_ROOT_PASSWORD=coldcold
+      - MONGO_INITDB_DATABASE=kkhcfiles
     ports:
       - 127.0.0.1:27017:27017
     networks:
