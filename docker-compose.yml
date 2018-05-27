@@ -23,6 +23,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    volumes:
+      - ./backend/server:/opt/server/
     ports:
       - 3000:3000
       - 9229-9239:9229-9239
@@ -31,7 +33,7 @@ services:
     links:
       - mongo
     working_dir: /opt
-    command: pm2 --no-daemon start ./server/pm2.json
+    command: nodemon -L ./server/app.js
     environment:
       NODE_ENV: development
       NODE_APP_INSTANCE: docker
