@@ -1,0 +1,8 @@
+FROM 218806007807.dkr.ecr.eu-west-2.amazonaws.com/pnnode:8.9.4-stretch
+
+WORKDIR /opt/server
+
+ADD ./jest.config.js .
+ADD ./tsconfig.json .
+ADD ./package.json .
+RUN npm install

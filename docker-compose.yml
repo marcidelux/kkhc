@@ -1,0 +1,46 @@
+version: '2.1'
+services:
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - ./data/db:/data/db
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    ports:
+      - 127.0.0.1:27017:27017
+    networks:
+      kkhc_net:
+        aliases:
+          - db
+
+  server:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+      - 9229-9239:9229-9239
+    networks:
+      kkhc_net:
+    links:
+      - mongo
+    working_dir: /opt
+    command: pm2 --no-daemon start ./server/pm2.json
+    environment:
+      NODE_ENV: development
+      NODE_APP_INSTANCE: docker
+      NODE_CONFIG_DIR: /opt/server/config
+      NODE_PATH: /opt/server
+
+networks:
+  kkhc_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.15.2.0/16
+        gateway: 172.15.1.9

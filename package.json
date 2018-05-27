@@ -4,7 +4,8 @@
   "description": "kkhc site",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "docker-compose -f docker-compose.yml down && docker-compose -f docker-compose.yml up -d server"
   },
   "repository": {
     "type": "git",
@@ -17,11 +18,14 @@
   },
   "homepage": "https://github.com/DonBattery/kkhc#readme",
   "dependencies": {
-    "endpointz": "^1.0.2",
+    "assert-plus": "^1.0.0",
+    "bluebird": "^3.5.1",
+    "config": "^1.30.0",
+    "cors": "^2.8.4",
     "express": "^4.16.3",
-    "express3-handlebars": "^0.5.2",
-    "handlebars": "^4.0.11",
-    "huli-hb": "^1.0.0",
+    "jest": "^23.0.1",
+    "lodash": "^4.17.10",
+    "morgan": "^1.9.0",
     "serve-favicon": "^2.5.0"
   }
 }
