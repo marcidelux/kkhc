@@ -1,7 +1,9 @@
-FROM node:10.2.1
+FROM donbattery/kkhc
 
 WORKDIR /opt
 
 ADD ./package.json .
+ADD ./startup.sh .
+
 RUN npm install -g nodemon
 RUN npm install --production

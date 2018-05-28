@@ -33,7 +33,7 @@ services:
     links:
       - mongo
     working_dir: /opt
-    command: nodemon -L ./server/app.js
+    command: ./startup.sh
     environment:
       NODE_ENV: development
       NODE_APP_INSTANCE: docker
