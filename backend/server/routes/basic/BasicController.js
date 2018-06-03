@@ -1,14 +1,20 @@
 
+const Folder = require('./../../database/folderModel')
+
 class BasicController {
 
     constructor() {}
 
     _dummyGet() {
-        return (req, res) => {
+        return async (req, res) => {
             console.log(req.query)
             console.log(req.body);
             res.status(200);
-            res.json({status: 'ok'});
+            let data = await Folder.findOne({name: 'vörös_majom'})
+            let images = '';
+            let basePath = data.path
+            data.contains.forEach((img) => img.type === 'file' ? images += `<img src="${basePath}/${img.name}">` : null)
+            res.send(images)
         };
     }
 }

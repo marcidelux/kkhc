@@ -25,6 +25,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend/server:/opt/server/
+      - ./backend/test_images:/opt/test_images/
     ports:
       - 3000:3000
       - 9229-9239:9229-9239
