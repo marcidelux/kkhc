@@ -1,32 +1,49 @@
-const express = require('express')
+'use strict';
+
+const express = require('express');
 const RouterHub = require('./routes/RouterHub');
-const path = require('path')
+const path = require('path');
+const exphbs  = require('express-handlebars');
+const morgan = require('morgan');
+const favicon = require('serve-favicon');
 
 class RootServer {
 
-    constructor(port) {
-        this.PORT = port
-        this.server;
-        this.app;
-        this.HOST = '0.0.0.0';
-        this.router = new RouterHub();
-    }
+  constructor(port) {
+    this.PORT = port;
+    this.server;
+    this.app;
+    this.HOST = '0.0.0.0';
+    this.router = new RouterHub();
+  }
 
-    init() {
-        this.app = express();
+  init() {
+    this.app = express();
+    this.http = require('http').Server(this.app);
+    this.io = require('socket.io')(this.http);
+    this.ioHandler = require('./socketIO/ioHandler').handler(this.io);
+    
+    this.app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));    
+    
+    this.app.use(morgan('dev'));
+    
+    this.app.use(express.static('assets'));
 
-        this.app.use('/opt/test_images/',express.static(path.join(__dirname + '/../test_images')));
+    this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+    this.app.set('view engine', 'handlebars');
 
-        this.app.use('/', this.router.getRouter());
-        this.app.use('/admin', this.router.getAdminRouter());
+    this.app.use('/', this.router.getRouter());
+    this.app.use('/admin', this.router.getAdminRouter());
 
-        this.server = this.app.listen(this.PORT);
-        console.log(`Running on http://${this.HOST}:${this.PORT}`);
-    }
+    this.server = this.http.listen(this.PORT);
 
-    close() {
-        this.server.close();
-    }
+    console.log(`KKHC Server running on http://${this.HOST}:${this.PORT}`);
+  }
+
+  close() {
+    this.server.close();
+  }
+
 }
 
 module.exports = RootServer;

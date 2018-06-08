@@ -1,5 +1,5 @@
 
-let routes = [{
+const routes = [{
     path: '/ping',
     method: 'get',
     controller: (req, res) => {
