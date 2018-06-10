@@ -1,7 +1,5 @@
 const config = require('./config/envConfig');
 const RootServer = require('./RootServer');
-const traverse = require('./database/traverser')
-const Folder = require('./database/folderModel')
 
 const mongoose = require('mongoose');
 

@@ -28,8 +28,15 @@ class RootServer {
     this.app.use(morgan('dev'));
     
     this.app.use(express.static('assets'));
+    
+    this.app.use('/opt/test_images/', express.static(path.join(__dirname + '/../test_images')));
+    
+    this.app.engine('handlebars', exphbs({
+      extname:'handlebars', 
+      defaultLayout:'main.handlebars', 
+      layoutsDir: 'views/layouts'
+    }));
 
-    this.app.engine('handlebars', exphbs({defaultLayout: 'main'}));
     this.app.set('view engine', 'handlebars');
 
     this.app.use('/', this.router.getRouter());
