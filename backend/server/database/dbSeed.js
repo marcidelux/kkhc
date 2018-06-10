@@ -1,5 +1,10 @@
-const traverse = require('./traverser')
-const Folder = require('./folderModel')
+const traverse = require('./traverser');
+const Folder = require('./folderModel').Folder;
+const connection = require('./folderModel').connection;
+const mongoose = require('mongoose');
+
+
+let pendingSaves = [];
 
 const recursiveModelMaker = (model) => {
 	if (model.type === 'dir') {
@@ -13,8 +18,8 @@ const recursiveModelMaker = (model) => {
     contains: folderContainer,
     hash: model.hash,
   });
-  newCollection.save()
-    .then(() => console.log('collection created -> ', newCollection));
+  console.log(newCollection)
+  pendingSaves.push(newCollection.save())
 
 	model.files.forEach((subModel) => {
   		recursiveModelMaker(subModel);
@@ -27,3 +32,6 @@ const dbModel = traverse('/opt/test_images');
 dbModel.forEach((model) => {
 	recursiveModelMaker(model);
 });
+
+Promise.all(pendingSaves).then(() => connection.close())
+

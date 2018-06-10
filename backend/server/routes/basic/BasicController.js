@@ -1,6 +1,7 @@
 'use strict';
 
-const Folder = require('./../../database/folderModel');
+const Folder = require('./../../database/folderModel').Folder;
+const connection = require('./../../database/folderModel').connection;
 
 class BasicController {
   
@@ -23,7 +24,7 @@ class BasicController {
       console.log(req.query);
       console.log(req.body);
       res.status(200);
-      let data = await Folder.findOne({hash: 1528649288838});
+      let data = await Folder.findOne({hash: 1528664632620});
       let images = '';
       console.log(data);
       let basePath = data.path;
@@ -31,9 +32,9 @@ class BasicController {
           img.type === 'file' ? images += `<img src="${basePath}/${img.name}">` : images += `<p>${img.name}</p>`;
         });
       res.send(images);
+      connection.close()
     };
   };
-
 };
 
 module.exports = BasicController;
