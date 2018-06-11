@@ -13,12 +13,22 @@ const routes = [
   {
     path: '/',
     method: 'get',
-    controller: controller.home(),
+    controller: controller.login(),
+  },
+  {
+    path: '/auth',
+    method: 'post',
+    controller: controller.auth(),
   },
   {
     path: '/ribbit',
     method: 'get',
     controller: controller.ribbit(),
+  },
+  {
+    path: '/addUser',
+    method: 'get',
+    controller: controller.addUser(),
   },
 ];
 

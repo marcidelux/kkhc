@@ -7,6 +7,10 @@ const exphbs  = require('express-handlebars');
 const morgan = require('morgan');
 const favicon = require('serve-favicon');
 
+// hbs.registerHelper('loginError', function(msg) {
+//   return new exphbs.SafeString(`<div class="loginError">${msg}</div>`);
+// });
+
 class RootServer {
 
   constructor(port) {
@@ -34,7 +38,7 @@ class RootServer {
     this.app.engine('handlebars', exphbs({
       extname:'handlebars', 
       defaultLayout:'main.handlebars', 
-      layoutsDir: 'views/layouts'
+      layoutsDir: 'views/layouts',
     }));
 
     this.app.set('view engine', 'handlebars');
