@@ -6,13 +6,12 @@ const path = require('path');
 const exphbs  = require('express-handlebars');
 const morgan = require('morgan');
 const favicon = require('serve-favicon');
-
-// hbs.registerHelper('loginError', function(msg) {
-//   return new exphbs.SafeString(`<div class="loginError">${msg}</div>`);
-// });
-
+const session = require('express-session');
+const MemoryStore = require('memorystore')(session);
+const util = require('util');
+ 
 class RootServer {
-
+  
   constructor(port) {
     this.PORT = port;
     this.server;
@@ -20,35 +19,36 @@ class RootServer {
     this.HOST = '0.0.0.0';
     this.router = new RouterHub();
   }
-
+  
   init() {
     this.app = express();
     this.http = require('http').Server(this.app);
     this.io = require('socket.io')(this.http);
-    this.ioHandler = require('./socketIO/ioHandler').handler(this.io);
-    
-    this.app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));    
-    
-    this.app.use(morgan('dev'));
-    
-    this.app.use(express.static('assets'));
-    
-    this.app.use('/opt/test_images/', express.static(path.join(__dirname + '/../test_images')));
+    this.ioHandler = require('./socketIO/ioHandler').handler(this.io);    
+    this.app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));        
+    this.app.use(morgan('dev'));    
+    this.app.use(session(Object.assign({a:1},{
+        store: new MemoryStore({
+          checkPeriod: 86400000 // prune expired entries every 24h
+        }),
+        secret: 'a játék'
+    })));
+
+    this.app.use(express.static('assets'));    
+    this.app.use('/opt/test_images/', express.static(path.join(__dirname + '/../test_images')));    
     
     this.app.engine('handlebars', exphbs({
       extname:'handlebars', 
       defaultLayout:'main.handlebars', 
       layoutsDir: 'views/layouts',
-    }));
-
+    }));    
     this.app.set('view engine', 'handlebars');
 
     this.app.use('/', this.router.getRouter());
-    this.app.use('/admin', this.router.getAdminRouter());
 
-    this.server = this.http.listen(this.PORT);
-
-    console.log(`KKHC Server running on http://${this.HOST}:${this.PORT}`);
+    this.server = this.http.listen(this.PORT, () => {
+      console.log(`KKHC Server running on http://${this.HOST}:${this.PORT}`);
+    });
   }
 
   close() {

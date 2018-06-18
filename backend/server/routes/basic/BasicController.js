@@ -3,14 +3,16 @@
 // const Folder = require('./../../database/folderModel').Folder;
 // const connection = require('./../../database/folderModel').connection;
 
-const findFolderByHash = require('./../../database/folderModel').findFolderByHash;
-const findUserByName = require('./../../database/folderModel').findUserByName;
+const {findFolderByHash} = require('./../../database/folderModel');
+const {findUserByEmail} = require('./../../database/folderModel');
 const User = require('./../../database/folderModel').User;
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 class BasicController {
   
   constructor() {};
-  
+
   home() {
     return (req, res) => {
         res.render('home');
@@ -19,30 +21,46 @@ class BasicController {
   
   addUser() {
     return (req, res) => {
-      let user_ = new User({username: 'klé', password: '123', avatar: 'apád'});
-      user_.save();
-      res.json({msg: 'user added'});
+      let myHash = '';
+      bcrypt.hash('123', saltRounds, function(err, hash) {
+        if (err) {
+          console.log('ERROR', err);
+        } else {
+          myHash = hash;
+          console.log('HASHED ', myHash);
+          let user_ = new User({ email: 'asd@wasd.gov', password: myHash, avatar: 'apád' });
+          user_.save();
+          res.json({ msg: 'user added' });
+        }
+      });
     };
   };
   
   auth() {
     return (req, res) => {      
-      if (req.body.username.length > 0) {
-        findUserByName(req.body.username, err => {
+      if (req.body.email.length > 0) {
+        findUserByEmail(req.body.email, err => {
           res.json({ Error: 'DB error' });
         }, user => {
           if (user) {
-            if (req.body.password === user.password) {
-              res.json({ Success: 'Successfully authenticated' });
-            } else {
-              res.json({ Error: 'wrong password' });
-            }
+            bcrypt.compare(req.body.password, user.password, function(err, hashReturn) {
+              if (err) {
+                console.log('ERROR', err);
+              } else {
+                if (hashReturn) {
+                  req.session.authenticated = true;
+                  res.json({ Success: 'Successfully authenticated' });
+                } else {
+                  res.json({ Error: 'wrong password' });
+                }
+              }
+            });     
           } else {
             res.json({ Error: 'user cannot be found' })
           }
         });
       } else {
-        res.json({ Error: 'no username provided' });
+        res.json({ Error: 'no Email provided' });
       }
     };
   };
@@ -58,7 +76,6 @@ class BasicController {
         res.render('ribbit');
     };
   };
-
 
   _dummyGet() {
     return async (req, res) => {

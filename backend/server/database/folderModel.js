@@ -12,6 +12,7 @@ const folderSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema({ 
   username: String,
   password: String,
+  email: String,
   avatar: String,
 });
 
@@ -20,11 +21,11 @@ const Folder = connection.model('folders', folderSchema, 'folders');
 const User = connection.model('users', userSchema, 'users');
 
 function findFolderByHash(hash){
-  return Folder.findOne({ hash: hash });
+  return Folder.findOne({ hash });
 }
 
-function findUserByName(username, onError, onResult){
-  User.findOne({ username: username }, (err, res) => { 
+function findUserByEmail(email, onError, onResult){
+  User.findOne({ email }, (err, res) => { 
     if (err) {
       onError(err);
     } else { 
@@ -33,4 +34,4 @@ function findUserByName(username, onError, onResult){
   });
 }
 
-module.exports = {User, Folder, connection, findFolderByHash, findUserByName};
+module.exports = {User, Folder, connection, findFolderByHash, findUserByEmail};

@@ -9,6 +9,7 @@ const routes = [
     path: '/_dummy',
     method: 'get',
     controller: controller._dummyGet(),
+    auth: true,
   },
   {
     path: '/',
@@ -24,11 +25,13 @@ const routes = [
     path: '/ribbit',
     method: 'get',
     controller: controller.ribbit(),
+    auth: true,
   },
   {
     path: '/addUser',
     method: 'get',
     controller: controller.addUser(),
+    auth: false,
   },
 ];
 
