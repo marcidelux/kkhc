@@ -3,15 +3,15 @@ services:
 
   mongo:
     image: mongo:latest
+    environment:
+      - MONGO_DATA_DIR=${MONGO_DATA_DIR}
+      - MONGO_LOG_DIR=${MONGO_LOG_DIR}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     volumes:
       - ./data/db:/data/db
       - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    environment:
-      - MONGO_DATA_DIR=/data/db
-      - MONGO_LOG_DIR=/dev/null
-      - MONGO_INITDB_ROOT_USERNAME=karma
-      - MONGO_INITDB_ROOT_PASSWORD=coldcold
-      - MONGO_INITDB_DATABASE=kkhcfiles
     ports:
       - 127.0.0.1:27017:27017
     networks:
@@ -23,23 +23,24 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    environment:
+      - EXPRESS_PORT=${EXPRESS_PORT}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     volumes:
-      - ./backend/server:/opt/server/
-      - ./backend/test_images:/opt/test_images/
+      - ./server:/opt/server/
+      - ./data/test_images:/opt/images/
     ports:
       - 3000:3000
       - 9229-9239:9229-9239
     networks:
-      kkhc_net:
+      - kkhc_net
     links:
       - mongo
     working_dir: /opt
-    command: ./startup.sh
-    environment:
-      NODE_ENV: development
-      NODE_APP_INSTANCE: docker
-      NODE_CONFIG_DIR: /opt/server/config
-      NODE_PATH: /opt/server
+    command: ./server/startup.sh
+
 
 networks:
   kkhc_net:

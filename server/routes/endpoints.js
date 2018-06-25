@@ -1,6 +1,6 @@
 'use strict';
 
-const BasicController = require('./BasicController');
+const BasicController = require('./controllers');
 
 const controller = new BasicController();
 
@@ -9,7 +9,7 @@ const routes = [
     path: '/_dummy',
     method: 'get',
     controller: controller._dummyGet(),
-    auth: true,
+    auth: false,
   },
   {
     path: '/',

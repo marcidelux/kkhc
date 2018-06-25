@@ -24,13 +24,18 @@ function findFolderByHash(hash){
   return Folder.findOne({ hash });
 }
 
-function findUserByEmail(email, onError, onResult){
-  User.findOne({ email }, (err, res) => { 
-    if (err) {
-      onError(err);
-    } else { 
-      onResult(res);
-    }
+function findUserByEmail(email) {
+  return new Promise ((reject, resolve) => {
+    User.findOne({ email }, (err, res) => {
+      if (err) {
+        reject(err);
+      } else if (!res) {
+        throw {error: 'user cannot be found'};
+      } else {
+        console.log('DB RES :', res); 
+        resolve(res);     
+      }
+    }); 
   });
 }
 
