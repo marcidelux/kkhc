@@ -1,16 +1,19 @@
 const traverse = require('./traverser');
-const Folder = require('./folderModel').Folder;
-const connection = require('./folderModel').connection;
+const { Folder } = require('./folderModel');
+const { connection } = require('./folderModel');
 const mongoose = require('mongoose');
 
-
-let pendingSaves = [];
+const pendingSaves = [];
 
 const recursiveModelMaker = (model) => {
 	if (model.type === 'dir') {
   	const folderContainer = model.files.map((innerFile) => {
-  		return { name: innerFile.file, type: innerFile.type, hash: innerFile.hash }
-  	});
+    return { 
+      name: innerFile.file,
+      type: innerFile.type,
+      hash: innerFile.hash,
+    };
+  });
 
   const newCollection = new Folder({ 
     name: model.file,
@@ -18,7 +21,9 @@ const recursiveModelMaker = (model) => {
     contains: folderContainer,
     hash: model.hash,
   });
+
   console.log(newCollection)
+
   pendingSaves.push(newCollection.save())
 
 	model.files.forEach((subModel) => {
@@ -27,11 +32,26 @@ const recursiveModelMaker = (model) => {
 	}
 }
 
-const dbModel = traverse('/opt/test_images');
-
-dbModel.forEach((model) => {
+const rootFolders = traverse('/opt/images');
+rootFolders.forEach((model) => {
 	recursiveModelMaker(model);
 });
 
-Promise.all(pendingSaves).then(() => connection.close())
+Promise.all(pendingSaves).then(async () => {
+
+  const ROOT = new Folder({
+    name: 'kkhc',
+    path: '/opt/images',
+    contains: [...rootFolders.map((folder) => {
+      delete folder.files && delete folder.path
+      return folder
+    })],
+    hash: 0,
+  });
+
+  console.log(ROOT);
+  await ROOT.save()
+
+  connection.close()
+})
 
