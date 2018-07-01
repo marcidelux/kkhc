@@ -28,8 +28,6 @@
     "memorystore": "^1.6.0",
     "mongoose": "^5.1.2",
     "morgan": "^1.9.0",
-    "react-native-navigation": "^1.1.473",
-    "react-navigation": "^2.5.5",
     "serve-favicon": "^2.5.0",
     "socket.io": "^2.1.1"
   },
