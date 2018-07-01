@@ -5,7 +5,7 @@ const traverse = function(dir, result = []) {
     
     fs.readdirSync(dir).forEach((file) => {
         const fPath = path.resolve(dir, file);
-        const fileStats = { file, path: fPath };
+        const fileStats = { name: file, path: fPath };
 
         if (fs.statSync(fPath).isDirectory()) {
             fileStats.type = 'dir';
@@ -17,6 +17,8 @@ const traverse = function(dir, result = []) {
 
         fileStats.type = 'file';
         fileStats.hash = Date.now()
+        fileStats.commentFlow = false;
+        fileStats.tags = [];
         result.push(fileStats);
     });
     return result;

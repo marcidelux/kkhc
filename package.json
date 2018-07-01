@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "docker-compose -f docker-compose.yml down && docker-compose -f docker-compose.yml up -d server",
-    "seed": "docker exec -it kkhc_server_1 node server/database/dbSeed.js"
+    "seed": "docker exec -it kkhc_server_1 node server/database/dbSeed.js",
+    "stop": "docker-compose -f docker-compose.yml down "
   },
   "repository": {
     "type": "git",

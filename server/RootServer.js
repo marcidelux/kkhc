@@ -3,7 +3,7 @@
 const express = require('express');
 const RouterHub = require('./routes/RouterHub');
 const path = require('path');
-const exphbs  = require('express-handlebars');
+const exphbs = require('express-handlebars');
 const morgan = require('morgan');
 const favicon = require('serve-favicon');
 const session = require('express-session');
@@ -27,15 +27,15 @@ class RootServer {
     this.ioHandler = require('./socketIO/ioHandler').handler(this.io);    
     this.app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));        
     this.app.use(morgan('dev'));    
-    this.app.use(session(Object.assign({a:1},{
+    this.app.use(session({
         store: new MemoryStore({
           checkPeriod: 86400000 // prune expired entries every 24h
         }),
         secret: 'a játék'
-    })));
+    }));
 
     this.app.use(express.static('assets'));    
-    this.app.use('/opt/test_images/', express.static(path.join(__dirname + '/../test_images')));    
+    this.app.use('/opt/images/', express.static(path.join(__dirname + '/../images')));
     
     this.app.engine('handlebars', exphbs({
       extname:'handlebars', 
