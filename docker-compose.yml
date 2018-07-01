@@ -32,7 +32,7 @@ services:
       - ./server:/opt/server/
       - ./data/test_images:/opt/images/
     ports:
-      - 3000:3000
+      - 3099:3099
       - 9229-9239:9229-9239
     networks:
       - kkhc_net

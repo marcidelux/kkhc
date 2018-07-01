@@ -1,30 +1,24 @@
 const traverse = require('./traverser');
 const { Folder } = require('./folderModel');
 const { connection } = require('./folderModel');
-const mongoose = require('mongoose');
 
 const pendingSaves = [];
 
 const recursiveModelMaker = (model) => {
 	if (model.type === 'dir') {
-  	const folderContainer = model.files.map((innerFile) => {
-    return { 
-      name: innerFile.file,
-      type: innerFile.type,
-      hash: innerFile.hash,
-    };
-  });
 
-  const newCollection = new Folder({ 
-    name: model.file,
+  const newFolderCollection = new Folder({ 
+    name: model.name,
     path: model.path,
-    contains: folderContainer,
+    contains: [
+        ...model.files.map(({path, ...rest}) => rest )
+    ],
     hash: model.hash,
   });
 
-  console.log(newCollection)
+  console.log(newFolderCollection)
 
-  pendingSaves.push(newCollection.save())
+  pendingSaves.push(newFolderCollection.save())
 
 	model.files.forEach((subModel) => {
   		recursiveModelMaker(subModel);
