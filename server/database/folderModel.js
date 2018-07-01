@@ -7,6 +7,15 @@ const {
 
 const connection = mongoose.createConnection(`mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@db:27017/${MONGO_INITDB_DATABASE}?authSource=admin`, { poolSize: 10 });
 
+
+connection.on('connected', function(){
+  console.log('connected')
+});
+
+connection.on('disconnected', function(){
+  console.log('disconnected')
+});
+
 const folderSchema = new mongoose.Schema({ 
   name: String,
   path: String,
