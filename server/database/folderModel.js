@@ -5,7 +5,8 @@ const {
     MONGO_INITDB_DATABASE, 
 } = require('./../envConfig');
 
-const connection = mongoose.createConnection(`mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@db:27017/${MONGO_INITDB_DATABASE}?authSource=admin`, { poolSize: 10 });
+// const connection = mongoose.createConnection(`mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@db:27017/${MONGO_INITDB_DATABASE}?authSource=admin`, { poolSize: 10 });
+const connection = mongoose.createConnection(`mongodb://test_super:stub@test_db:27017/test_kkhcfiles?authSource=admin`, { poolSize: 10 });
 
 
 connection.on('connected', function(){

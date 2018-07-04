@@ -52,7 +52,7 @@ class RootServer {
   }
 
   close() {
-    this.server.close();
+    return this.server.close();
   }
 
 }

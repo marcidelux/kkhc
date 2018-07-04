@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "kkhc site",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "jest": "jest -c './test/jest.config.js' ",
+    "test": "docker-compose -f docker-compose.yml down && docker-compose -f docker-compose.yml up test_server",
     "dev": "docker-compose -f docker-compose.yml down && docker-compose -f docker-compose.yml up -d server",
     "seed": "docker exec -it kkhc_server_1 node server/database/dbSeed.js",
     "stop": "docker-compose -f docker-compose.yml down "
@@ -32,6 +33,7 @@
     "socket.io": "^2.1.1"
   },
   "devDependencies": {
-    "jest": "^23.2.0"
+    "jest": "^23.2.0",
+    "supertest": "^3.1.0"
   }
 }
