@@ -6,6 +6,6 @@ const traverse = require('./traverser');
 
 
 connectToDb(config).then(async (connectionEstablished) => {
-  populate(traverse('/opt/images'), connectionEstablished)
+  await populate(traverse('/opt/images'), connectionEstablished)
   await connectionEstablished.disconnect()
 })
