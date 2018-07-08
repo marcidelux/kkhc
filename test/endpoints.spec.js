@@ -7,7 +7,7 @@ const populate = require('./../server/database/populate');
 const traverse = require('./../server/database/traverser');
 const mockConfig = Object.assign(config, {
   	DB_ALIAS: 'test_db',
-  	DB_PORT: '37017',
+  	DB_PORT: '27018',
 })
 console.log(mockConfig)
 

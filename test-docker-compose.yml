@@ -12,7 +12,8 @@ services:
     volumes:
       - ./data/mongo/test_docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
-      - 127.0.0.1:37017:27017
+      - 127.0.0.1:27018:27018
+    command: mongod --port 27018
     networks:
       test_kkhc_net:
         aliases:
@@ -38,7 +39,7 @@ services:
     links:
       - test_mongo
     working_dir: /opt
-    # command: ./test_startup.sh
+    command: ./test_startup.sh
 
 networks:
   test_kkhc_net:
@@ -47,6 +48,6 @@ networks:
       com.docker.network.enable_ipv6: "false"
     ipam:
       driver: default
-      # config:
-      # - subnet: 172.27.2.1/16
-      #   gateway: 172.27.1.10
+      config:
+      - subnet: 172.27.2.1/16
+        gateway: 172.27.1.10
