@@ -28,7 +28,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     volumes:
-      - /run/media/miki/Twins1/KKHC:opt/images
+      - /run/media/miki/Twins1/KKHC:/opt/images
     ports:
       - 3099:3099
       - 9229-9239:9229-9239
