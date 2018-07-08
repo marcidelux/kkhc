@@ -1,9 +1,14 @@
 'use strict';
 
-const conf = require('./envConfig');
+const config = require('./envConfig');
 const RootServer = require('./RootServer');
+const connectToDb = require('./database/folderModel');
 
-console.log(conf)
+console.log(config)
 
-const server = new RootServer(conf.EXPRESS_PORT);
-server.init();
+connectToDb(config).then((connectionEstablished) => {
+	const server = new RootServer(config.EXPRESS_PORT, connectionEstablished);
+	server.init();
+})
+
+

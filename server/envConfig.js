@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = {
   MONGO_DATA_DIR: process.env.MONGO_DATA_DIR, 
   MONGO_LOG_DIR: process.env.MONGO_LOG_DIR,
@@ -7,4 +5,6 @@ module.exports = {
   MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD,
   MONGO_INITDB_DATABASE: process.env.MONGO_INITDB_DATABASE,
   EXPRESS_PORT: process.env.EXPRESS_PORT,
+  DB_ALIAS: 'db',
+  DB_PORT: '27017',
 }

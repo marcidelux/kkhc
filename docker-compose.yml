@@ -19,23 +19,6 @@ services:
         aliases:
           - db
 
-  test_mongo:
-    image: mongo:latest
-    environment:
-      - MONGO_DATA_DIR=/data/db
-      - MONGO_LOG_DIR=/test/null
-      - MONGO_INITDB_ROOT_USERNAME=test_super
-      - MONGO_INITDB_ROOT_PASSWORD=stub
-      - MONGO_INITDB_DATABASE=test_kkhcfiles
-    volumes:
-      - ./data/mongo/test_docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    ports:
-      - 127.0.0.1:27017:27017
-    networks:
-      kkhc_net:
-        aliases:
-          - test_db
-
   server:
     build:
       context: ./
@@ -57,28 +40,6 @@ services:
       - mongo
     working_dir: /opt
     command: ./server/startup.sh
-
-  test_server:
-    build:
-      context: ./
-      dockerfile: Test.Dockerfile
-    environment:
-      - EXPRESS_PORT=3055
-      - MONGO_INITDB_ROOT_USERNAME=test_super
-      - MONGO_INITDB_ROOT_PASSWORD=stub
-      - MONGO_INITDB_DATABASE=test_kkhcfiles
-    volumes:
-      - ./server:/opt/server/
-      - ./test:/opt/test/
-      - ./data/test_images:/opt/images/
-    ports:
-      - 8229-8239:8229-8239
-    networks:
-      - kkhc_net
-    links:
-      - test_mongo
-    working_dir: /opt
-    command: ./test_startup.sh
 
 networks:
   kkhc_net:

@@ -4,7 +4,7 @@
   "description": "kkhc site",
   "scripts": {
     "jest": "jest -c './test/jest.config.js' ",
-    "test": "docker-compose -f docker-compose.yml down && docker-compose -f docker-compose.yml up test_server",
+    "test": "docker-compose -f test-docker-compose.yml down && docker-compose -f test-docker-compose.yml up test_server",
     "dev": "docker-compose -f docker-compose.yml down && docker-compose -f docker-compose.yml up -d server",
     "seed": "docker exec -it kkhc_server_1 node server/database/dbSeed.js",
     "stop": "docker-compose -f docker-compose.yml down "
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/DonBattery/kkhc#readme",
   "dependencies": {
     "bcrypt": "^2.0.1",
+    "bluebird": "^3.5.1",
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
@@ -33,6 +34,7 @@
     "socket.io": "^2.1.1"
   },
   "devDependencies": {
+    "eslint": "^5.0.1",
     "jest": "^23.2.0",
     "supertest": "^3.1.0"
   }

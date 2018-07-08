@@ -1,38 +1,45 @@
+const mongoose = require('mongoose');
 const RootServer = require('./../server/RootServer');
-const config = require('./../server/envConfig');
 const request = require('supertest');
-const {
-  connection,
-  User,
-  Folder,
-  CommentFlow,
-  Tag,
-  findCommentFlowById,
-  findFolderByHash,
-  findUserByEmail,
-  findTagByName,
-} = require('./../server/database/folderModel.js');
+const connectToDb = require('./../server/database/folderModel.js');
+const config = require('./../server/envConfig');
+const populate = require('./../server/database/populate');
+const traverse = require('./../server/database/traverser');
+const mockConfig = Object.assign(config, {
+  	DB_ALIAS: 'test_db',
+  	DB_PORT: '37017',
+})
+console.log(mockConfig)
 
-describe('should init', async () => {
-	const server = new RootServer(1111);
-	server.init();
+describe('should init', () => {
+	let connection;
+	let server;
 
+	beforeAll(async (done) => {
+		connection = await connectToDb(config)
+		server = new RootServer(1111, connection);
+		server.init();
 
-	afterAll(async () => {
-
-		await Promise.all([
-			Folder.remove().exec(),
-			CommentFlow.remove().exec(),
-			Tag.remove().exec(),
-		])
-		connection.close().then(() => server.close());
-				console.log('teardown')
+	  	await populate(traverse('/opt/images'), connection)
+		return done()
 	})
 
-
+	afterAll(async (done) => {
+		await mongoose.connection.dropDatabase()
+		await mongoose.connection.close(true)
+		server.close();
+		return done()
+	})
 
 	it('to be true', async () => {
-		expect(await Folder.find({})).toBe({});
+		const rootFolder = await connection.models.Folder.find({ hash: 0 }).exec();
+
+
+		const req = await request(server.app)
+            .get('/folder/0')
+            .set('Accept', 'application/json')
+
+		expect(JSON.parse(req.text).hash).toEqual(rootFolder[0].hash);
 	})
 
 });

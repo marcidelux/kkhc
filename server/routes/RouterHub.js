@@ -1,13 +1,24 @@
 'use strict';
 
 const cors = require('cors');
-
 const express = require('express');
 
-const routes = require('./endpoints');
+class RouterHub {
 
-function redirect(req, res, next) {
-  console.log(req.session);
+  constructor(dbConnection) {
+    this.router = express.Router();
+    this.RoutesInitializer = require('./endpoints');
+    this.routeObject = new this.RoutesInitializer(dbConnection);
+    this.routes = this.routeObject.routes
+    this.initializeRoutes();
+  }
+
+  getRouter() {
+    return this.router;
+  }
+
+  redirect(req, res, next) {
+    console.log(req.session);
   if (req.session.hasOwnProperty('authenticated')) {
     console.log('not the First visit');
     if (req.session.authenticated) {
@@ -27,25 +38,14 @@ function redirect(req, res, next) {
     return false;
   }
   next();
-}
-
-class RouterHub {    
-
-  constructor() {
-    this.router = express.Router();
-    this.initializeRoutes();
-  }
-
-  getRouter() {
-    return this.router;
   }
 
   initializeRoutes() {
     this.router.use(cors());
     this.router.use(express.json());
-    routes.forEach((route) => {
+    this.routes.forEach((route) => {
       route.auth 
-      ? this.router[route.method](route.path, redirect, route.controller)
+      ? this.router[route.method](route.path, this.redirect, route.controller)
       : this.router[route.method](route.path, route.controller);
     });
   }
