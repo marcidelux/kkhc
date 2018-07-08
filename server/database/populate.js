@@ -17,7 +17,7 @@ const populate = async (traversedDirectory, dbConnection) => {
 
     console.log(newFolderCollection)
 
-    pendingSaves.push(newFolderCollection.save().exec())
+    pendingSaves.push(newFolderCollection.save())
 
     model.files.forEach((subModel) => {
         recursiveModelMaker(subModel);
@@ -42,7 +42,7 @@ const populate = async (traversedDirectory, dbConnection) => {
   });
 
   console.log(ROOT);
-  await ROOT.save().exec();
+  await ROOT.save();
 
   })
 }
