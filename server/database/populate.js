@@ -1,27 +1,27 @@
 const mongoose = require('mongoose');
 
 const populate = async (traversedDirectory, dbConnection) => {
+
   const pendingSaves = [];
   const connection = dbConnection
   const recursiveModelMaker = (model) => {
     if (model.type === 'dir') {
-
-    const newFolderCollection = new connection.models.Folder({ 
-      name: model.name,
-      path: model.path,
-      contains: [
-          ...model.files.map(({path, ...rest}) => rest )
-      ],
-      hash: model.hash,
-    });
-
-    console.log(newFolderCollection)
-
-    pendingSaves.push(newFolderCollection.save())
-
-    model.files.forEach((subModel) => {
-        recursiveModelMaker(subModel);
+      const newFolderCollection = new connection.models.Folder({
+        name: model.name,
+        path: model.path,
+        contains: [
+            ...model.files.map(({path, files, ...rest}) => rest)
+        ],
+        hash: model.hash,
       });
+
+      console.log(newFolderCollection)
+
+      pendingSaves.push(newFolderCollection.save())
+
+      model.files.forEach((subModel) => {
+          recursiveModelMaker(subModel);
+        });
     }
   }
 
