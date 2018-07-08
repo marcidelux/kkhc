@@ -29,8 +29,8 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     volumes:
       - type: bind
-      source: /run/media/miki/Twins1/KKHC
-      target: /opt/images
+        source: /run/media/miki/Twins1/KKHC
+        target: /opt/images
     ports:
       - 3099:3099
       - 9229-9239:9229-9239
