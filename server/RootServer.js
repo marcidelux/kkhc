@@ -12,12 +12,12 @@ const util = require('util');
  
 class RootServer {
   
-  constructor(port) {
+  constructor(port, db) {
     this.PORT = port;
     this.server;
     this.app;
     this.HOST = '0.0.0.0';
-    this.router = new RouterHub();
+    this.router = new RouterHub(db);
   }
   
   init() {

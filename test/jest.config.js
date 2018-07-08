@@ -1,8 +1,6 @@
 module.exports = {
-    "transform": {
-        "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(//.*|(\\.|/)(test|spec))\\.tsx?$",
+    "testPathIgnorePatterns": ["<rootDir>/mobile/"],
+    "testRegex": "(//.*|(\\.|/)(test|spec))\\.js?$",
     "moduleFileExtensions": [
         "ts",
         "tsx",

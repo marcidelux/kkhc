@@ -1,23 +1,15 @@
 'use strict';
 
-const {
-  User,
-  Folder,
-  CommentFlow,
-  Tag,
-  findCommentFlowById,
-  findFolderByHash,
-  findUserByEmail,
-  findTagByName,
-} = require('./../database/folderModel');
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 class BasicController {
   
-  constructor() {};
+  constructor(dbConnection) {
+    this.connection = dbConnection
+    this.models = this.connection.models;
+  };
 
   test() {
     return (req, res) => {
@@ -31,7 +23,7 @@ class BasicController {
     return async ({ params }, res) => {
       if (params) {
         try {
-          const searchedFolderObject = await findFolderByHash(params.folderHash)
+          const searchedFolderObject = await this.models.Folder.findOne({ hash: params.folderHash }).exec();
           res.status(200);
           res.json(searchedFolderObject);
         } catch(error) {
@@ -46,7 +38,7 @@ class BasicController {
     return async ({ params, body }, res) => {
       if (params && body.fileHash) {
         try {
-          const searchedFolderObject = await findFolderByHash(params.folderHash)
+          const searchedFolderObject = await this.models.Folder.findOne({ hash: params.folderHash }).exec();
           let indexToSave;
 
           searchedFolderObject.contains.forEach((file, index) => {
@@ -56,7 +48,7 @@ class BasicController {
           })
 
           if (indexToSave) {
-            const newCommentFLow = await new CommentFlow({
+            const newCommentFLow = await new this.models.CommentFlow({
               comments: [{
                 id: new mongoose.mongo.ObjectId(),
                 text: body.text,
@@ -88,7 +80,7 @@ class BasicController {
     return async ({ body, params }, res) => {
       if (params && body.text && body.user) {
         try {
-          const commentFlow = await findCommentFlowById(params.commentFlowId);
+          const commentFlow = await this.models.CommentFlow.findById(params.commentFlowId).exec();
           const newComment = {
             id: new mongoose.mongo.ObjectId(),
             text: body.text,
@@ -111,7 +103,7 @@ class BasicController {
     return async({ body, params }, res) => {
       if (params) {
         try {
-          const commentFlow = await findCommentFlowById(params.commentFlowId);
+          const commentFlow = await this.models.CommentFlow.findById(params.commentFlowId).exec();
           res.status(200).json(commentFlow);
         } catch(error) {
           console.log(error)
@@ -126,10 +118,10 @@ class BasicController {
       const { folderHash } = params;
       const { name, reference, originalAuthor } = body;
       try {
-        const tag = new Tag({ name, refersTo: [ reference ], originalAuthor });
+        const tag = new this.modesl.Tag({ name, refersTo: [ reference ], originalAuthor });
         await tag.save();
 
-        const folder = await findFolderByHash(folderHash);
+        const folder = await this.models.Folder.findOne({ hash: folderHash }).exec();
 
         let indexToUpdate;
         folder.contains.forEach((file, index) => {
@@ -153,7 +145,7 @@ class BasicController {
       const { folderHash } = params;
       const { name, reference } = body;
       try {
-        const existingTag = await findTagByName(name);
+        const existingTag = await Tag.findOne({ name }).exec();
 
         let unique = true;
         existingTag.refersTo.forEach((filereference) => filereference.fileHash === reference.fileHash ? unique = false : null)
@@ -163,7 +155,7 @@ class BasicController {
           existingTag.markModified('refersTo');
 
           
-          const folder = await findFolderByHash(folderHash);
+          const folder = await this.models.Folder.findOne({ hash: folderHash }).exec();
 
           let indexToUpdate;
           folder.contains.forEach((file, index) => {
@@ -208,13 +200,13 @@ class BasicController {
   addUser() {
     return (req, res) => {
       let myHash = '';
-      bcrypt.hash('123', saltRounds, function(err, hash) {
+      bcrypt.hash('123', saltRounds, (err, hash) => {
         if (err) {
           console.log('ERROR', err);
         } else {
           myHash = hash;
           console.log('HASHED ', myHash);
-          let user_ = new User({ email: 'asd@wasd.gov', password: myHash, avatar: 'SOLARIS' });
+          let user_ = new this.models.User({ email: 'asd@wasd.gov', password: myHash, avatar: 'SOLARIS' });
           user_.save();
           res.json({ msg: 'user added' });
         }
@@ -226,7 +218,7 @@ class BasicController {
     return async ({ body, session }, response) => {
       if (body.email) {
         try {
-          const user = await findUserByEmail(body.email);
+          const user = await User.findOne({ email: body.email }).exec();
           const hash = await bcrypt.compare(body.password, user.password);
 
           hash
@@ -260,7 +252,7 @@ class BasicController {
 
       let data = "";
 
-      findUserByEmail('asd@wanksd.gov')
+      User.findOne({ email: 'asd@wasd.gov' }).exec()
       .then(res => console.log(res, 'wtf'))
       .catch(err => console.log(err, 'ERRRORRRRR'));
 

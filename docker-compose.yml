@@ -41,7 +41,6 @@ services:
     working_dir: /opt
     command: ./startup.sh
 
-
 networks:
   kkhc_net:
     driver: bridge
