@@ -1,0 +1,51 @@
+version: '2'
+services:
+
+  mongo:
+    image: mongo:latest
+    environment:
+      - MONGO_DATA_DIR=${MONGO_DATA_DIR}
+      - MONGO_LOG_DIR=${MONGO_LOG_DIR}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    volumes:
+      - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 127.0.0.1:27017:27017
+    networks:
+      kkhc_net:
+        aliases:
+          - db
+
+  server:
+    build:
+      context: ./
+      dockerfile: Build.Dockerfile
+    environment:
+      - EXPRESS_PORT=${EXPRESS_PORT}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    volumes:
+      - /run/media/miki/Twins/KKHC:/opt/images/
+    ports:
+      - 3099:3099
+      - 9229-9239:9229-9239
+    networks:
+      - kkhc_net
+    links:
+      - mongo
+    working_dir: /opt
+    command: ./server/build_startup.sh
+
+networks:
+  kkhc_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.15.2.0/16
+        gateway: 172.15.1.9
