@@ -6,8 +6,10 @@ do
     sleep 1
 done
 
+cd server
+
 echo "Seeding database with folder structure..."
-node server/database/dbSeed.js
+node database/dbSeed.js
 
 echo "Starting Server..."
-node server/app.js
+node app.js
