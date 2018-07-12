@@ -37,7 +37,7 @@ services:
       - 9229-9239:9229-9239
     networks:
       - kkhc_net
-      - nginxproxy
+      - documents_nginxproxy
     links:
       - mongo
     working_dir: /opt
