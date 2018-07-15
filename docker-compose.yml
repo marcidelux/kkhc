@@ -1,19 +1,16 @@
 version: '2'
+
 services:
 
   mongo:
     image: mongo:latest
-    environment:
-      - MONGO_DATA_DIR=${MONGO_DATA_DIR}
-      - MONGO_LOG_DIR=${MONGO_LOG_DIR}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    env_file:
+      - ./.env
     volumes:
       - ./data/db:/data/db
       - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
-      - 127.0.0.1:27017:27017
+      - 27017:27017
     networks:
       kkhc_net:
         aliases:
@@ -23,11 +20,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    environment:
-      - EXPRESS_PORT=${EXPRESS_PORT}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    env_file:
+      - ./.env
     volumes:
       - ./server:/opt/server/
       - ./data/test_images:/opt/images/

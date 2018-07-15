@@ -17,6 +17,14 @@ connectToDb = (config) => {
     avatar: String,
   });
 
+  
+  // const chatSchema = new mongoose.Schema({ 
+  //   email: String,
+  //   body: String,
+  //   email: String,
+  //   avatar: String,
+  // });
+
   const commentFlowSchema = new mongoose.Schema({ 
     comments: Array,
     belongsTo: Number,

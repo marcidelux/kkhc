@@ -1,5 +1,6 @@
 'use strict';
 
+const config = require('../envConfig');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -214,29 +215,36 @@ class BasicController {
     };
   };
 
-  auth() {
-    return async ({ body, session }, response) => {
-      if (body.email) {
-        try {
-          const user = await User.findOne({ email: body.email }).exec();
-          const hash = await bcrypt.compare(body.password, user.password);
-
-          hash
-          ? session.authenticated = true && response.json({ Success: 'Successfully authenticated' })
-          : response.json({ Error: 'wrong password' });
-
-        } catch(err) {
-          console.log(err);
-        }
-      } else {
-        response.status(400).json({ Error: 'no Email provided' });
-      }
-    };
-  };
+    auth() {
+        return (req, res) => {      
+          if ((req.body.email.length > 0) && (req.body.password.length > 0)) {
+            this.models.User.findOne({ email: req.body.email })
+            .then((user) => {
+              console.log('USER ???', user);
+              bcrypt.compare(req.body.password, user.password, function(err, hashReturn) {
+                if (err) {
+                  console.log('HASH ERROR', err);
+                } else {
+                  if (hashReturn) {
+                    req.session.authenticated = true;
+                    res.json({ Success: 'Successfully authenticated' });
+                  } else {
+                    res.json({ Error: 'wrong password' });
+                  }
+                }
+              });
+            }).catch(err =>
+              res.json({ Error: 'User not found' })
+            );
+          } else {
+            res.json({ Error: 'no Email and/or Password provided' });
+          }
+        };
+      };
 
   login() {
     return (req, res) => {
-        res.render('login');
+        res.render('login', { URL: config.WEB_URL });
     };
   };
 

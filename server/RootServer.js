@@ -9,6 +9,7 @@ const favicon = require('serve-favicon');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const util = require('util');
+const config = require('./envConfig');
  
 class RootServer {
   
@@ -25,8 +26,8 @@ class RootServer {
     this.http = require('http').Server(this.app);
     this.io = require('socket.io')(this.http);
     this.ioHandler = require('./socketIO/ioHandler').handler(this.io);    
-    this.app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));        
-    this.app.use(morgan('dev'));    
+    this.app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));
+    this.app.use(morgan((config.NODE_ENV == 'development') ? 'dev' : ''));    
     this.app.use(session({
         store: new MemoryStore({
           checkPeriod: 86400000 // prune expired entries every 24h
