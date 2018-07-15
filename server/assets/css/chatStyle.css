@@ -1,0 +1,75 @@
+#chatWrapper {
+  display: none;
+}
+
+#chatBox {
+  overflow-y: auto;
+  position: absolute;
+  width: 100%;
+  top: 64px;
+  left: 0;
+  bottom: 4.2rem;
+}
+
+.chatMessage {
+  padding-left: 3px;
+  color: aquamarine;
+}
+
+#chatUsers {
+  position: fixed;
+  display: flex;
+  flex-wrap: wrap;
+  top: 0;
+  left: 0;
+  height: 64px;
+  overflow-y: auto;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-right: 0.5rem;
+}
+
+.infoAvatar {
+  height: 32px;
+  width: 32px;
+}
+
+.infoNickname {
+  padding-left: 3px;
+}
+
+#chatMessages { 
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  vertical-align: middle;
+  align-self: center;
+  padding-left: 0.75rem;
+}
+
+#chatMessages li {
+  white-space: normal;
+  display: flex;
+}
+
+#chatMessages li:nth-child(odd) {
+  background: rgb(9, 163, 155);
+}
+
+#messageForm {
+  display: grid;
+  grid-template-columns: 8fr 2fr;
+  position: fixed;
+  background: #000; 
+  padding: 3px; 
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+}

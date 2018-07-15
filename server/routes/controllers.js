@@ -1,6 +1,5 @@
 'use strict';
 
-const config = require('../envConfig');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -15,7 +14,6 @@ class BasicController {
   test() {
     return (req, res) => {
       console.log(req.body);
-      res.status(200);
       res.json({msg:' connect EXPO!'});
     }
   };
@@ -191,12 +189,6 @@ class BasicController {
       // @TODO
     }
   }
-
-  home() {
-    return (req, res) => {
-        res.render('home');
-    };
-  };
   
   addUser() {
     return (req, res) => {
@@ -215,42 +207,70 @@ class BasicController {
     };
   };
 
-    auth() {
-        return (req, res) => {      
-          if ((req.body.email.length > 0) && (req.body.password.length > 0)) {
-            this.models.User.findOne({ email: req.body.email })
-            .then((user) => {
-              console.log('USER ???', user);
-              bcrypt.compare(req.body.password, user.password, function(err, hashReturn) {
-                if (err) {
-                  console.log('HASH ERROR', err);
-                } else {
-                  if (hashReturn) {
-                    req.session.authenticated = true;
-                    res.json({ Success: 'Successfully authenticated' });
-                  } else {
-                    res.json({ Error: 'wrong password' });
-                  }
-                }
-              });
-            }).catch(err =>
-              res.json({ Error: 'User not found' })
-            );
-          } else {
-            res.json({ Error: 'no Email and/or Password provided' });
-          }
-        };
-      };
+  auth() {
+    return (req, res) => {      
+      if ((req.body.email.length > 0) && (req.body.password.length > 0)) {
+        this.models.User.findOne({ email: req.body.email })
+        .then((user) => {
+          console.log('USER ???', user);
+          bcrypt.compare(req.body.password, user.password, function(err, hashReturn) {
+            if (err) {
+              console.log('HASH ERROR', err);
+            } else {
+              if (hashReturn) {
+                req.session.authenticated = true;
+                res.json({ Success: 'Successfully authenticated' });
+              } else {
+                res.json({ Error: 'wrong password' });
+              }
+            }
+          });
+        }).catch(err =>
+          res.json({ Error: 'User not found' })
+        );
+      } else {
+        res.json({ Error: 'no Email and/or Password provided' });
+      }
+    };
+  };
 
-  login() {
+  root() {
     return (req, res) => {
-        res.render('login', { URL: config.WEB_URL });
+      if (req.session.authenticated) {
+        res.render('home');
+      } else {
+        res.render('login');
+      }
+    };
+  };
+
+  home() {
+    return (req, res) => {
+      res.render('home');
     };
   };
 
   ribbit() {
     return (req, res) => {
-        res.render('ribbit');
+      res.render('ribbit');
+    };
+  };
+
+  drive() {
+    return (req, res) => {
+      res.render('drive');
+    };
+  };
+
+  games() {
+    return (req, res) => {
+      res.render('games');
+    };
+  };
+
+  options() {
+    return (req, res) => {
+      res.render('options');
     };
   };
 

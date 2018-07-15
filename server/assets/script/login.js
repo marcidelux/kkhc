@@ -1,16 +1,12 @@
 'use strict';
 
-function getURL() {
-  return $('#WEB_URL').html()
-}
-
 function loginResult(msg) {
   console.log(msg);
   if (msg.hasOwnProperty('Error')) {
     $('#errorBox').html(msg.Error);
     $('#errorBox').show();
   } else {
-    window.location.assign(getURL() + '/ribbit');
+    window.location.assign(getURL() + '/home');
   }
 }
 

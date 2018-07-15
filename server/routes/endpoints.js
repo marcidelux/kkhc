@@ -10,7 +10,7 @@ class RoutesInitializer {
     {
       path: '/',
       method: 'get',
-      controller: this.controller.login(),
+      controller: this.controller.root(),
     },
     {
       path: '/auth',
@@ -18,9 +18,33 @@ class RoutesInitializer {
       controller: this.controller.auth(),
     },
     {
+      path: '/home',
+      method: 'get',
+      controller: this.controller.home(),
+      auth: true,
+    },
+    {
       path: '/ribbit',
       method: 'get',
       controller: this.controller.ribbit(),
+      auth: true,
+    },
+    {
+      path: '/drive',
+      method: 'get',
+      controller: this.controller.drive(),
+      auth: true,
+    },
+    {
+      path: '/games',
+      method: 'get',
+      controller: this.controller.games(),
+      auth: true,
+    },
+    {
+      path: '/options',
+      method: 'get',
+      controller: this.controller.options(),
       auth: true,
     },
     {

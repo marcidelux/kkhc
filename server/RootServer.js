@@ -10,7 +10,16 @@ const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const util = require('util');
 const config = require('./envConfig');
- 
+
+const hbs = exphbs.create({
+  extname:'handlebars', 
+  defaultLayout:'main.handlebars', 
+  layoutsDir: 'views/layouts',
+  helpers: {
+      WEB_URL: function () { return config.WEB_URL; },
+  }
+});
+
 class RootServer {
   
   constructor(port, db) {
@@ -38,11 +47,8 @@ class RootServer {
     this.app.use(express.static('assets'));    
     this.app.use('/opt/images/', express.static(path.join(__dirname + '/../images')));
     
-    this.app.engine('handlebars', exphbs({
-      extname:'handlebars', 
-      defaultLayout:'main.handlebars', 
-      layoutsDir: 'views/layouts',
-    }));    
+    this.app.engine('handlebars', hbs.engine);
+
     this.app.set('view engine', 'handlebars');
 
     this.app.use('/', this.router.getRouter());

@@ -1,0 +1,89 @@
+* {
+  box-sizing: border-box;
+}
+
+html body {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background-color:rgb(49, 88, 117);
+  color: rgb(159, 219, 154);
+  font-family: "Courier New", "Courier", "monospace";
+  font-size: 1.2rem;
+  white-space: nowrap;
+  height: 100%;
+}
+
+#mainWrapper {
+  width: fit-content;
+  height: 100%;
+  margin: 0 auto;
+} 
+
+#nickName {
+  width: 75%;
+}
+
+.inputError {
+  padding-top: 0.3rem;
+  color: rgb(216, 113, 113);
+  display: none;
+}
+
+.mainHeader {
+  display: block;
+}
+
+  .verticalBox {
+    display: inline-block;
+    top: 30px;
+    padding-left: 10px;
+  }
+
+  .ribbitText {
+    font-size: 3rem;
+    font-weight: bolder;
+    color: rgb(181, 248, 93);
+  }
+
+  .quoteText {
+    font-size: 1rem;
+    padding-left: 5px;
+    color: azure;
+  }
+
+#avatarWrapper {
+  display: none;
+}
+
+  #avatarSelector {
+    display: flex;
+    flex-wrap: wrap;
+    width: 320px;
+  }
+
+.formInput {
+  border: 0px ;
+  padding: 10px; 
+  min-width: 50px;
+  background-color: rgb(14, 167, 194);
+  color: rgb(204, 248, 233);
+  font-size: 2rem;
+  border-radius: 5px;
+}
+
+.formButton {
+  background: rgb(130, 224, 255);
+  color: rgb(4, 85, 58);
+  border: none;
+  padding: 10px;
+  font-size: 2rem;
+  font-weight: bolder;
+  border-radius: 5px;
+}
+
+@media only screen and (max-width: 600px) {
+  html {
+      font-size: 0.75rem;
+  }
+}

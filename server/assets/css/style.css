@@ -2,6 +2,10 @@ html {
   background-color: rgba(0, 0, 255, 0);
 }
 
+#WEB_URL {
+  display: none;
+}
+
 #errorBox {
   padding-bottom: 0.75rem;
   color: rgb(226, 48, 48);

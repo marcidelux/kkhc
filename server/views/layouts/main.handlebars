@@ -13,20 +13,35 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-
+  <script src="script/mainMenu.js"></script>
+  
   <title>KKHC</title>
 
 </head>
 <body>
-  
-    {{{body}}}
 
-    <script>
-      const socket = io();
-      socket.on('accept', (msg) => {
-        console.log('IO :', msg)
-      });
-    </script>
+  <div id="WEB_URL">{{WEB_URL}}</div>
+
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <ul class="nav navbar-nav">
+        <li id="Home_Button"><a href="#">Home</a></li>
+        <li id="Ribbit_Button"><a href="#">Ribbit</a></li>
+        <li id="Drive_Button"><a href="#">Drive</a></li>
+        <li id="Games_Button"><a href="#">Games</a></li>
+        <li id="Options_Button"><a href="#">Options</a></li>
+      </ul>
+    </div>
+  </nav>  
+
+  {{{body}}}
+
+  <script>
+    const socket = io();
+    socket.on('accept', (msg) => {
+      console.log('IO :', msg)
+    });
+  </script>
 
 </body>
 </html>
