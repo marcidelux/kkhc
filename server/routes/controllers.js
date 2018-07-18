@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const config = require('./../envConfig');
 
 class BasicController {
   
@@ -192,18 +193,27 @@ class BasicController {
   
   addUser() {
     return (req, res) => {
-      let myHash = '';
-      bcrypt.hash('123', saltRounds, (err, hash) => {
-        if (err) {
-          console.log('ERROR', err);
-        } else {
-          myHash = hash;
-          console.log('HASHED ', myHash);
-          let user_ = new this.models.User({ email: 'asd@wasd.gov', password: myHash, avatar: 'SOLARIS' });
-          user_.save();
-          res.json({ msg: 'user added' });
-        }
-      });
+      console.log(req.headers)
+      if (req.headers.admin_password === config.ADMIN_PASSWORD) {
+        bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
+          if (err) {
+            console.log('ERROR', err);
+          } else {
+            const myHash = hash;
+            console.log('HASHED ', myHash);
+            let user_ = new this.models.User({
+              email: req.body.email,
+              userName: req.body.userName,
+              password: myHash,
+              avatar: '',
+            });
+            user_.save()
+            .then(() => res.json({ msg: `created user - ${req.body.email}` }));
+          }
+        });
+      } else {
+        res.json({msg: 'you have no rights to do this'})
+      }
     };
   };
 
@@ -271,22 +281,6 @@ class BasicController {
   options() {
     return (req, res) => {
       res.render('options');
-    };
-  };
-
-  _dummyGet() {
-    return async (req, res) => {
-      res.status(200);
-
-      let data = "";
-
-      User.findOne({ email: 'asd@wasd.gov' }).exec()
-      .then(res => console.log(res, 'wtf'))
-      .catch(err => console.log(err, 'ERRRORRRRR'));
-
-
-      let basePath = data.path;
-
     };
   };
 };

@@ -79,14 +79,8 @@ class RoutesInitializer {
     },
     {
       path: '/addUser',
-      method: 'get',
+      method: 'post',
       controller: this.controller.addUser(),
-      auth: false,
-    },
-    {
-      path: '/_dummy',
-      method: 'get',
-      controller: this.controller._dummyGet(),
       auth: false,
     }];
   }

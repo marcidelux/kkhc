@@ -17,4 +17,5 @@ module.exports = {
   EXPRESS_PORT,
   NODE_ENV,
   WEB_URL,
+  ADMIN_PASSWORD: 'kacsa',
 }
