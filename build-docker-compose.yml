@@ -31,7 +31,7 @@ services:
       - LETSENCRYPT_HOST=kkhc.eu,www.kkhc.eu
       - LETSENCRYPT_EMAIL=kkhc.bot@gmail.com
     volumes:
-      - /run/media/miki/Twins1/KKHC:/opt/images
+      - /media/karma/Twins/KKHC:/opt/images
     ports:
       - 3099:80
       - 9229-9239:9229-9239
