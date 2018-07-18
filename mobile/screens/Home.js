@@ -19,7 +19,7 @@ export class HomeScreen extends React.Component {
   fetchFolders = async (hash) => {
     try {
       let response = await fetch(
-        `http://10.1.10.24:3099/folder/${hash}`,
+        `https://kkhc.eu/folder/${hash}`,
           {
         method: 'GET',
         headers: {
@@ -47,14 +47,16 @@ export class HomeScreen extends React.Component {
   renderImages() {
     return this.state.rootFolder.contains.map((fileObject, index) =>{
       if (fileObject.type === 'file') {
-        return <TouchableHighlight onPress={() => this.inspectImage(fileObject)} key={index}>
+        return <TouchableHighlight style={{ width: 140 }}
+        onPress={() => this.inspectImage(fileObject)} key={index}>
         <Image
-        source={{uri: `http://10.1.10.24:3099${this.state.rootFolder.path}/${fileObject.name}`}}
+        source={{uri: `https://kkhc.eu${this.state.rootFolder.path}/${fileObject.name}`}}
         style={{width: 138, height: 138}} />
         </TouchableHighlight>
       } else {
         return <TouchableOpacity
         key={index}
+        style={{width: 138, height: 138, backgroundColor: 'blue', borderRadius: 15}} 
         onPress={() => this.loadInnerFolder(fileObject)}
         ><Text>{fileObject.name}</Text></TouchableOpacity>
       }
@@ -80,11 +82,12 @@ export class HomeScreen extends React.Component {
       <ImageBackground source={require('./pics.png')} style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5FCFF" }}>
       <ImageModal ref={(ref) => { this.child = ref; }} />
       <View>
-      <Text>hajjj</Text>
+      {this.renderDirectoryNavigators()}
       </View>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', width: '80%', height: '80%', backgroundColor: 'red' }}>
-          {this.renderDirectoryNavigators()}
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', width: '95%', height: '80%', backgroundColor: 'red' }}>
+          <ScrollView style={{ width: '100%' }} contentContainerStyle={{flexDirection: 'row',flexWrap: 'wrap'}}>
           {this.renderImages()}
+          </ScrollView>
           <Button
             title="Go to Details"
             onPress={() => console.log(this.state)}

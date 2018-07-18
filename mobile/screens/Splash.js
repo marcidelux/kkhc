@@ -17,9 +17,9 @@ export class SplashScreen extends React.Component {
           'Content-Type': 'application/json; charset=utf-8',
     }});
       let { Success } = await response.json();
-      if (Success) {
+      // if (Success) {
         this.props.navigation.navigate('Home')
-      }
+      // }
     } catch (error) {
       console.error(error);
     }
