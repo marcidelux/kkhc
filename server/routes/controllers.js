@@ -194,7 +194,7 @@ class BasicController {
   addUser() {
     return (req, res) => {
       console.log(req.headers)
-      if (req.headers.admin_password === config.ADMIN_PASSWORD) {
+      if (req.headers.adminpassword === config.ADMIN_PASSWORD) {
         bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
           if (err) {
             console.log('ERROR', err);
