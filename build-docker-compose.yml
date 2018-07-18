@@ -23,6 +23,7 @@ services:
       context: ./
       dockerfile: Build.Dockerfile
     environment:
+      - NODE_ENV=${NODE_ENV}
       - EXPRESS_PORT=${EXPRESS_PORT}
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
