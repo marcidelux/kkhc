@@ -4,7 +4,7 @@ const NODE_ENV =  process.env.NODE_ENV || 'development';
 
 const EXPRESS_PORT = process.env.EXPRESS_PORT || 3000;
 
-const WEB_URL = (NODE_ENV == 'development') ? `http://localhost:${EXPRESS_PORT}` : 'kkhc.eu'
+const WEB_URL = (NODE_ENV == 'development') ? `http://localhost:${EXPRESS_PORT}` : 'https://kkhc.eu'
 
 module.exports = {
   MONGO_DATA_DIR: process.env.MONGO_DATA_DIR, 
