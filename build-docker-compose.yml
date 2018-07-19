@@ -3,12 +3,8 @@ services:
 
   mongo:
     image: mongo:latest
-    environment:
-      - MONGO_DATA_DIR=${MONGO_DATA_DIR}
-      - MONGO_LOG_DIR=${MONGO_LOG_DIR}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    env_file:
+      - ./.env
     volumes:
       - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
@@ -22,16 +18,11 @@ services:
     build:
       context: ./
       dockerfile: Build.Dockerfile
-    environment:
-      - EXPRESS_PORT=${EXPRESS_PORT}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
-      - VIRTUAL_HOST=kkhc.eu,www.kkhc.eu
-      - LETSENCRYPT_HOST=kkhc.eu,www.kkhc.eu
-      - LETSENCRYPT_EMAIL=kkhc.bot@gmail.com
+    env_file:
+      - ./.env
+
     volumes:
-      - /run/media/miki/Twins1/KKHC:/opt/images
+      - /media/karma/Twins/KKHC:/opt/images
     ports:
       - 3099:80
       - 9229-9239:9229-9239
