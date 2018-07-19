@@ -195,11 +195,15 @@ class BasicController {
       let myHash = '';
       bcrypt.hash('123', saltRounds, (err, hash) => {
         if (err) {
-          console.log('ERROR', err);
+          console.log('HASH ERROR ', err);
         } else {
           myHash = hash;
-          console.log('HASHED ', myHash);
-          let user_ = new this.models.User({ email: 'asd@wasd.gov', password: myHash, avatar: 'SOLARIS' });
+          let user_ = new this.models.User({
+            email: 'asd@wasd.gov',
+            username: 'Test User',
+            password: myHash,
+            avatar: 'SOLARIS'
+          });
           user_.save();
           res.json({ msg: 'user added' });
         }
@@ -219,6 +223,7 @@ class BasicController {
             } else {
               if (hashReturn) {
                 req.session.authenticated = true;
+                req.session.userID = user.id;
                 res.json({ Success: 'Successfully authenticated' });
               } else {
                 res.json({ Error: 'wrong password' });
@@ -270,7 +275,9 @@ class BasicController {
 
   options() {
     return (req, res) => {
-      res.render('options');
+      this.models.User.findOne({ _id: req.session.userID }).then(user => {
+        res.render('options', { email: user.email, username: user.username });
+      });
     };
   };
 
