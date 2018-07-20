@@ -6,6 +6,7 @@ services:
     env_file:
       - ./.env
     volumes:
+      - /media/karma/Twins/KKHC_DB:/data/db
       - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - 27017:27017
