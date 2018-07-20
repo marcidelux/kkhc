@@ -2,6 +2,7 @@ version: '2'
 services:
 
   mongo:
+    restart: always
     image: mongo:latest
     env_file:
       - ./.env
@@ -16,6 +17,7 @@ services:
           - db
 
   server:
+    restart: always
     build:
       context: ./
       dockerfile: Build.Dockerfile
@@ -42,8 +44,6 @@ networks:
       com.docker.network.enable_ipv6: "false"
     ipam:
       driver: default
-      config:
-      - subnet: 172.15.2.0/16
-        gateway: 172.15.1.9
+      
   nginx_nginxproxy:
     external: true
