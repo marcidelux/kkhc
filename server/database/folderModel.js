@@ -3,6 +3,15 @@ const mongoose = require('mongoose');
 connectToDb = (config) => {
   const connection = mongoose.connect(`mongodb://${config.MONGO_INITDB_ROOT_USERNAME}:${config.MONGO_INITDB_ROOT_PASSWORD}@${config.DB_ALIAS}:${config.DB_PORT}/${config.MONGO_INITDB_DATABASE}?authSource=admin`, { poolSize: 10 });
 
+  const imageSchema = new mongoose.Schema({
+    name: String,
+    url: String,
+    hash: Number,
+    thumb: String,
+    tags: Array,
+    commentFlow: String,
+  });
+
   const folderSchema = new mongoose.Schema({ 
     name: String,
     path: String,
@@ -17,7 +26,6 @@ connectToDb = (config) => {
     avatar: String,
   });
 
-  
   // const chatSchema = new mongoose.Schema({ 
   //   email: String,
   //   body: String,
@@ -40,6 +48,7 @@ connectToDb = (config) => {
   const CommentFlow = mongoose.model('CommentFlow', commentFlowSchema, 'CommentFlow');
   const User = mongoose.model('User', userSchema, 'User');
   const Tag = mongoose.model('Tag', tagSchema, 'Tag');
+  const Image = mongoose.model('Image', imageSchema, 'Image');
 
   return connection;
 }

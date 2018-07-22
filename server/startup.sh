@@ -1,6 +1,6 @@
 #!/bin/bash
 
-until nc -z db 27017
+until nc -z db 27019
 do
     sleep 1
 done
