@@ -13,17 +13,9 @@ connectToDb = (config) => {
   const userSchema = new mongoose.Schema({ 
     username: String,
     password: String,
-    email: String,
     avatar: String,
+    enabled: Boolean,
   });
-
-  
-  // const chatSchema = new mongoose.Schema({ 
-  //   email: String,
-  //   body: String,
-  //   email: String,
-  //   avatar: String,
-  // });
 
   const commentFlowSchema = new mongoose.Schema({ 
     comments: Array,

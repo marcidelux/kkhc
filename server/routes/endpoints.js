@@ -78,9 +78,9 @@ class RoutesInitializer {
       controller: this.controller.insertIntoTag(),
     },
     {
-      path: '/addUser',
+      path: '/admin',
       method: 'post',
-      controller: this.controller.addUser(),
+      controller: this.controller.admin(),
       auth: false,
     }];
   }

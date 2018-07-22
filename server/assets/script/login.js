@@ -17,11 +17,11 @@ $(() => {
       url: getURL() + '/auth',
       contentType: "application/json; charset=utf-8",
       dataType: "json",
-      data: JSON.stringify({ password: $('#password').val(), email: $('#email').val() }),
+      data: JSON.stringify({ password: $('#password').val(), username: $('#username').val() }),
       success: loginResult
     });
     $('#password').val('');
-    $('#email').val('');
+    $('#username').val('');
     return false;
   });
 });

@@ -191,26 +191,57 @@ class BasicController {
     }
   }
   
-  addUser() {
+  admin() {
     return (req, res) => {
-      console.log(req.headers)
       if (req.headers.adminpassword === config.ADMIN_PASSWORD) {
-        bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
-          if (err) {
-            console.log('ERROR', err);
-          } else {
-            const myHash = hash;
-            console.log('HASHED ', myHash);
-            let user_ = new this.models.User({
-              email: req.body.email,
-              userName: req.body.userName,
-              password: myHash,
-              avatar: '',
-            });
-            user_.save()
-            .then(() => res.json({ msg: `created user - ${req.body.email}` }));
+        console.log('/admin BODY :\n', req.body);
+        if (req.body.hasOwnProperty('Command')) {
+          switch(req.body.Command) {
+            case 'list':
+              console.log('FIND ALL USER');
+              this.models.User.find()
+              .then(users => res.json(users.map(user => {
+                return {
+                  "username": user.username,
+                  "enabled": user.enabled,
+                }
+              })));
+              break;
+            case 'add':
+              if (req.body.Username && req.body.Password) {
+                this.models.User.findOne({username: req.body.Username})
+                .then(user => {
+                  res.json({msg: `User: ${user.username} already exists`});
+                })
+                .catch(err => {
+                  bcrypt.hash(req.body.Password, saltRounds, (err, hash) => {
+                    if (err) {
+                      console.log('ERROR', err);
+                    } else {
+                      const myHash = hash;
+                      let user_ = new this.models.User({
+                        username: req.body.Username,
+                        password: myHash,
+                        enabled: true,
+                      });
+                      user_.save()
+                      .then(() => res.json({ msg: `User created: ${req.body.Username}` }))
+                      .catch(err => {
+                        res.json({ msg: 'cannot save to DB'});
+                      });
+                    }
+                  });                  
+                });
+              } else {
+                res.json({ msg: "no username or password provided"});
+              }
+              break;
+            default:
+              res.json({ msg: 'no valid command issued'});
           }
-        });
+        } else {
+          res.json({ msg: 'no command issued'});
+        }
       } else {
         res.json({msg: 'you have no rights to do this'})
       }
@@ -219,8 +250,8 @@ class BasicController {
 
   auth() {
     return (req, res) => {      
-      if ((req.body.email.length > 0) && (req.body.password.length > 0)) {
-        this.models.User.findOne({ email: req.body.email })
+      if ((req.body.username.length > 0) && (req.body.password.length > 0)) {
+        this.models.User.findOne({ username: req.body.username })
         .then((user) => {
           console.log('USER ???', user);
           bcrypt.compare(req.body.password, user.password, function(err, hashReturn) {
@@ -240,7 +271,7 @@ class BasicController {
           res.json({ Error: 'User not found' })
         );
       } else {
-        res.json({ Error: 'no Email and/or Password provided' });
+        res.json({ Error: 'no username and/or Password provided' });
       }
     };
   };
@@ -282,7 +313,7 @@ class BasicController {
   options() {
     return (req, res) => {
       this.models.User.findOne({ _id: req.session.userID }).then(user => {
-        res.render('options', { email: user.email, username: user.username });
+        res.render('options', { username: user.username });
       });
     };
   };
