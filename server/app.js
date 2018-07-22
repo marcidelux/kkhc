@@ -2,7 +2,7 @@
 
 const config = require('./envConfig');
 const RootServer = require('./RootServer');
-const connectToDb = require('./database/folderModel');
+const connectToDb = require('./database/connectToDb');
 
 connectToDb(config).then((connectionEstablished) => {
 	console.log(connectionEstablished);

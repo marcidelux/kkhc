@@ -8,6 +8,7 @@ MONGO_LOG_DIR=/dev/null
 MONGO_INITDB_ROOT_USERNAME=mongouser
 MONGO_INITDB_ROOT_PASSWORD=mongopassword
 MONGO_INITDB_DATABASE=dbname
+MONGO_PORT=27017
 EXPRESS_PORT=80
 NODE_ENV=production or development
 VIRTUAL_HOST=yoursite.com,www.yoursite.com

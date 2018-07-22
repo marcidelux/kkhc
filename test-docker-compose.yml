@@ -28,8 +28,12 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=test_super
       - MONGO_INITDB_ROOT_PASSWORD=stub
       - MONGO_INITDB_DATABASE=test_kkhcfiles
+      - ADMIN_PASSWORD=password123
+      - EXPRESS_SECRET=123
+
     volumes:
       - ./server:/opt/server/
+      - ./www:/opt/www/
       - ./test:/opt/test/
       - ./data/test_images:/opt/images/
     ports:

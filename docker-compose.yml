@@ -25,6 +25,7 @@ services:
       - ./.env
     volumes:
       - ./server:/opt/server/
+      - ./www:/opt/www/
       - ./data/test_images:/opt/images/
     ports:
       - 3099:3099

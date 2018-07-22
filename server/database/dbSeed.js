@@ -1,9 +1,8 @@
 'use strict';
 
-const connectToDb = require('./folderModel');
+const connectToDb = require('./connectToDb');
 const config = require('./../envConfig');
 const populate = require('./populate');
-const mongoose = require('mongoose');
 const traverse = require('./traverser');
 
 connectToDb(config).then(async (connectionEstablished) => {

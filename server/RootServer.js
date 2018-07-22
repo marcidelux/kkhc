@@ -1,20 +1,20 @@
 'use strict';
 
+const cors = require('cors');
 const express = require('express');
-const RouterHub = require('./routes/RouterHub');
+const RouterHub = require('./router/RouterHub');
 const path = require('path');
 const exphbs = require('express-handlebars');
 const morgan = require('morgan');
 const favicon = require('serve-favicon');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
-const util = require('util');
 const config = require('./envConfig');
 
 const hbs = exphbs.create({
   extname:'handlebars', 
   defaultLayout:'main.handlebars', 
-  layoutsDir: 'views/layouts',
+  layoutsDir: './../www/views/layouts',
   helpers: {
       WEB_URL: function () { return config.WEB_URL; },
   }
@@ -22,12 +22,12 @@ const hbs = exphbs.create({
 
 class RootServer {
   
-  constructor(port, db) {
+  constructor(port, dbConnection) {
     this.PORT = port;
     this.server;
     this.app;
     this.HOST = '0.0.0.0';
-    this.router = new RouterHub(db);
+    this.router = new RouterHub(dbConnection);
   }
   
   init() {
@@ -35,24 +35,22 @@ class RootServer {
     this.http = require('http').Server(this.app);
     this.io = require('socket.io')(this.http);
     this.ioHandler = require('./socketIO/ioHandler').handler(this.io);    
-    this.app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));
+    this.app.use(favicon(path.join(__dirname, '../www/assets', 'favicon.ico')));
     this.app.use(morgan((config.NODE_ENV == 'development') ? 'dev' : ''));    
     this.app.use(session({
         store: new MemoryStore({
           checkPeriod: 86400000 // prune expired entries every 24h
         }),
-        secret: 'a játék'
+        secret: config.EXPRESS_SECRET
     }));
-
-    this.app.use(express.static('assets'));    
-    this.app.use('/opt/images/', express.static(path.join(__dirname + '/../images')));
-    
+    this.app.use(cors());
+    this.app.use(express.json());
+    this.app.use(express.static('../www/assets'));    
+    this.app.use('/opt/images/', express.static(path.join(__dirname + '/../images')));    
     this.app.engine('handlebars', hbs.engine);
-
     this.app.set('view engine', 'handlebars');
-
+    this.app.set('views', __dirname + '/../www/views');
     this.app.use('/', this.router.getRouter());
-
     this.server = this.http.listen(this.PORT, () => {
       console.log(`KKHC Server running on http://${this.HOST}:${this.PORT}`);
     });
