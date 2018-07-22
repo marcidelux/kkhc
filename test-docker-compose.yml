@@ -33,7 +33,7 @@ services:
       - ./test:/opt/test/
       - ./data/test_images:/opt/images/
     ports:
-      - 8229-8239:8229-8239
+      - 7229-7239:7229-7239
     networks:
       - test_kkhc_net
     links:

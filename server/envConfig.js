@@ -14,7 +14,7 @@ module.exports = {
   MONGO_INITDB_DATABASE: process.env.MONGO_INITDB_DATABASE,
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
   DB_ALIAS: 'db',
-  DB_PORT: '27017',
+  DB_PORT: '27019',
   EXPRESS_PORT,
   NODE_ENV,
   WEB_URL,

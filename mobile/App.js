@@ -1,18 +1,23 @@
-import React from 'react';
+import React from "react";
 
-import { createStackNavigator } from 'react-navigation'; // Version can be specified in package.json
-import { HomeScreen } from './screens/Home';
-import { SplashScreen } from './screens/Splash';
+import { createStackNavigator } from "react-navigation"; // Version can be specified in package.json
+import { HomeScreen } from "./screens/Home";
+import { SplashScreen } from "./screens/Splash";
+import { ImageInspect } from "./screens/ImageInspect";
 
-
-export default createStackNavigator({
+export default createStackNavigator(
+  {
     Home: {
-      screen: HomeScreen,
+      screen: HomeScreen
     },
     Splash: {
-      screen: SplashScreen,
+      screen: SplashScreen
     },
+    ImageInspect: {
+      screen: ImageInspect
+    }
   },
   {
-    initialRouteName: 'Splash',
-  });
+    initialRouteName: "Splash"
+  }
+);

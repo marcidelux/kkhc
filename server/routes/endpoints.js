@@ -53,6 +53,11 @@ class RoutesInitializer {
       controller: this.controller.folder(),
     },
     {
+      path: '/image/:imageHash',
+      method: 'get',
+      controller: this.controller.image(),
+    },
+    {
       path: '/addFirstCommentToPicture/:folderHash',
       method: 'post',
       controller: this.controller.addFirstCommentToPicture(),

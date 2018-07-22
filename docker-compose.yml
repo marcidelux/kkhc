@@ -10,7 +10,8 @@ services:
       - ./data/db:/data/db
       - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
-      - 27017:27017
+      - 27019:27019
+    command: mongod --port 27019
     networks:
       kkhc_net:
         aliases:
@@ -27,7 +28,7 @@ services:
       - ./data/test_images:/opt/images/
     ports:
       - 3099:3099
-      - 9229-9239:9229-9239
+      - 8229-8239:9229-9239
     networks:
       - kkhc_net
     links:

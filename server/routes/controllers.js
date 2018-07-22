@@ -34,6 +34,21 @@ class BasicController {
     }
   }
 
+  image() {
+    return async ({params, body}, res) => {
+      if (params) {
+        try {
+          const searchedImageObject = await this.models.Image.findOne({hash: params.imageHash}).exec();
+          console.log(searchedImageObject);
+          res.status(200).json(searchedImageObject);
+        } catch(error) {
+          console.log(error)
+        }
+      }
+
+    }
+  }
+
   addFirstCommentToPicture() {
     return async ({ params, body }, res) => {
       if (params && body.fileHash) {
@@ -118,7 +133,7 @@ class BasicController {
       const { folderHash } = params;
       const { name, reference, originalAuthor } = body;
       try {
-        const tag = new this.modesl.Tag({ name, refersTo: [ reference ], originalAuthor });
+        const tag = new this.models.Tag({ name, refersTo: [ reference ], originalAuthor });
         await tag.save();
 
         const folder = await this.models.Folder.findOne({ hash: folderHash }).exec();
