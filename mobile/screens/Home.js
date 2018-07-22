@@ -26,7 +26,7 @@ export class HomeScreen extends React.Component {
   fetchFolders = async hash => {
     try {
       let response = await fetch(
-        `http://${process.env.WEB_URL}/folder/${hash}`,
+        `https://${process.env.WEB_URL}/folder/${hash}`,
         {
           method: "GET",
           headers: {
