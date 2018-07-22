@@ -5,6 +5,20 @@ const populate = async (traversedDirectory, dbConnection) => {
   const pendingSaves = [];
   const connection = dbConnection
   const recursiveModelMaker = (model) => {
+
+    if (model.type === 'file') {
+      const newImage = new connection.models.Image({
+        name: model.name,
+        url: model.path,
+        hash: model.hash,
+        thumb: '',
+        tags: [],
+        commentFlow: '',
+      })
+      pendingSaves.push(newImage.save())
+      console.log(newImage)
+    }
+
     if (model.type === 'dir') {
       const newFolderCollection = new connection.models.Folder({
         name: model.name,
@@ -16,7 +30,6 @@ const populate = async (traversedDirectory, dbConnection) => {
       });
 
       console.log(newFolderCollection)
-
       pendingSaves.push(newFolderCollection.save())
 
       model.files.forEach((subModel) => {
