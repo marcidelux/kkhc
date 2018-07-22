@@ -4,16 +4,23 @@ const populate = async (traversedDirectory, dbConnection) => {
 
   const pendingSaves = [];
   const connection = dbConnection
-  const recursiveModelMaker = (model) => {
+  const recursiveModelMaker = async (model) => {
 
     if (model.type === 'file') {
+
+      const newCommentFlow = await new connection.models.CommentFlow({
+        comments: [], 
+      }).save()
+
+      console.log(newCommentFlow)
+
       const newImage = new connection.models.Image({
         name: model.name,
         url: model.path,
         hash: model.hash,
         thumb: '',
         tags: [],
-        commentFlow: '',
+        commentFlow: newCommentFlow._id,
       })
       pendingSaves.push(newImage.save())
       console.log(newImage)

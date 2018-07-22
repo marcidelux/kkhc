@@ -13,13 +13,6 @@ class BasicController {
     this.models = this.connection.models;
   };
 
-  test() {
-    return (req, res) => {
-      console.log(req.body);
-      res.json({msg:' connect EXPO!'});
-    }
-  };
-
   folder() {
     return async ({ params }, res) => {
       if (params) {
@@ -50,66 +43,50 @@ class BasicController {
     }
   }
 
-  addFirstCommentToPicture() {
+  addToCommentFlow() {
     return async ({ params, body }, res) => {
-      if (params && body.fileHash) {
+      const paramsParsed = JSON.parse(params.hashes)
+      if (paramsParsed.folderHash && paramsParsed.imageHash) {
         try {
-          const searchedFolderObject = await this.models.Folder.findOne({ hash: params.folderHash }).exec();
-          let indexToSave;
+          const searchedFolderObject = await this.models.Folder.findOne({ hash: paramsParsed.folderHash }).exec();
+          let indexToSave = -1;
 
           searchedFolderObject.contains.forEach((file, index) => {
-            file.hash === body.fileHash && !file.commentFlow
+            console.log(file.hash === paramsParsed.imageHash)
+            file.hash === paramsParsed.imageHash
               ? indexToSave = index
               : null
           })
 
-          if (indexToSave) {
-            const newCommentFLow = await new this.models.CommentFlow({
-              comments: [{
-                id: new mongoose.mongo.ObjectId(),
-                text: body.text,
-                user: body.user,
-                date: new Date(),
-              }], 
-              belongsTo: searchedFolderObject.contains[indexToSave].hash,
-            }).save()
+          const commentFlow = await this.models.CommentFlow.findById(paramsParsed.commentFlowHash).exec();
 
-          searchedFolderObject.contains[indexToSave].commentFlow = newCommentFLow._id;
+          if (indexToSave > -1) {
+            const newComment = {
+              id: new mongoose.mongo.ObjectId(),
+              text: body.text,
+              user: body.user,
+              date: new Date(),
+            }
+            commentFlow.comments.push(newComment);
+            commentFlow.markModified('comments');
+            await commentFlow.save();
 
-          searchedFolderObject.markModified('contains');
-          await searchedFolderObject.save();
-          res.status(200).json({msg: "created new CommentFlow"});
+            const searchedImage = await this.models.Image.findOne({ hash: paramsParsed.imageHash }).exec();
+            searchedImage.commentFlow = commentFlow._id;
+            searchedImage.markModified('commentFlow');
+            await searchedImage.save();
+
+            searchedFolderObject.contains[indexToSave].commentFlow = commentFlow._id;
+            searchedFolderObject.markModified('contains');
+            await searchedFolderObject.save();
+            res.status(200).json(commentFlow);
           } else {
             res.status(304).send();
           }
-          
 
         } catch(error) {
           console.log(error)
 
-        }
-      }
-    }
-  }
-
-  addToCommentFlow() {
-    return async ({ body, params }, res) => {
-      if (params && body.text && body.user) {
-        try {
-          const commentFlow = await this.models.CommentFlow.findById(params.commentFlowId).exec();
-          const newComment = {
-            id: new mongoose.mongo.ObjectId(),
-            text: body.text,
-            user: body.user,
-            date: new Date(),
-          }
-          commentFlow.comments.push(newComment);
-          commentFlow.markModified('comments');
-          await commentFlow.save();
-          res.status(200).json({msg: "added comment to commentFLow"});
-
-        } catch(error) {
-          console.log(error)
         }
       }
     }

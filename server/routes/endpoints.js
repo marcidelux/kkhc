@@ -57,13 +57,13 @@ class RoutesInitializer {
       method: 'get',
       controller: this.controller.image(),
     },
+    // {
+    //   path: '/addFirstCommentToPicture/:hashes',
+    //   method: 'post',
+    //   controller: this.controller.addFirstCommentToPicture(),
+    // },
     {
-      path: '/addFirstCommentToPicture/:folderHash',
-      method: 'post',
-      controller: this.controller.addFirstCommentToPicture(),
-    },
-    {
-      path: '/addToCommentFlow/:commentFlowId',
+      path: '/addToCommentFlow/:hashes',
       method: 'post',
       controller: this.controller.addToCommentFlow(),
     },

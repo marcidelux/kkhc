@@ -35,7 +35,6 @@ connectToDb = (config) => {
 
   const commentFlowSchema = new mongoose.Schema({ 
     comments: Array,
-    belongsTo: Number,
   });
 
   const tagSchema = new mongoose.Schema({ 

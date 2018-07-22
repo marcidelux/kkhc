@@ -48,6 +48,3 @@ networks:
       com.docker.network.enable_ipv6: "false"
     ipam:
       driver: default
-      config:
-      - subnet: 172.27.2.1/16
-        gateway: 172.27.1.10

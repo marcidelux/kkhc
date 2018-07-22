@@ -26,7 +26,7 @@ export class HomeScreen extends React.Component {
   fetchFolders = async hash => {
     try {
       let response = await fetch(
-        `https://${process.env.WEB_URL}/folder/${hash}`,
+        `http://192.168.0.15:3099/folder/${hash}`,
         {
           method: "GET",
           headers: {
@@ -50,7 +50,7 @@ export class HomeScreen extends React.Component {
   }
 
   inspectImage(imageObject) {
-    this.props.navigation.navigate("ImageInspect", { imageObject });
+    this.props.navigation.navigate("ImageInspect", { imageObject, folderObject: this.state.rootFolder });
   }
 
   renderImages() {
@@ -64,7 +64,7 @@ export class HomeScreen extends React.Component {
           >
             <Image
               source={{
-                uri: `https://${process.env.WEB_URL}${
+                uri: `http://192.168.0.15:3099${
                   this.state.rootFolder.path
                 }/${fileObject.name}`
               }}
