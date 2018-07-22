@@ -1,6 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const runSeed = require('../database/dbSeed').runSeed;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const config = require('./../envConfig');
@@ -213,7 +214,6 @@ class BasicController {
         if (req.body.hasOwnProperty('Command')) {
           switch(req.body.Command) {
             case 'list':
-              console.log('FIND ALL USER');
               this.models.User.find()
               .then(users => res.json(users.map(user => {
                 return {
@@ -221,6 +221,9 @@ class BasicController {
                   "enabled": user.enabled,
                 }
               })));
+              break;
+            case 'seed':
+              res.json({ msg: runSeed()});
               break;
             case 'add':
               if (req.body.Username && req.body.Password) {
@@ -233,10 +236,9 @@ class BasicController {
                     if (err) {
                       console.log('ERROR', err);
                     } else {
-                      const myHash = hash;
                       let user_ = new this.models.User({
                         username: req.body.Username,
-                        password: myHash,
+                        password: hash,
                         enabled: true,
                       });
                       user_.save()
@@ -246,6 +248,33 @@ class BasicController {
                       });
                     }
                   });                  
+                });
+              } else {
+                res.json({ msg: "no username or password provided"});
+              }
+              break;
+            case 'reset':
+              if (req.body.Username && req.body.Password) {
+                this.models.User.findOne({ username: req.body.Username })
+                .then(user => {
+                  if (!user) {
+                    throw Error (`User ${req.body.Username} cannot be found`);
+                  } 
+                  bcrypt.hash(req.body.Password, saltRounds, (err, hash) => {
+                    if (err) {
+                      console.log('ERROR', err);
+                    } else {
+                      user.password = hash;
+                      user.save()
+                      .then(() => res.json({ msg: `Password of ${req.body.Username} has been changed.` }))
+                      .catch(err => {
+                        res.json({ msg: 'cannot save to DB'});
+                      });
+                    }
+                  });
+                })
+                .catch(err => {
+                  res.json({msg: `User ${req.body.Username} cannot be found`});                  
                 });
               } else {
                 res.json({ msg: "no username or password provided"});
