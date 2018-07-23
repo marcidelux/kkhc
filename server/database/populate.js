@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+'use strict';
 
 const populate = async (traversedDirectory, dbConnection) => {
 

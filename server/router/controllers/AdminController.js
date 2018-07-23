@@ -1,8 +1,18 @@
 'use strict';
 
+const seedDB = require('../../database/dbSeed').seedDB;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const config = require('./../../envConfig');
+
+async function seeder(conn, res) {
+  try {
+    await seedDB(conn);
+    res.json({ msg: "Database successfully seeded" });
+  } catch (err) {
+    res.json({ msg: "Error seeding database"} );
+  }
+}
 
 class AdminController {
   
@@ -27,7 +37,7 @@ class AdminController {
               })));
               break;
             case 'seed':
-              res.json({ msg: runSeed()});
+              seeder(this.connection, res);           
               break;
             case 'add':
               if (req.body.Username && req.body.Password) {

@@ -8,8 +8,5 @@ done
 
 cd server
 
-echo "Seeding database with folder structure..."
-node database/dbSeed.js
-
 echo "Starting Server..."
 node app.js
