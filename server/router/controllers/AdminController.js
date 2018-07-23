@@ -4,6 +4,7 @@ const seedDB = require('../../database/dbSeed').seedDB;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const config = require('./../../envConfig');
+const mongoose = require('mongoose');
 
 async function seeder(conn, res) {
   try {
@@ -20,25 +21,75 @@ class AdminController {
     this.connection = dbConnection
     this.models = this.connection.models;
   };
-
+  
   admin() {
     return (req, res) => {
       if (req.headers.adminpassword === config.ADMIN_PASSWORD) {
         console.log('/admin BODY :\n', req.body);
         if (req.body.hasOwnProperty('Command')) {
           switch(req.body.Command) {
+            
             case 'list':
               this.models.User.find()
-              .then(users => res.json(users.map(user => {
-                return {
-                  "username": user.username,
-                  "enabled": user.enabled,
-                }
-              })));
+              .then(users => res.json(
+                users.map(user => {
+                  return {
+                    "username": user.username
+                  }
+                })
+              ));
               break;
+            
+            case 'collections':
+              const myCollections = [];            
+              mongoose.connection.db.listCollections().toArray(function(err, collList) {
+                if (err) {
+                  res.json({ msg: "Cannot read database"})
+                }
+                else {
+                  collList.forEach(function(element) {
+                    let coll = { Name: element.name}
+                    myCollections.push(coll);
+                  });
+                  res.json(myCollections);
+                }
+              });
+              break;
+
             case 'seed':
               seeder(this.connection, res);           
               break;
+
+            case 'flush':
+              if (!req.body.hasOwnProperty('Collection')) {
+                res.json({ msg: 'No colllection provided' });
+                break;
+              }
+              const collections = [];            
+              mongoose.connection.db.listCollections().toArray(function(err, collList) {
+                if (err) {
+                  res.json({ msg: "Cannot read database"})
+                }
+                else {
+                  collList.forEach(function(element) {
+                    collections.push(element.name);
+                  });
+                  let collIndex = collections.indexOf(req.body.Collection);
+                  if (collIndex >= 0) {
+                    mongoose.connection.db.dropCollection(req.body.Collection, (err, result) => {
+                      if (err) {
+                        res.json({ msg: `Cannot flush ${req.body.Collection}`});
+                      } else {
+                        res.json({ msg: `Collection ${req.body.Collection} has been flushed`});                        
+                      }
+                    });
+                  } else {
+                    res.json({ msg: `Collection ${req.body.Collection} cannot be found` });
+                  }
+                }
+              });          
+              break;
+
             case 'add':
               if (req.body.Username && req.body.Password) {
                 this.models.User.findOne({username: req.body.Username})
@@ -67,6 +118,7 @@ class AdminController {
                 res.json({ msg: "no username or password provided"});
               }
               break;
+
             case 'reset':
               if (req.body.Username && req.body.Password) {
                 this.models.User.findOne({ username: req.body.Username })
@@ -94,8 +146,10 @@ class AdminController {
                 res.json({ msg: "no username or password provided"});
               }
               break;
+
             default:
               res.json({ msg: 'no valid command issued'});
+
           }
         } else {
           res.json({ msg: 'no command issued'});
