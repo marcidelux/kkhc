@@ -1,5 +1,5 @@
 node_modules
-data/db
+data
 .env
 .DS_Store
 yarn.lock
