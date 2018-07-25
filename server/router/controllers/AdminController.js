@@ -15,6 +15,22 @@ async function seeder(conn, res) {
   }
 }
 
+async function getCollectionsInfo(collList) {
+  const myCollections = [];
+  collList.forEach(async function(collection) {
+    myCollections.push(new Promise ((resolve, reject) => {
+      mongoose.models[collection.name].count({}, (err, sum) => {
+        if (err) {
+          reject({ msg: 'Cannot read database'});
+        } else {
+          resolve({ Name: `${collection.name}  [ ${sum} ]` })
+        }
+      });
+    }));
+  });
+  return Promise.all(myCollections); 
+}
+
 class AdminController {
   
   constructor(dbConnection) {
@@ -41,17 +57,13 @@ class AdminController {
               break;
             
             case 'collections':
-              const myCollections = [];            
-              mongoose.connection.db.listCollections().toArray(function(err, collList) {
+              mongoose.connection.db.listCollections().toArray(async function(err, collList) {
                 if (err) {
                   res.json({ msg: "Cannot read database"})
                 }
                 else {
-                  collList.forEach(function(element) {
-                    let coll = { Name: element.name}
-                    myCollections.push(coll);
-                  });
-                  res.json(myCollections);
+                  let response = await getCollectionsInfo(collList)
+                  res.json(response);                
                 }
               });
               break;
