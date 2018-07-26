@@ -2,7 +2,7 @@ html {
   background-color: rgba(0, 0, 255, 0);
 }
 
-#WEB_URL {
+.HIDE {
   display: none;
 }
 

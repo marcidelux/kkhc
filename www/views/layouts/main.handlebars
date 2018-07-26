@@ -20,7 +20,8 @@
 </head>
 <body>
 
-  <div id="WEB_URL">{{WEB_URL}}</div>
+  <div class="HIDE" id="WEB_URL">{{WEB_URL}}</div>
+  <div class="HIDE" id="SID"></div>
 
   <nav class="navbar navbar-default">
     <div class="container-fluid">
@@ -36,12 +37,7 @@
 
   {{{body}}}
 
-  <script>
-    const socket = io();
-    socket.on('accept', (msg) => {
-      console.log('IO :', msg)
-    });
-  </script>
+  <script src="script/socketHandler.js"></script>
 
 </body>
 </html>

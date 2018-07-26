@@ -37,6 +37,26 @@ class NavigationController {
     };
   };
 
+  logout() {
+    return (req, res) => {
+      req.session.destroy();
+      res.send('Logged out');
+    }
+  }
+
+  identify() {
+    return (req, res) => {
+      if (req.session.authenticated) {
+        res.json({
+          sid: req.session.id,
+          userid: req.session.userID,
+        });
+      } else {
+        res.json({ msg: 'Not authenticated' });
+      }
+    }
+  }
+
   root() {
     return (req, res) => {
       if (req.session.authenticated) {

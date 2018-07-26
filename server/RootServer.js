@@ -16,7 +16,7 @@ const hbs = exphbs.create({
   defaultLayout:'main.handlebars', 
   layoutsDir: './../www/views/layouts',
   helpers: {
-      WEB_URL: function () { return config.WEB_URL; },
+      WEB_URL: () => { return config.WEB_URL; },
   }
 });
 
@@ -38,6 +38,7 @@ class RootServer {
     this.app.use(favicon(path.join(__dirname, '../www/assets', 'favicon.ico')));
     this.app.use(morgan((config.NODE_ENV == 'development') ? 'dev' : ''));    
     this.app.use(session({
+        name: 'KKHC_Kuki',
         store: new MemoryStore({
           checkPeriod: 86400000 // prune expired entries every 24h
         }),

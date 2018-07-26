@@ -9,6 +9,16 @@ class NavigationRoutes {
         controller: controller.auth(),
       }, 
       {
+        path: '/logout',
+        method: 'post',
+        controller: controller.logout(),
+      }, 
+      {
+        path: '/identify',
+        method: 'post',
+        controller: controller.identify(),
+      }, 
+      {
         path: '/',
         method: 'get',
         controller: controller.root(),
