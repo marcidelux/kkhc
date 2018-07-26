@@ -1,6 +1,26 @@
 'use strict';
 
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+
+function checkUserPassword(username, password) {
+  return new Promise((resolve,  reject) => {
+    mongoose.models['User'].findOne({ username: username }).
+    then(user => {
+      console.log('USER FOUND');
+      bcrypt.compare(password, user.password, function(err, hashReturn) {
+        if(err) {
+          reject('Wrong password');
+        } else {
+          resolve(user.id);
+        }
+      });
+    }).catch(err => {
+      console.log('ERROR');
+      reject('User not find')
+    });
+  });
+}
 
 class NavigationController {
   
@@ -12,30 +32,19 @@ class NavigationController {
   auth() {
     return (req, res) => {      
       if ((req.body.username.length > 0) && (req.body.password.length > 0)) {
-        this.models.User.findOne({ username: req.body.username })
-        .then((user) => {
-          console.log('USER ???', user);
-          bcrypt.compare(req.body.password, user.password, function(err, hashReturn) {
-            if (err) {
-              console.log('HASH ERROR', err);
-            } else {
-              if (hashReturn) {
-                req.session.authenticated = true;
-                req.session.userID = user.id;
-                res.json({ Success: 'Successfully authenticated' });
-              } else {
-                res.json({ Error: 'wrong password' });
-              }
-            }
-          });
-        }).catch(err =>
-          res.json({ Error: 'User not found' })
-        );
+        checkUserPassword(req.body.username, req.body.password)
+        .then(msg => {
+          req.session.authenticated = true;
+          req.session.userID = msg;
+          res.json({ Success: 'Successfully authenticated' }); 
+        }).catch(err => {
+          res.json({ Error: err});
+        })
       } else {
         res.json({ Error: 'no username and/or Password provided' });
       }
-    };
-  };
+    }
+  }
 
   logout() {
     return (req, res) => {
@@ -94,7 +103,12 @@ class NavigationController {
   options() {
     return (req, res) => {
       this.models.User.findOne({ _id: req.session.userID }).then(user => {
-        res.render('options', { username: user.username });
+        let user_ = {
+          username: user.username,
+          userID: req.session.userID
+        }
+        console.log('USER OBJ :\n', user_);
+        res.render('options', { data: user_ });
       });
     };
   };

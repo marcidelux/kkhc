@@ -11,6 +11,7 @@ function loginResult(msg) {
 }
 
 $(() => {
+
   $('#loginForm').submit(() => {
     $.ajax({
       type: "POST",
@@ -24,4 +25,5 @@ $(() => {
     $('#username').val('');
     return false;
   });
+  
 });

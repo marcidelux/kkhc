@@ -46,7 +46,9 @@ function newMessage(msgObj) {
 }
 
 $(function () {
-  
+
+  showActive('ribbit');
+
   socket.chatUser = {
     nickname: '',
     avatar: '',

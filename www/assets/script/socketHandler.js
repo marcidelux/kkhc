@@ -18,9 +18,6 @@ $(() => {
     $.ajax({
       type: "POST",
       url: getURL() + '/identify',
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      data: JSON.stringify({ password: $('#password').val(), username: $('#username').val() }),
       success: identifyMe,
       failure: errMsg => {
         alert(errMsg);

@@ -2,6 +2,6 @@
 
 $(() => {
 
-  showActive('drive');
+  showActive('home');
 
 });

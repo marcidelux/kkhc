@@ -1,51 +1,28 @@
- <link rel="stylesheet" href="css/options.css">
+<link rel="stylesheet" href="css/options.css">
+<div></div>
 <div class="container">
-  <div class="row">
-		<div class="span12">
-			<form class="form-horizontal" action=''>
-			  <fieldset>
-			    <div id="legend">
-			      <legend class="">User Profile</legend>
-			    </div>
-			    <div class="control-group">
-			      <!-- Email -->
-			      <label class="control-label"  for="email">Email</label>
-			      <div class="controls">
-			        <input type="email" id="email" name="email" class="input-xlarge" spellcheck="false" value="{{email}}">
-			      </div>
-			    </div>
-			    <div class="control-group">
-			      <!-- Username -->
-			      <label class="control-label"  for="username">Username</label>
-			      <div class="controls">
-			        <input type="text" id="activeUser" name="username" class="input-xlarge" value="{{username}}">
-			      </div>
-			    </div>
-			    <div class="control-group">
-			      <!-- Password-->
-			      <label class="control-label" for="password">Password</label>
-			      <div class="controls">
-			        <input type="password" id="password" name="password" placeholder="" class="input-xlarge">
-			      </div>
-			    </div>
-			    <div class="control-group">
-			      <!-- New Password-->
-			      <label class="control-label" for="newPassword">New Password</label>
-			      <div class="controls">
-			        <input type="password" id="newPassword" name="newPassword" placeholder="" class="input-xlarge">
-			      </div>
-			    </div>
-          <br/>
-			    <div class="control-group">
-			      <!-- Update & Logout Button -->
-						<div class="btn-group btn-group-lg">
-							<button type="button" class="btn btn-primary">Update</button>
-							<button type="button" class="btn btn-primary btn-danger" id="LogoutButton">Logout</button>
-						</div>
-			    </div>
-			  </fieldset>
-			</form>
+	<form>
+		<div class="form-group">
+			<label for="currentUsername">Username</label>
+			<input type="text" class="form-control" id="currentUsername" value={{@exphbs.data.username}}>
 		</div>
-	</div>
+		<div class="form-group">
+			<label for="currentPassword">Current Password</label>
+			<input type="password" class="form-control" id="currentPassword">
+		</div>
+		<div class="form-group">
+			<label for="newPassword">New Password</label>
+			<input type="password" class="form-control" id="newPassword">
+		</div>
+		<fieldset>
+			<div class="control-group">
+				<!-- Update & Logout Button -->
+				<div class="btn-group btn-group-lg">
+					<button type="button" class="btn btn-primary" id="UpdateButton">Update</button>
+					<button type="button" class="btn btn-primary btn-danger" id="LogoutButton">Logout</button>
+				</div>
+			</div>
+		</fieldset>
+	</form>
 </div>
 <script src="script/options.js"></script>
