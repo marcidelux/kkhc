@@ -6,7 +6,7 @@ html {
   display: none;
 }
 
-#errorBox {
+.errorBox {
   padding-bottom: 0.75rem;
   color: rgb(226, 48, 48);
   display: none;

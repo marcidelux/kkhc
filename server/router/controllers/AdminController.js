@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const config = require('./../../envConfig');
 const mongoose = require('mongoose');
+const activeUsers = require('./../../helpers/activeUsers');
 
 async function seeder(conn, res) {
   try {
@@ -119,7 +120,10 @@ class AdminController {
                         enabled: true,
                       });
                       user_.save()
-                      .then(() => res.json({ msg: `User created: ${req.body.Username}` }))
+                      .then(() => {
+                        activeUsers.addNewUser(user_.username);
+                        res.json({ msg: `User created: ${req.body.Username}` });
+                      })
                       .catch(err => {
                         res.json({ msg: 'cannot save to DB'});
                       });

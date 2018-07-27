@@ -1,5 +1,9 @@
 'use strict';
 
+function identify(socket) {
+  
+}
+
 function handler(io) {
   io.on('connection', (socket) => {
     console.log('new client connected to Socket.IO with the ID:', socket.id);

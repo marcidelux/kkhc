@@ -20,23 +20,33 @@ function goTo(view) {
 $(() => {
 
   $('#Home_Button').click(() => {
-    goTo('home');
+    if (!($('#Home_Button').hasClass('active'))) {
+      goTo('home');
+    }
   });
   
   $('#Ribbit_Button').click(() => {
-    goTo('ribbit');
+    if (!($('#Ribbit_Button').hasClass('active'))) {
+      goTo('ribbit');
+    }
   });
-  
+    
   $('#Drive_Button').click(() => {
-    goTo('drive');
+    if (!($('#Drive_Button').hasClass('active'))) {
+      goTo('drive');
+    }
   });
-  
+      
   $('#Games_Button').click(() => {
-    goTo('games');
+    if (!($('#Games_Button').hasClass('active'))) {
+      goTo('games');
+    }
   });
-  
+    
   $('#Options_Button').click(() => {
-    goTo('options');
+    if (!($('#Options_Button').hasClass('active'))) {
+      goTo('options');
+    }
   });
 
 });

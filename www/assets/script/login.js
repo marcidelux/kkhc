@@ -6,7 +6,7 @@ function loginResult(msg) {
     $('#errorBox').html(msg.Error);
     $('#errorBox').show();
   } else {
-    window.location.assign(getURL() + '/home');
+    goTo('home');
   }
 }
 
@@ -25,5 +25,5 @@ $(() => {
     $('#username').val('');
     return false;
   });
-  
+
 });

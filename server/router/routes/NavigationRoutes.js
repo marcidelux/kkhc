@@ -14,6 +14,11 @@ class NavigationRoutes {
         controller: controller.logout(),
       }, 
       {
+        path: '/updateuser',
+        method: 'post',
+        controller: controller.updateuser(),
+      }, 
+      {
         path: '/identify',
         method: 'post',
         controller: controller.identify(),

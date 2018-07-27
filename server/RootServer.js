@@ -10,6 +10,7 @@ const favicon = require('serve-favicon');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
 const config = require('./envConfig');
+const activeUsers = require('./helpers/activeUsers');
 
 const hbs = exphbs.create({
   extname:'handlebars', 
@@ -31,6 +32,7 @@ class RootServer {
   }
   
   init() {
+    activeUsers.populateUserList();
     this.app = express();
     this.http = require('http').Server(this.app);
     this.io = require('socket.io')(this.http);
