@@ -10,6 +10,7 @@ MONGO_INITDB_ROOT_PASSWORD=mongopassword
 MONGO_INITDB_DATABASE=dbname
 MONGO_PORT=27017
 EXPRESS_PORT=80
+SENDGRID_API=API_KEY
 NODE_ENV=production or development
 VIRTUAL_HOST=yoursite.com,www.yoursite.com
 LETSENCRYPT_HOST=yoursite.com,www.yoursite.com
