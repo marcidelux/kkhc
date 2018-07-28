@@ -39,13 +39,13 @@ function validUsername(username) {
   };
   return false;
 }
-  
 
-class NavigationController {
+const BaseController = require('./../BaseController');
+
+class NavigationController extends BaseController {
   
   constructor(dbConnection) {
-    this.connection = dbConnection;
-    this.models = this.connection.models;
+    super(dbConnection);
   };
 
   auth() {

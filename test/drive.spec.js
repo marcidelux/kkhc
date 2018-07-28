@@ -7,11 +7,10 @@ const populate = require('./../server/database/populate');
 const traverse = require('./../server/database/traverser');
 const mockConfig = Object.assign(config, {
   	DB_ALIAS: 'test_db',
-  	DB_PORT: '27018',
+  	MONGO_PORT: '27018',
 })
-console.log(mockConfig)
 
-describe('should init', () => {
+describe('should database seeding work', () => {
 	let connection;
 	let server;
 
@@ -29,7 +28,9 @@ describe('should init', () => {
 	})
 
 	afterAll(async (done) => {
-		await mongoose.connection.dropDatabase()
+		await connection.models.Folder.collection.drop();
+		await connection.models.Image.collection.drop();
+		await connection.models.CommentFlow.collection.drop();
 		await mongoose.connection.close(true)
 		server.close();
 		return done()

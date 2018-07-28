@@ -35,11 +35,6 @@ class DriveRoutes {
       },
     ];
   }
-
-  exportRoutes() {
-    return this.routes;
-  }
-
 }
 
 module.exports = DriveRoutes;

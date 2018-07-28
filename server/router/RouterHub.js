@@ -7,9 +7,12 @@ class RouterHub {
   constructor(dbConnection) {
     this.router = express.Router();
     this.RoutesInitializer = require('./RoutesInitializer');
-    this.routeObject = new this.RoutesInitializer(dbConnection);
-    this.routes = this.routeObject.routes
-    this.initializeRoutes();
+    this.routeObject = new this.RoutesInitializer(dbConnection)
+    this.routeObject.loadRoutes()
+        .then((routes) => {
+          this.routes = routes
+          this.initializeRoutes();
+    });
   }
 
   getRouter() {
@@ -31,7 +34,6 @@ class RouterHub {
   }
 
   initializeRoutes() {
-
     this.routes.forEach((route) => {
       route.auth 
       ? this.router[route.method](route.path, this.redirect, route.controller)

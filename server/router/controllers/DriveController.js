@@ -1,12 +1,12 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const BaseController = require('./../BaseController');
 
-class DriveController {
+class DriveController extends BaseController {
   
   constructor(dbConnection) {
-    this.connection = dbConnection
-    this.models = this.connection.models;
+    super(dbConnection);
   };
 
   folder() {
@@ -48,7 +48,6 @@ class DriveController {
           let indexToSave = -1;
 
           searchedFolderObject.contains.forEach((file, index) => {
-            console.log(file.hash === paramsParsed.imageHash)
             file.hash === paramsParsed.imageHash
               ? indexToSave = index
               : null

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 connectToDb = (config) => {
-  const connection = mongoose.connect(`mongodb://${config.MONGO_INITDB_ROOT_USERNAME}:${config.MONGO_INITDB_ROOT_PASSWORD}@${config.DB_ALIAS}:${config.DB_PORT}/${config.MONGO_INITDB_DATABASE}?authSource=admin`, { poolSize: 10 });
+  const connection = mongoose.connect(`mongodb://${config.MONGO_INITDB_ROOT_USERNAME}:${config.MONGO_INITDB_ROOT_PASSWORD}@${config.DB_ALIAS}:${config.MONGO_PORT}/${config.MONGO_INITDB_DATABASE}?authSource=admin`, { poolSize: 10 });
 
   const imageSchema = new mongoose.Schema({
     name: String,
@@ -19,11 +19,14 @@ connectToDb = (config) => {
     hash: Number,
   });
 
-  const userSchema = new mongoose.Schema({ 
+  const userSchema = new mongoose.Schema({
+    email: { type: String, unique: true, required: true },
     username: String,
     password: String,
     avatar: String,
     enabled: Boolean,
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordTokenExpires: { type: Number, default: null },
   });
 
   // const chatSchema = new mongoose.Schema({ 

@@ -12,7 +12,7 @@ const populate = async (traversedDirectory, dbConnection) => {
         comments: [], 
       }).save()
 
-      console.log(newCommentFlow)
+      // console.log(newCommentFlow)
 
       const newImage = new connection.models.Image({
         name: model.name,
@@ -23,7 +23,7 @@ const populate = async (traversedDirectory, dbConnection) => {
         commentFlow: newCommentFlow._id,
       })
       pendingSaves.push(newImage.save())
-      console.log(newImage)
+      // console.log(newImage)
     }
 
     if (model.type === 'dir') {
@@ -36,7 +36,7 @@ const populate = async (traversedDirectory, dbConnection) => {
         hash: model.hash,
       });
 
-      console.log(newFolderCollection)
+      // console.log(newFolderCollection)
       pendingSaves.push(newFolderCollection.save())
 
       model.files.forEach((subModel) => {
@@ -61,7 +61,7 @@ const populate = async (traversedDirectory, dbConnection) => {
     hash: 0,
   });
 
-  console.log(ROOT);
+  // console.log(ROOT);
   await ROOT.save();
 
   })

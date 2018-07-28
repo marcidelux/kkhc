@@ -1,25 +1,33 @@
-'use strict';
+"use strict";
 
-const NavigationController = require('./controllers/NavigationController');
-const AdminController = require('./controllers/AdminController');
-const DriveController = require('./controllers/DriveController');
-
-const NavigationRoutes = require('./routes/NavigationRoutes');
-const AdminRoutes = require('./routes/AdminRoutes');
-const DriveRoutes = require('./routes/DriveRoutes');
+const fs = require("fs");
+const _ = require("lodash");
 
 class RoutesInitializer {
-
   constructor(dbConnection) {
-    this.adminRoutes = new AdminRoutes(new AdminController(dbConnection))
-    this.navigationRoutes = new NavigationRoutes(new NavigationController(dbConnection))
-    this.driveRoutes = new DriveRoutes(new DriveController(dbConnection))
+    this.routes = [];
+    this.dbConnection = dbConnection;
+  }
 
-    this.routes = [
-      ...this.navigationRoutes.exportRoutes(),
-      ...this.adminRoutes.exportRoutes(),
-      ...this.driveRoutes.exportRoutes(),
-    ];
+  loadRoutes() {
+    return new Promise((resolve, reject) => {
+      return fs.readdir(`${__dirname}/controllers`, (error, files) => {
+        files.forEach(fileName => {
+          const [nameSpace] = _.upperFirst(
+            _.kebabCase(fileName.split(".")[0])
+          ).split("-");
+
+          const constructorController = require(`./controllers/${nameSpace}Controller`);
+          const constructorRoutes = require(`./routes/${nameSpace}Routes`);
+
+          this[nameSpace] = new constructorRoutes(
+            new constructorController(this.dbConnection)
+          );
+          this.routes.push(...this[nameSpace].routes);
+          resolve(this.routes);
+        });
+      });
+    });
   }
 }
 

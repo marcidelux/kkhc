@@ -34,7 +34,8 @@ services:
     volumes:
       - ./server:/opt/server/
       - ./www:/opt/www/
-      - ./test:/opt/test/
+      - ./test/:/opt/test/
+      - ./__mocks__:/opt/__mocks__/
       - ./data/test_images:/opt/images/
     ports:
       - 7229-7239:7229-7239
@@ -43,6 +44,7 @@ services:
     links:
       - test_mongo
     working_dir: /opt
+    # command: ls test/integration
     command: ./test_startup.sh
 
 networks:

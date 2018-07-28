@@ -9,5 +9,3 @@ connectToDb(config).then((connectionEstablished) => {
 	console.log('Initializing KKHC Server...');
 	server.init();
 })
-
-

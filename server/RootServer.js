@@ -32,13 +32,14 @@ class RootServer {
   }
   
   init() {
+    // @TODO have a place for this
     activeUsers.populateUserList();
     this.app = express();
     this.http = require('http').Server(this.app);
     this.io = require('socket.io')(this.http);
-    this.ioHandler = require('./socketIO/ioHandler').handler(this.io);    
+    this.ioHandler = require('./socketIO/ioHandler').handler(this.io);
     this.app.use(favicon(path.join(__dirname, '../www/assets', 'favicon.ico')));
-    this.app.use(morgan((config.NODE_ENV == 'development') ? 'dev' : ''));    
+    this.app.use(morgan((config.NODE_ENV == 'development') ? 'dev' : ''));
     this.app.use(session({
         name: 'KKHC_Kuki',
         store: new MemoryStore({

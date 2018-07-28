@@ -6,6 +6,7 @@ const saltRounds = 10;
 const config = require('./../../envConfig');
 const mongoose = require('mongoose');
 const activeUsers = require('./../../helpers/activeUsers');
+const BaseController = require('./../BaseController');
 
 async function seeder(conn, res) {
   try {
@@ -32,11 +33,10 @@ async function getCollectionsInfo(collList) {
   return Promise.all(myCollections); 
 }
 
-class AdminController {
+class AdminController extends BaseController {
   
   constructor(dbConnection) {
-    this.connection = dbConnection
-    this.models = this.connection.models;
+    super(dbConnection);
   };
   
   admin() {

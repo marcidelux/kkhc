@@ -11,11 +11,6 @@ class AdminRoutes {
     }
     ];
   }
-
-  exportRoutes() {
-    return this.routes;
-  }
-
 }
 
 module.exports = AdminRoutes;

@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/DonBattery/kkhc#readme",
   "dependencies": {
+    "@sendgrid/mail": "^6.3.1",
     "bcrypt": "^3.0.0",
+    "bluebird": "^3.5.1",
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",

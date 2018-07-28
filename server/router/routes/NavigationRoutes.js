@@ -60,11 +60,6 @@ class NavigationRoutes {
       },
     ];
   }
-
-  exportRoutes() {
-    return this.routes;
-  }
-
 }
 
 module.exports = NavigationRoutes;
