@@ -23,8 +23,10 @@ function checkUserPassword(username, password) {
 };
 
 function validPassword(password) {
-  if (typeof password == 'string') {
+  console.log(1111)
+  if (typeof password === 'string') {
     if (password.length > 2) {
+      console.log(1111)
       return true;
     };
   };
@@ -32,7 +34,7 @@ function validPassword(password) {
 }
 
 function validUsername(username) {
-  if (typeof username == 'string') {
+  if (typeof username === 'string') {
     if ((username.length > 2) && (username.length < 19)) {
       return true;
     };
@@ -109,19 +111,20 @@ class NavigationController extends BaseController {
                     } else {
                       user.password = hash;
                       result += 'password has been changed for ' + user.username + ' ';
+                      user.save()
+                      .then(() => {
+                        res.json({ 
+                          Msg: result,
+                          Error: error
+                        });
+                      })
+                      .catch(err => {
+                        res.json({ Error: 'cannot save to database'});
+                      });
                     }
                   });
                 };
-                user.save()
-                .then(() => {
-                  res.json({ 
-                    Msg: result,
-                    Error: error
-                  });
-                })
-                .catch(err => {
-                  res.json({ Error: 'cannot save to database'});
-                });
+                
               };            
             });
           }).catch(err => {

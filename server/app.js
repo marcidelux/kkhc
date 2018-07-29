@@ -7,5 +7,5 @@ const connectToDb = require('./database/connectToDb');
 connectToDb(config).then((connectionEstablished) => {
 	const server = new RootServer(config.EXPRESS_PORT, connectionEstablished);
 	console.log('Initializing KKHC Server...');
-	server.init();
+	server.init();	
 })
