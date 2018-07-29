@@ -3,10 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "@types/jest": "^23.3.1",
+    "@types/react": "^16.4.7",
+    "@types/react-dom": "^16.0.6",
+    "@types/react-native": "^0.56.4",
+    "@types/react-test-renderer": "^16.0.1",
     "babel-plugin-inline-dotenv": "^1.1.2",
+    "concurrently": "^3.6.1",
     "jest-expo": "~27.0.0",
     "react-native-scripts": "1.14.0",
-    "react-test-renderer": "16.3.1"
+    "react-native-typescript-transformer": "^1.2.10",
+    "react-test-renderer": "16.3.1",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^23.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2"
   },
   "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
   "scripts": {
@@ -14,15 +25,26 @@
     "eject": "react-native-scripts eject",
     "android": "react-native-scripts android",
     "ios": "react-native-scripts ios",
-    "test": "jest"
+    "test": "jest",
+    "tsc": "tsc",
+    "clean": "rimraf build",
+    "build": "yarn run clean && mkdir -p ./build/static && cp -R ./src/static/ ./build/static && yarn run tsc",
+    "watch": "yarn run build -w",
+    "watchAndRunAndroid": "concurrently \"yarn run watch\" \"yarn run android\"",
+    "buildRunAndroid": "yarn run build && yarn run watchAndRunAndroid ",
+    "watchAndRunIOS": "concurrently \"yarn run watch\" \"yarn run ios\"",
+    "buildRunIOS": "yarn run build && yarn run watchAndRunIOS ",
+    "watchAndStart": "concurrently \"yarn run watch\" \"yarn run start\"",
+    "buildAndStart": "yarn run build && yarn run watchAndStart "
   },
   "jest": {
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@types/react-navigation": "^2.0.12",
     "expo": "^27.0.1",
-    "react": "16.3.1",
-    "react-native": "~0.55.2",
+    "react": "16.4.0",
+    "react-native": "0.55.4",
     "react-native-modal": "^6.1.0",
     "react-native-navigation": "^1.1.473",
     "react-native-scalable-image": "^0.4.0",

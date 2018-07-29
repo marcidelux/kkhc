@@ -9,20 +9,27 @@ import {
 } from "react-native";
 import Image from "react-native-scalable-image";
 
-export class ImageInspect extends React.Component {
-  state = {
-    imageObject: null,
-    folderObject: null,
-    comments: null,
-    fetched: false
-  };
+export class ImageInspect extends React.Component<any, { imageObject: {commentFlow: string, name: string, url: string, tags: Array<any>, hash: number}, folderObject: { hash: number }, comments: Array<any>, fetched: boolean, text: string}> {
+  
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      imageObject: null,
+      folderObject: null,
+      comments: null,
+      fetched: false,
+      text: null,
+    };
+  }
 
   componentWillMount() {
     const { navigation } = this.props;
     const imageObject = navigation.getParam("imageObject");
     const folderObject = navigation.getParam("folderObject");
-    this.state.imageObject = imageObject;
-    this.state.folderObject = folderObject;
+    this.setState({
+      imageObject,
+      folderObject,
+    })
   }
 
   componentDidMount() {
@@ -30,9 +37,9 @@ export class ImageInspect extends React.Component {
     console.log(this.state.imageObject, "[][][][][][][][][]");
   }
 
-  fetchImage = async hash => {
+  fetchImage = async (hash: number) => {
     try {
-      let response = await fetch(`http://192.168.0.15:3099/image/${hash}`, {
+      let response = await fetch(`http://192.168.0.13:3099/image/${hash}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json; charset=utf-8"
@@ -51,10 +58,10 @@ export class ImageInspect extends React.Component {
     }
   };
 
-  getComments = async commentFlowId => {
+  getComments = async (commentFlowId: string) => {
     try {
       let response = await fetch(
-        `http://192.168.0.15:3099/getCommentFlow/${commentFlowId}`,
+        `http://192.168.0.13:3099/getCommentFlow/${commentFlowId}`,
         {
           method: "GET",
           headers: {
@@ -93,7 +100,7 @@ export class ImageInspect extends React.Component {
           <Image
             width={Dimensions.get("window").width}
             source={{
-              uri: `http://192.168.0.15:3099${this.state.imageObject.url}`
+              uri: `http://192.168.0.13:3099${this.state.imageObject.url}`
             }}
           />
           {this.renderTags()}
@@ -133,7 +140,7 @@ export class ImageInspect extends React.Component {
 
   renderTags = () => {
     return this.state.imageObject.tags.length > 0
-      ? this.state.imageObject.tags.map((tag, index) => (
+      ? this.state.imageObject.tags.map((tag: {}, index: number) => (
           <Text key={index}>{tag}</Text>
         ))
       : null;
@@ -142,7 +149,7 @@ export class ImageInspect extends React.Component {
   addComment = async () => {
     try {
       let response = await fetch(
-        `http://192.168.0.15:3099/addToCommentFlow/${JSON.stringify({
+        `http://192.168.0.13:3099/addToCommentFlow/${JSON.stringify({
           imageHash: this.state.imageObject.hash,
           folderHash: this.state.folderObject.hash,
           commentFlowHash: this.state.imageObject.commentFlow

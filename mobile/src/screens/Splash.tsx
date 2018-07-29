@@ -1,23 +1,28 @@
 import React from "react";
-import { View, Text, Button, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, TextInput } from "react-native";
 
-export class SplashScreen extends React.Component {
-  state = {
-
+export class SplashScreen extends React.Component<any, {userName: string, password: string}> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      userName: null,
+      password: null,
+    }
   }
+
   login = async () => {
     try {
-      let response = await fetch(`http://192.168.0.15:3099/auth`, {
-        method: "POST",
-        body: JSON.stringify({
-          password: "123",
-          email: "asd@wasd.gov"
-        }),
-        headers: {
-          "Content-Type": "application/json; charset=utf-8"
-        }
-      });
-      let { Success } = await response.json();
+      // let response = await fetch(`http://192.168.0.13:3099/auth`, {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     password: "123",
+      //     email: "asd@wasd.gov"
+      //   }),
+      //   headers: {
+      //     "Content-Type": "application/json; charset=utf-8"
+      //   }
+      // });
+      // let { Success } = await response.json();
       // if (Success) {
       this.props.navigation.navigate("Home");
       // }
@@ -39,7 +44,6 @@ export class SplashScreen extends React.Component {
             placeholderTextColor="grey"
             maxLength={20}
             keyboardAppearance='dark'
-            onfocus={this.shiftUp}
           />
           <TextInput
             style={{ height: 40, width: 100, borderColor: "black", borderWidth: 1 }}
@@ -51,7 +55,6 @@ export class SplashScreen extends React.Component {
             maxLength={20}
             keyboardAppearance='dark'
             secureTextEntry={true}
-            onfocus={this.shiftUp}
           />
         <TouchableOpacity onPress={this.login.bind(this)}>
           <Text>Log me in</Text>

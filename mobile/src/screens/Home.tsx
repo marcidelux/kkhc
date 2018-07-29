@@ -10,11 +10,11 @@ import {
   TouchableHighlight
 } from "react-native";
 
-export class HomeScreen extends React.Component {
-  constructor() {
-    super();
+export class HomeScreen extends React.Component<any, { rootFolder: {contains: Array<any>, path: any}, placeIndicator: Array<any> }> {
+  constructor(props: any) {
+    super(props);
     this.state = {
-      rootFolder: { contains: [] },
+      rootFolder: { contains: [], path: null },
       placeIndicator: []
     };
   }
@@ -23,10 +23,10 @@ export class HomeScreen extends React.Component {
     this.fetchFolders(0);
   }
 
-  fetchFolders = async hash => {
+  fetchFolders = async (hash: number) => {
     try {
       let response = await fetch(
-        `http://192.168.0.15:3099/folder/${hash}`,
+        `http://192.168.0.13:3099/folder/${hash}`,
         {
           method: "GET",
           headers: {
@@ -45,11 +45,11 @@ export class HomeScreen extends React.Component {
     }
   };
 
-  loadInnerFolder(folder) {
+  loadInnerFolder(folder: {hash: number}) {
     this.fetchFolders(folder.hash);
   }
 
-  inspectImage(imageObject) {
+  inspectImage(imageObject: {}) {
     this.props.navigation.navigate("ImageInspect", { imageObject, folderObject: this.state.rootFolder });
   }
 
@@ -64,7 +64,7 @@ export class HomeScreen extends React.Component {
           >
             <Image
               source={{
-                uri: `http://192.168.0.15:3099${
+                uri: `http://192.168.0.13:3099${
                   this.state.rootFolder.path
                 }/${fileObject.name}`
               }}
@@ -91,7 +91,7 @@ export class HomeScreen extends React.Component {
     });
   }
 
-  goBack(hash, index) {
+  goBack(hash: any, index: number) {
     this.state.placeIndicator.splice(index, this.state.placeIndicator.length);
     this.fetchFolders(hash);
   }
@@ -100,7 +100,7 @@ export class HomeScreen extends React.Component {
     let indicatorButtonList = this.state.rootFolder.path
       .replace("/opt/images", "")
       .split("/");
-    return indicatorButtonList.map((button, index) => {
+    return indicatorButtonList.map((button: string, index: number) => {
       return (
         <Button
           key={index}
@@ -115,7 +115,7 @@ export class HomeScreen extends React.Component {
     if (!this.state.rootFolder.contains.length) return null;
     return (
       <ImageBackground
-        source={require("./pics.png")}
+        source={require("./../static/pics.png")}
         style={{
           flex: 1,
           justifyContent: "center",
