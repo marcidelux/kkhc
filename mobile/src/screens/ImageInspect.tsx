@@ -39,7 +39,7 @@ export class ImageInspect extends React.Component<any, { imageObject: {commentFl
 
   fetchImage = async (hash: number) => {
     try {
-      let response = await fetch(`http://192.168.0.13:3099/image/${hash}`, {
+      let response = await fetch(`http://10.1.10.15:3099/image/${hash}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json; charset=utf-8"
@@ -61,7 +61,7 @@ export class ImageInspect extends React.Component<any, { imageObject: {commentFl
   getComments = async (commentFlowId: string) => {
     try {
       let response = await fetch(
-        `http://192.168.0.13:3099/getCommentFlow/${commentFlowId}`,
+        `http://10.1.10.15:3099/getCommentFlow/${commentFlowId}`,
         {
           method: "GET",
           headers: {
@@ -100,7 +100,7 @@ export class ImageInspect extends React.Component<any, { imageObject: {commentFl
           <Image
             width={Dimensions.get("window").width}
             source={{
-              uri: `http://192.168.0.13:3099${this.state.imageObject.url}`
+              uri: `http://10.1.10.15:3099${this.state.imageObject.url}`
             }}
           />
           {this.renderTags()}
@@ -149,7 +149,7 @@ export class ImageInspect extends React.Component<any, { imageObject: {commentFl
   addComment = async () => {
     try {
       let response = await fetch(
-        `http://192.168.0.13:3099/addToCommentFlow/${JSON.stringify({
+        `http://10.1.10.15:3099/addToCommentFlow/${JSON.stringify({
           imageHash: this.state.imageObject.hash,
           folderHash: this.state.folderObject.hash,
           commentFlowHash: this.state.imageObject.commentFlow

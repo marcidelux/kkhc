@@ -12,7 +12,7 @@ export class SplashScreen extends React.Component<any, {userName: string, passwo
 
   login = async () => {
     try {
-      // let response = await fetch(`http://192.168.0.13:3099/auth`, {
+      // let response = await fetch(`http://10.1.10.15:3099/auth`, {
       //   method: "POST",
       //   body: JSON.stringify({
       //     password: "123",

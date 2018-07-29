@@ -10,6 +10,7 @@ connectToDb = (config) => {
     thumb: String,
     tags: Array,
     commentFlow: String,
+    extension: String,
   });
 
   const folderSchema = new mongoose.Schema({ 

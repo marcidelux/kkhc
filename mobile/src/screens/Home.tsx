@@ -26,7 +26,7 @@ export class HomeScreen extends React.Component<any, { rootFolder: {contains: Ar
   fetchFolders = async (hash: number) => {
     try {
       let response = await fetch(
-        `http://192.168.0.13:3099/folder/${hash}`,
+        `http://10.1.10.15:3099/folder/${hash}`,
         {
           method: "GET",
           headers: {
@@ -56,6 +56,10 @@ export class HomeScreen extends React.Component<any, { rootFolder: {contains: Ar
   renderImages() {
     return this.state.rootFolder.contains.map((fileObject, index) => {
       if (fileObject.type === "file") {
+        let pathToImage = fileObject.name.slice(0, fileObject.name.lastIndexOf('.'));
+        console.log(fileObject.extension)
+        pathToImage += `_thumb.png`;
+        console.log(pathToImage)
         return (
           <TouchableHighlight
             style={{ width: 140 }}
@@ -64,9 +68,9 @@ export class HomeScreen extends React.Component<any, { rootFolder: {contains: Ar
           >
             <Image
               source={{
-                uri: `http://192.168.0.13:3099${
+                uri: `http://10.1.10.15:3099${
                   this.state.rootFolder.path
-                }/${fileObject.name}`
+                }/${pathToImage}`
               }}
               style={{ width: 138, height: 138 }}
             />
