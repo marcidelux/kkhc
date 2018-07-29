@@ -3,11 +3,6 @@ import { HomeScreen } from "./screens/Home";
 import { SplashScreen } from "./screens/Splash";
 import { ImageInspect } from "./screens/ImageInspect";
 
-
-
-
-
-
 export default createStackNavigator(
   {
     Home: {
