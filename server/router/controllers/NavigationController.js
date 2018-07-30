@@ -28,24 +28,101 @@ function checkUserPassword(obj, password) {
 };
 
 function validPassword(password) {
-  console.log(1111)
   if (typeof password === 'string') {
     if (password.length > 2) {
-      console.log(1111)
-      return true;
+      return 'valid';
+    } else {
+      return 'password too short';
     };
   };
-  return false;
+  return 'type error';
 }
 
 function validUsername(username) {
+  let user = memDB.getUser({ username: username });
+  if (user) {
+    return 'username already in use';
+  }
   if (typeof username === 'string') {
     if ((username.length > 2) && (username.length < 19)) {
-      return true;
+      return 'valid';
+    } else {
+      return 'length error'
     };
   };
-  return false;
+  return 'type error';
 }
+
+function validEmail(email) {
+  let user = memDB.getUser({ email: email });
+  let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;  
+  if (user) {
+    return 'email already in use';
+  }
+  if (typeof email === 'string') {
+    if (re.test(email)) {
+      return 'valid';
+    };
+  };
+  return 'type error';
+}
+
+function validateUpdate(updateObj) {
+  for (let key of Object.keys(updateObj)) {
+    switch (key) {
+      case password:
+        let isValidPassword = validPassword(updateObj.password);
+        if (isValidPassword != 'valid') {
+          return isValidPassword;
+        };
+        break;
+      case username:
+        let isValidUsername = validUsername(updateObj.username);
+        if (isValidUsername != 'valid') {
+          return isValidUsername;
+        };
+        break;
+      case email:
+        let isValidEmail = validEmail(updateObj.email);
+        if (isValidEmail != 'valid') {
+          return isValidEmail;
+        };
+        break;
+    };
+  };
+  return 'valid';
+};
+
+function updateDB(id, updateObj) {
+  return new Promise ((resolve, reject) => {
+    let isvalid = validateUpdate(updateObj);
+    if (isvalid != 'valid') {
+      reject(isvalid);
+    };
+    mongoose.models['User'].findOne({ _id: id }).
+    then(user => {
+      for (let key of Object.keys(updateObj)) {
+        if (key == 'password') {
+          bcrypt.hash(updateObj.password, saltRounds, (err, hash) => {
+            if (err) {
+              reject(err);
+            } else {
+              updateObj.password = hash;
+            };
+          });
+        };
+        user[key] = updateObj[key];
+      };
+      user.save()
+      .then(msg => {
+        memDB.updateUser(user);
+        resolve(`${user.username} has been updated`);
+      });
+    }).catch(err => {
+      reject('database error');
+    });
+  });
+};
 
 const BaseController = require('./../BaseController');
 
@@ -88,79 +165,18 @@ class NavigationController extends BaseController {
   
   updateuser() {
     return (req, res) => {
-      if (!(req.session.authenticated)) {
-        res.json({ Error: 'not authenticated' });
-        return;
-      };
-      if (!(req.body.hasOwnProperty('newPassword')) && !(req.body.hasOwnProperty('newUsername'))) {
-        res.json({ Error: 'nothing to change' });
-        return;
-      };
-      checkUserPassword({ id: req.session.userID }, req.session.currentPassword)
+      checkUserPassword({ id: req.session.userID }, req.body.currentPassword)
       .then(msg => {
-        if (req.body.hasOwnProperty('newPassword')) {
-          updatePassword({ id: req.body.userID }, req.body.newPassword)
-          .then(msg => {
-            
-          }).catch(err => {
-            
-          });
-        };
+        updateDB(msg, req.body.update)
+        .then(msg => {
+          res.json({ msg: msg });
+        });
       })
       .catch(err => {
         res.json({ Error: 'wrong password' });
-      });
+      });      
     };
   };
-  //     mongoose.models['User'].findOne({ _id: req.session.userID })
-  //     .then(user => {
-  //           let error = '';
-  //           let result = '';
-  //           bcrypt.compare(req.body.currentPassword, user.password, (err, hashReturn) => {
-  //             if(err) {
-  //               res.json({ Error: 'wrong password' });                
-  //             } else {
-  //               if (validUsername(req.body.newUsername)) {
-  //                 user.username = req.body.newUsername;
-  //                 result += 'username has been changed to ' + req.body.newUsername + ' ';
-  //               } else {
-  //                 error += 'invalid new username ';
-  //               };
-  //               if (validPassword(req.body.newPassword)) {
-  //                 bcrypt.hash(req.body.newPassword, saltRounds, (err, hash) => {
-  //                   if (err) {
-  //                     console.log('ERROR', err);
-  //                     error += 'error during encrypt ';
-  //                   } else {
-  //                     user.password = hash;
-  //                     result += 'password has been changed for ' + user.username + ' ';
-  //                     user.save()
-  //                     .then(() => {
-  //                       memDB.updateUser(user);
-  //                       res.json({ 
-  //                         Msg: result,
-  //                         Error: error
-  //                       });
-  //                     })
-  //                     .catch(err => {
-  //                       res.json({ Error: 'cannot save to database'});
-  //                     });
-  //                   }
-  //                 });
-  //               };
-                
-  //             };            
-  //           });
-  //         }).catch(err => {
-  //           res.json({ Error: 'Cannot read database' });
-  //         });
-  //       };
-  //     } else {
-  //       res.json({ Error: 'not authenticated' });
-  //     }
-  //   };
-  // };
-
 
   identify() {
     return (req, res) => {
@@ -212,15 +228,6 @@ class NavigationController extends BaseController {
   options() {
     return (req, res) => {
       res.render('options', { data: memDB.getUser({ id: req.session.userID }) });
-
-    //   this.models.User.findOne({ _id: req.session.userID }).then(user => {
-    //     let user_ = {
-    //       username: user.username,
-    //       userID: req.session.userID
-    //     }
-    //     console.log('USER OBJ :\n', user_);
-    //     res.render('options', { data: user_ });
-    //   });
     };
   };
 
