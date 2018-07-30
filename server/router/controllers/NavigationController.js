@@ -3,22 +3,27 @@
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const mongoose = require('mongoose');
-const activeUsers = require('./../../helpers/activeUsers');
+const memDB = require('./../../helpers/InMemoryDB').db;
 
-function checkUserPassword(username, password) {
+function checkUserPassword(obj, password) {
   return new Promise((resolve,  reject) => {
-    mongoose.models['User'].findOne({ username: username }).
-    then(user => {
-      bcrypt.compare(password, user.password, (err, res) => {
-        if(res) {
-          resolve(user.id);
-        } else {
-          reject('Wrong password');
-        }
+    let user_ = memDB.getUser(obj);
+    if (user_) {
+      mongoose.models['User'].findOne({ username: user_.username }).
+      then(user => {
+        bcrypt.compare(password, user.password, (err, res) => {
+          if(res) {
+            resolve(user.id);
+          } else {
+            reject('Wrong password');
+          }
+        });
+      }).catch(err => {
+        reject('User not found');
       });
-    }).catch(err => {
-      reject('User not find');
-    });
+    } else {
+      reject('User not found');
+    };
   });
 };
 
@@ -53,12 +58,12 @@ class NavigationController extends BaseController {
   auth() {
     return (req, res) => {      
       if ((req.body.username.length > 0) && (req.body.password.length > 0)) {
-        checkUserPassword(req.body.username, req.body.password)
+        checkUserPassword({ username: req.body.username }, req.body.password)
         .then(msg => {
           console.log('AUTH MSG\n', msg);
-          req.session.authenticated = true;
           req.session.userID = msg;
-          activeUsers.activateUser(activeUsers.idToUsername(msg));
+          req.session.authenticated = true;          
+          memDB.activateUser({ id: req.session.userID });
           res.json({ Success: 'Successfully authenticated' }); 
         }).catch(err => {
           console.log('\nAUTH ERROR\n', JSON.stringify(err));
@@ -74,7 +79,7 @@ class NavigationController extends BaseController {
   logout() {
     return (req, res) => {
       if (req.session.hasOwnProperty('userID')) {
-        activeUsers.deactivateUser(activeUsers.idToUsername(req.session.userID));
+        memDB.deactivateUser({ id: req.session.userID });
       }
       req.session.destroy();
       res.send('Logged out');
@@ -83,59 +88,78 @@ class NavigationController extends BaseController {
   
   updateuser() {
     return (req, res) => {
-      if (req.session.authenticated) {
-        if (!(req.body.hasOwnProperty('currentPassword'))) {
-          res.json({ Error: 'no password provided'})
-        } else if (!(req.body.hasOwnProperty('newPassword')) && !(req.body.hasOwnProperty('newUsername'))) {
-          res.json({ Error: 'nothing to change' });
-        } else {
-          mongoose.models['User'].findOne({ _id: req.session.userID })
-          .then(user => {
-            let error = '';
-            let result = '';
-            bcrypt.compare(req.body.currentPassword, user.password, (err, hashReturn) => {
-              if(err) {
-                res.json({ Error: 'wrong password' });                
-              } else {
-                if (validUsername(req.body.newUsername)) {
-                  user.username = req.body.newUsername;
-                  result += 'username has been changed to ' + req.body.newUsername + ' ';
-                } else {
-                  error += 'invalid new username ';
-                };
-                if (validPassword(req.body.newPassword)) {
-                  bcrypt.hash(req.body.newPassword, saltRounds, (err, hash) => {
-                    if (err) {
-                      console.log('ERROR', err);
-                      error += 'error during encrypt ';
-                    } else {
-                      user.password = hash;
-                      result += 'password has been changed for ' + user.username + ' ';
-                      user.save()
-                      .then(() => {
-                        res.json({ 
-                          Msg: result,
-                          Error: error
-                        });
-                      })
-                      .catch(err => {
-                        res.json({ Error: 'cannot save to database'});
-                      });
-                    }
-                  });
-                };
-                
-              };            
-            });
+      if (!(req.session.authenticated)) {
+        res.json({ Error: 'not authenticated' });
+        return;
+      };
+      if (!(req.body.hasOwnProperty('newPassword')) && !(req.body.hasOwnProperty('newUsername'))) {
+        res.json({ Error: 'nothing to change' });
+        return;
+      };
+      checkUserPassword({ id: req.session.userID }, req.session.currentPassword)
+      .then(msg => {
+        if (req.body.hasOwnProperty('newPassword')) {
+          updatePassword({ id: req.body.userID }, req.body.newPassword)
+          .then(msg => {
+            
           }).catch(err => {
-            res.json({ Error: 'Cannot read database' });
+            
           });
         };
-      } else {
-        res.json({ Error: 'not authenticated' });
-      }
+      })
+      .catch(err => {
+        res.json({ Error: 'wrong password' });
+      });
     };
   };
+  //     mongoose.models['User'].findOne({ _id: req.session.userID })
+  //     .then(user => {
+  //           let error = '';
+  //           let result = '';
+  //           bcrypt.compare(req.body.currentPassword, user.password, (err, hashReturn) => {
+  //             if(err) {
+  //               res.json({ Error: 'wrong password' });                
+  //             } else {
+  //               if (validUsername(req.body.newUsername)) {
+  //                 user.username = req.body.newUsername;
+  //                 result += 'username has been changed to ' + req.body.newUsername + ' ';
+  //               } else {
+  //                 error += 'invalid new username ';
+  //               };
+  //               if (validPassword(req.body.newPassword)) {
+  //                 bcrypt.hash(req.body.newPassword, saltRounds, (err, hash) => {
+  //                   if (err) {
+  //                     console.log('ERROR', err);
+  //                     error += 'error during encrypt ';
+  //                   } else {
+  //                     user.password = hash;
+  //                     result += 'password has been changed for ' + user.username + ' ';
+  //                     user.save()
+  //                     .then(() => {
+  //                       memDB.updateUser(user);
+  //                       res.json({ 
+  //                         Msg: result,
+  //                         Error: error
+  //                       });
+  //                     })
+  //                     .catch(err => {
+  //                       res.json({ Error: 'cannot save to database'});
+  //                     });
+  //                   }
+  //                 });
+  //               };
+                
+  //             };            
+  //           });
+  //         }).catch(err => {
+  //           res.json({ Error: 'Cannot read database' });
+  //         });
+  //       };
+  //     } else {
+  //       res.json({ Error: 'not authenticated' });
+  //     }
+  //   };
+  // };
 
 
   identify() {
@@ -187,16 +211,19 @@ class NavigationController extends BaseController {
 
   options() {
     return (req, res) => {
-      this.models.User.findOne({ _id: req.session.userID }).then(user => {
-        let user_ = {
-          username: user.username,
-          userID: req.session.userID
-        }
-        console.log('USER OBJ :\n', user_);
-        res.render('options', { data: user_ });
-      });
+      res.render('options', { data: memDB.getUser({ id: req.session.userID }) });
+
+    //   this.models.User.findOne({ _id: req.session.userID }).then(user => {
+    //     let user_ = {
+    //       username: user.username,
+    //       userID: req.session.userID
+    //     }
+    //     console.log('USER OBJ :\n', user_);
+    //     res.render('options', { data: user_ });
+    //   });
     };
   };
+
 };
 
 module.exports = NavigationController;

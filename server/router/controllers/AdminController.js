@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const config = require('./../../envConfig');
 const mongoose = require('mongoose');
-const activeUsers = require('./../../helpers/activeUsers');
+const memDB = require('./../../helpers/InMemoryDB');
 const BaseController = require('./../BaseController');
 
 async function seeder(conn, res) {
@@ -121,7 +121,7 @@ class AdminController extends BaseController {
                       });
                       user_.save()
                       .then(() => {
-                        activeUsers.addNewUser(user_.username);
+                        memDB.addNewUser(user_);
                         res.json({ msg: `User created: ${req.body.Username}` });
                       })
                       .catch(err => {

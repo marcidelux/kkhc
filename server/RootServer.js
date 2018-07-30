@@ -1,6 +1,7 @@
 'use strict';
 
 const cors = require('cors');
+const config = require('./envConfig');
 const express = require('express');
 const RouterHub = require('./router/RouterHub');
 const path = require('path');
@@ -9,8 +10,7 @@ const morgan = require('morgan');
 const favicon = require('serve-favicon');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session);
-const config = require('./envConfig');
-const activeUsers = require('./helpers/activeUsers');
+
 
 const hbs = exphbs.create({
   extname:'handlebars', 
@@ -33,7 +33,6 @@ class RootServer {
   
   init() {
     // @TODO have a place for this
-    activeUsers.populateUserList();
     this.app = express();
     this.http = require('http').Server(this.app);
     this.io = require('socket.io')(this.http);

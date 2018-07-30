@@ -15,7 +15,7 @@ module.exports = {
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
   EXPRESS_SECRET: process.env.EXPRESS_SECRET,
   MONGO_PORT: process.env.MONGO_PORT,
-  DB_ALIAS: 'db',
+  DB_ALIAS: '172.18.0.2',
   SENDGRID_API: process.env.SENDGRID_API,
   EXPRESS_PORT,
   NODE_ENV,
