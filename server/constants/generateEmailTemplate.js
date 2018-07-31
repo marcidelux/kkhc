@@ -1,4 +1,4 @@
-emailTemplateGenerator = (email, token) => {
+generateEmailTemplate = (email, token) => {
     return {
         to: email,
         from: {
@@ -11,4 +11,4 @@ emailTemplateGenerator = (email, token) => {
     }
 }
 
-module.exports = emailTemplateGenerator;
+module.exports = generateEmailTemplate;
