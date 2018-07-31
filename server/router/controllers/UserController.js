@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const Promise = require('bluebird')
 const crypto = Promise.promisifyAll(require('crypto'))
 const sendGridMail = require('@sendgrid/mail');
-const emailTemplateGenerator = require('./../../constants/emailTemplateGenerator')
+const generateEmailTemplate = require('./../../constants/generateEmailTemplate')
 const config = require('./../../envConfig');
 
 const BaseController = require('./../BaseController');
@@ -26,7 +26,7 @@ class UserController extends BaseController {
 
       sendEmail: async (email, token) => {
         sendGridMail.setApiKey(config.SENDGRID_API);
-        return sendGridMail.send(emailTemplateGenerator(email, token));
+        return sendGridMail.send(generateEmailTemplate(email, token));
       },
     }
   }

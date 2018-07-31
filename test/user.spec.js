@@ -6,7 +6,7 @@ const connectToDb = require('./../server/database/connectToDb');
 const config = require('./../server/envConfig');
 const sendGridMail = require('@sendgrid/mail');
 const UserController = require('./../server/router/controllers/UserController')
-const emailTemplateGenerator = require('./../server/constants/emailTemplateGenerator');
+const generateEmailTemplate = require('./../server/constants/generateEmailTemplate');
 const mockConfig = Object.assign(config, {
   	DB_ALIAS: 'test_db',
   	MONGO_PORT: '27018',
@@ -55,7 +55,7 @@ describe('forgotten password mechanism', () => {
         expect(resetPasswordTokenExpires).toBeTruthy();
 		expect(resetPasswordToken).toBeTruthy();
 		token = resetPasswordToken;
-		expect(sendGridMail.send).toHaveBeenCalledWith(emailTemplateGenerator(email, resetPasswordToken));
+		expect(sendGridMail.send).toHaveBeenCalledWith(generateEmailTemplate(email, resetPasswordToken));
 	});
 
 	it('fake email should not work', async () => {
