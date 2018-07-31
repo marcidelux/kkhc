@@ -94,6 +94,7 @@ class InMemoryDB {
     };
     newUser.active = false;
     this.users.push(newUser);
+    this.logger(`User\n${newUser}\nPushed to inMemoryDB\n${this.users}\n-------------------\n`);
     return `New user added ${user.username}`;
   };
   
@@ -110,7 +111,7 @@ class InMemoryDB {
     this.logger('Userupdate');
     if (!(user.id)) {
       if (user._id) {
-        user.id = String(user._id);
+        user.id = user._id;
       } else {
         return
       };

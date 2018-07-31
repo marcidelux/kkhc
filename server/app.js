@@ -29,7 +29,6 @@ connectToDb(config).then((connectionEstablished) => {
 		console.log('Get user by false id\n', memDB.getUser({ id: '5b4b4d5eb2db00bf3ad947' }), '\n-----------------------------------------\n');
 		console.log('Get user by username\n', memDB.getUser({ username: 'Ficó' }), '\n-----------------------------------------\n');
 		console.log('Get user by email\n', memDB.getUser({ email: 'ad@wasd.gov' }), '\n-----------------------------------------\n');
-		console.log('Updating user miki\n', memDB.updateUser({ id: '5b4b4d5eb2d03b00bf3ad947', email: 'denemáhova@oda.gov', username: 'Mikulás' }) ,'\n-----------------------------------------\n');
 		// console.log('Get user by id\n', memDB.getUser({ id: '5b4b4d5eb2d03b00bf3ad947' }), '\n-----------------------------------------\n');
 	}).catch(msg => {console.log(msg);});
 	console.log('Initializing KKHC Server...');

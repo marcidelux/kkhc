@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const config = require('./../../envConfig');
 const mongoose = require('mongoose');
-const memDB = require('./../../helpers/InMemoryDB');
+const memDB = require('./../../helpers/InMemoryDB').db;
 const BaseController = require('./../BaseController');
 
 async function seeder(conn, res) {
@@ -52,7 +52,7 @@ class AdminController extends BaseController {
                 users.map(user => {
                   return {
                     "username": user.username
-                  }
+                  };
                 })
               ));
               break;
@@ -117,6 +117,7 @@ class AdminController extends BaseController {
                       let user_ = new this.models.User({
                         username: req.body.Username,
                         password: hash,
+                        email: req.body.Email,
                         enabled: true,
                       });
                       user_.save()
@@ -125,6 +126,7 @@ class AdminController extends BaseController {
                         res.json({ msg: `User created: ${req.body.Username}` });
                       })
                       .catch(err => {
+                        console.log(`DB ERROR !!!!!\n${err}`);
                         res.json({ msg: 'cannot save to DB'});
                       });
                     }
