@@ -4,16 +4,15 @@ let indexHash = 0;
 
 const traverse = function(dir, result = []) {
   fs.readdirSync(dir).forEach(file => {
-    const fPath = path.resolve(dir, file);
+    const fullPath = path.resolve(dir, file);
 
     // @ TODO in pipeline traverser -> seed -> thumbler
     if (!fPath.endsWith('_thumb.jpg')) {
-      let fileStats = { name: file };
+      let fileStats = { name: file, path: fullPath };
       indexHash += 1;
 
       if (fs.statSync(fPath).isDirectory()) {
         const dirType = {
-          path: fPath,
           type: 'dir',
           files: [],
           hash: indexHash
@@ -22,17 +21,15 @@ const traverse = function(dir, result = []) {
         result.push(fileStats);
         return traverse(fPath, fileStats.files);
       }
-      const fileExtension = path.extname(fPath);
+
       const fileType = {
-        path: `${dir}/${indexHash}${fileExtension}`,
         type: 'file',
         hash: indexHash,
         commentFlow: false,
-        extension: fileExtension,
+        extension: path.extname(fullPath),
         tags: []
       };
       fileStats = { ...fileStats, ...fileType };
-      fs.renameSync(fPath, fileStats.path);
       result.push(fileStats);
     }
   });
