@@ -24,15 +24,25 @@ class DriveRoutes {
         controller: controller.getCommentFlow(),
       },
       {
-        path: '/createTag/:folderHash',
+        path: '/createTag/:imageHash',
         method: 'post',
         controller: controller.createTag(),
       },
       {
-        path: '/insertIntoTag/:folderHash',
-        method: 'post',
+        path: '/insertIntoTag/:imageHash',
+        method: 'put',
         controller: controller.insertIntoTag(),
       },
+      {
+        path: '/getSpecificTag/:tagId',
+        method: 'get',
+        controller: controller.getSpecificTag(),
+      },
+      {
+        path: '/getExistingTags',
+        method: 'get',
+        controller: controller.getExistingTags(),
+      }
     ];
   }
 }

@@ -102,26 +102,24 @@ class DriveController extends BaseController {
 
   createTag() {
     return async({ body, params }, res) => {
-      const { folderHash } = params;
+      const { imageHash } = params;
       const { name, reference, originalAuthor } = body;
       try {
-        const tag = new this.models.Tag({ name, refersTo: [ reference ], originalAuthor });
+        const tag = new this.models.Tag({
+          name,
+          refersTo: [ Object.assign(reference, { imageHash }) ],
+          originalAuthor
+        });
         await tag.save();
 
-        const folder = await this.models.Folder.findOne({ hash: folderHash }).exec();
+        const image = await this.models.Image.findOne({ hash: imageHash }).exec();
+        image.tags.push({ tagName: tag.name, tagId: tag._id });
+        image.markModified('tags');
+        await image.save();
 
-        let indexToUpdate;
-        folder.contains.forEach((file, index) => {
-          file.hash === reference.fileHash
-            ? indexToUpdate = index
-            : null
-        })
-
-        folder.contains[indexToUpdate].tags.push(tag.name)
-        folder.markModified('contains');
-        await folder.save();
-        res.status(200).json('created');
+        res.status(200).json(tag);
       } catch(error) {
+        res.status(304).json({ error: 'tag is already created' });
         console.log(error)
       }
     }
@@ -129,36 +127,28 @@ class DriveController extends BaseController {
 
   insertIntoTag() {
     return async({ body, params }, res) => {
-      const { folderHash } = params;
+      const { imageHash } = params;
       const { name, reference } = body;
       try {
-        const existingTag = await Tag.findOne({ name }).exec();
+        const existingTag = await this.models.Tag.findOne({ name }).exec();
 
         let unique = true;
-        existingTag.refersTo.forEach((filereference) => filereference.fileHash === reference.fileHash ? unique = false : null)
+        existingTag.refersTo.forEach((fileReference) => fileReference.imageHash === imageHash ? unique = false : null)
 
         if (unique) {
-          existingTag.refersTo.push(reference);
+          existingTag.refersTo.push(Object.assign(reference, { imageHash }));
           existingTag.markModified('refersTo');
 
-          
-          const folder = await this.models.Folder.findOne({ hash: folderHash }).exec();
-
-          let indexToUpdate;
-          folder.contains.forEach((file, index) => {
-            file.hash === reference.fileHash
-              ? indexToUpdate = indexToUpdate
-              : null
-          })
-
-          folder.contains[indexToUpdate].tags.push(existingTag.name)
-          folder.markModified('contains');
+          const image = await this.models.Image.findOne({ hash: imageHash }).exec();
+          image.tags.push({ tagName: existingTag.name, tagId: existingTag._id })
+          image.markModified('tags');
 
           await existingTag.save();
-          await folder.save();
-          res.status(200).json('created');
+          await image.save();
+
+          res.status(200).json(existingTag);
         } else {
-          console.log('already referenced')
+          res.status(304).json({ error: 'image is already referenced' });
         }
       } catch(error) {
         console.log(error)
@@ -166,15 +156,28 @@ class DriveController extends BaseController {
     }
   }
 
-  getSpecificTagsReferences() {
-    return async({ body }, res) => {
-      // @TODO
+  getSpecificTag() {
+    // @TODO related tags popUp in client side
+    return async({ params: { tagId } }, res) => {
+      if (tagId) {
+        try {
+          const tag = await this.models.Tag.findById(tagId).exec();
+          res.status(200).json(tag);
+        } catch(error) {
+          res.status(304).json({ error: `can\'t find tag with id: ${tagId}` });
+        }
+      }
     }
   }
 
-  getTags() {
-    return async({ body }, res) => {
-      // @TODO
+  getExistingTags() {
+    return async(req, res) => {
+      try {
+        const tags = await this.models.Tag.find({}).exec();
+        res.status(200).json(tags);
+      } catch (error) {
+        res.status(304).json({ error: 'cant\'t get the tags' });
+      }
     }
   }  
 }

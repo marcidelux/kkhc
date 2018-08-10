@@ -7,11 +7,11 @@ const traverse = function(dir, result = []) {
     const fullPath = path.resolve(dir, file);
 
     // @ TODO in pipeline traverser -> seed -> thumbler
-    if (!fPath.endsWith('_thumb.jpg')) {
+    if (!fullPath.endsWith('_thumb.jpg')) {
       let fileStats = { name: file, path: fullPath };
       indexHash += 1;
 
-      if (fs.statSync(fPath).isDirectory()) {
+      if (fs.statSync(fullPath).isDirectory()) {
         const dirType = {
           type: 'dir',
           files: [],
@@ -19,7 +19,7 @@ const traverse = function(dir, result = []) {
         };
         fileStats = { ...fileStats, ...dirType };
         result.push(fileStats);
-        return traverse(fPath, fileStats.files);
+        return traverse(fullPath, fileStats.files);
       }
 
       const fileType = {

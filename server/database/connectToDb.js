@@ -30,13 +30,6 @@ connectToDb = (config) => {
     resetPasswordTokenExpires: { type: Number, default: null },
   });
 
-  // const chatSchema = new mongoose.Schema({ 
-  //   email: String,
-  //   body: String,
-  //   email: String,
-  //   avatar: String,
-  // });
-
   const commentFlowSchema = new mongoose.Schema({ 
     comments: Array,
   });
