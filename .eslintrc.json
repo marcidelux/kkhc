@@ -1,3 +1,10 @@
 {
-    "extends": "airbnb-base"
+    "extends": "airbnb-base",
+    "rules": {
+        "no-underscore-dangle": [2, { "allow": ["_id", "user_"] }],
+        "no-unused-expressions": [2, { "allowTernary": true }]
+    },
+    "env": {
+        "jest": true
+    }
 }

@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+
 let indexHash = 0;
 
-const traverse = function(dir, result = []) {
-  fs.readdirSync(dir).forEach(file => {
+const traverse = (dir, result = []) => {
+  // @ todo test & refactor
+  fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.resolve(dir, file);
 
     // @ TODO in pipeline traverser -> seed -> thumbler
@@ -15,7 +17,7 @@ const traverse = function(dir, result = []) {
         const dirType = {
           type: 'dir',
           files: [],
-          hash: indexHash
+          hash: indexHash,
         };
         fileStats = { ...fileStats, ...dirType };
         result.push(fileStats);
@@ -27,7 +29,7 @@ const traverse = function(dir, result = []) {
         hash: indexHash,
         commentFlow: false,
         extension: path.extname(fullPath),
-        tags: []
+        tags: [],
       };
       fileStats = { ...fileStats, ...fileType };
       result.push(fileStats);

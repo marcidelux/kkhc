@@ -1,7 +1,5 @@
-'use strict';
-
 class DriveRoutes {
-  constructor (controller) {
+  constructor(controller) {
     this.routes = [
       {
         path: '/folder/:folderHash',
@@ -42,7 +40,7 @@ class DriveRoutes {
         path: '/getExistingTags',
         method: 'get',
         controller: controller.getExistingTags(),
-      }
+      },
     ];
   }
 }

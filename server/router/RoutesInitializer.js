@@ -1,7 +1,5 @@
-"use strict";
-
-const fs = require("fs");
-const _ = require("lodash");
+const fs = require('fs');
+const _ = require('lodash');
 
 class RoutesInitializer {
   constructor(dbConnection) {
@@ -10,24 +8,24 @@ class RoutesInitializer {
   }
 
   loadRoutes() {
-    return new Promise((resolve, reject) => {
-      return fs.readdir(`${__dirname}/controllers`, (error, files) => {
-        files.forEach(fileName => {
-          const [nameSpace] = _.upperFirst(
-            _.kebabCase(fileName.split(".")[0])
-          ).split("-");
+    return new Promise(resolve => fs.readdir(`${__dirname}/controllers`, (error, files) => {
+      files.forEach((fileName) => {
+        const [nameSpace] = _.upperFirst(
+          _.kebabCase(fileName.split('.')[0]),
+        ).split('-');
 
-          const constructorController = require(`./controllers/${nameSpace}Controller`);
-          const constructorRoutes = require(`./routes/${nameSpace}Routes`);
+        /* eslint-disable global-require, import/no-dynamic-require */
+        const ConstructorController = require(`./controllers/${nameSpace}Controller`);
+        const ConstructorRoutes = require(`./routes/${nameSpace}Routes`);
+        /* eslint-enable global-require, import/no-dynamic-require */
 
-          this[nameSpace] = new constructorRoutes(
-            new constructorController(this.dbConnection)
-          );
-          this.routes.push(...this[nameSpace].routes);
-          resolve(this.routes);
-        });
+        this[nameSpace] = new ConstructorRoutes(
+          new ConstructorController(this.dbConnection),
+        );
+        this.routes.push(...this[nameSpace].routes);
+        resolve(this.routes);
       });
-    });
+    }));
   }
 }
 

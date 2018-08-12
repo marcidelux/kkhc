@@ -1,28 +1,26 @@
-'use strict';
-
 class NavigationRoutes {
-  constructor (controller) {
+  constructor(controller) {
     this.routes = [
       {
         path: '/auth',
         method: 'post',
         controller: controller.auth(),
-      }, 
+      },
       {
         path: '/logout',
         method: 'post',
         controller: controller.logout(),
-      }, 
+      },
       {
         path: '/updateuser',
         method: 'post',
         controller: controller.updateuser(),
-      }, 
+      },
       {
         path: '/identify',
         method: 'post',
         controller: controller.identify(),
-      }, 
+      },
       {
         path: '/',
         method: 'get',

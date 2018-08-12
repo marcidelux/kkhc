@@ -1,17 +1,16 @@
-'use strict';
-
 class UserRoutes {
-  constructor (controller) {
+  constructor(controller) {
     this.routes = [
       {
         path: '/forgotPassword',
         method: 'put',
         controller: controller.forgotPassword(),
-      }, {
+      },
+      {
         path: '/resetPassword',
         method: 'put',
         controller: controller.resetPassword(),
-      }
+      },
     ];
   }
 }

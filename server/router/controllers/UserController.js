@@ -1,10 +1,8 @@
-"use strict";
-
 const bcrypt = require('bcrypt');
-const Promise = require('bluebird')
-const crypto = Promise.promisifyAll(require('crypto'))
+const Promise = require('bluebird');
+const crypto = Promise.promisifyAll(require('crypto'));
 const sendGridMail = require('@sendgrid/mail');
-const generateEmailTemplate = require('./../../constants/generateEmailTemplate')
+const generateEmailTemplate = require('./../../constants/generateEmailTemplate');
 const config = require('./../../envConfig');
 
 const BaseController = require('./../BaseController');
@@ -18,17 +16,14 @@ class UserController extends BaseController {
       minimumPasswordLength: 6,
       saltRounds: 10,
 
-      generateToken: (n) => {
-        return crypto.randomBytesAsync(n).then(buffer => {
-          return buffer.toString('hex')
-        })
-      },
+      generateToken: n => crypto.randomBytesAsync(n)
+        .then(buffer => buffer.toString('hex')),
 
       sendEmail: async (email, token) => {
         sendGridMail.setApiKey(config.SENDGRID_API);
         return sendGridMail.send(generateEmailTemplate(email, token));
       },
-    }
+    };
   }
 
   forgotPassword() {
@@ -45,9 +40,8 @@ class UserController extends BaseController {
             await this.utilities.sendEmail(email, token);
             res.status(200).json({ message: `send link to email: ${email}` });
           } else {
-            res.status(200).json({ error: `can't generate link to ${email}!` });            
+            res.status(200).json({ error: `can't generate link to ${email}!` });
           }
-
         } catch (error) {
           console.log(error);
         }
@@ -69,16 +63,15 @@ class UserController extends BaseController {
             searchedUser.resetPasswordToken = null;
             searchedUser.resetPasswordTokenExpires = null;
             await searchedUser.save();
-            res.status(200).json({ message: `password have been reseted` });
+            res.status(200).json({ message: 'password have been reseted' });
           } else {
-            res.status(200).json({ error: `token have been expired` });
+            res.status(200).json({ error: 'token have been expired' });
           }
-        } catch(error) {
+        } catch (error) {
           console.log(error);
         }
-
       }
-    }
+    };
   }
 }
 

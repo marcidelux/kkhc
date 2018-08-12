@@ -8,6 +8,8 @@ const mongoose = require('mongoose');
 const memDB = require('./../../helpers/InMemoryDB').db;
 const BaseController = require('./../BaseController');
 
+// @ todo refact
+
 async function seeder(conn, res) {
   try {
     await seedDB(conn);
