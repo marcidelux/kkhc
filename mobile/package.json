@@ -4,16 +4,20 @@
   "private": true,
   "devDependencies": {
     "@types/jest": "^23.3.1",
+    "@types/ramda": "^0.25.36",
     "@types/react": "^16.4.7",
     "@types/react-dom": "^16.0.6",
     "@types/react-native": "^0.56.4",
+    "@types/react-native-vector-icons": "^4.6.3",
+    "@types/react-redux": "^6.0.6",
     "@types/react-test-renderer": "^16.0.1",
-    "babel-plugin-inline-dotenv": "^1.1.2",
     "concurrently": "^3.6.1",
     "jest-expo": "~27.0.0",
+    "react-native-dotenv": "^0.2.0",
     "react-native-scripts": "1.14.0",
     "react-native-typescript-transformer": "^1.2.10",
     "react-test-renderer": "16.3.1",
+    "redux-logger": "^3.0.6",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.0.1",
     "tslint": "^5.11.0",
@@ -43,11 +47,15 @@
   "dependencies": {
     "@types/react-navigation": "^2.0.12",
     "expo": "^27.0.1",
+    "ramda": "^0.25.0",
     "react": "16.4.0",
     "react-native": "0.55.4",
-    "react-native-modal": "^6.1.0",
-    "react-native-navigation": "^1.1.473",
     "react-native-scalable-image": "^0.4.0",
-    "react-navigation": "^2.5.5"
+    "react-native-vector-icons": "^5.0.0",
+    "react-navigation": "^2.5.5",
+    "react-navigation-header-buttons": "^2.1.0",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-thunk": "^2.3.0"
   }
 }

@@ -18,7 +18,6 @@ describe('should database seeding work', () => {
   let innerDirectory;
   let imageObjectReferenceHash;
   let anotherImageObjectReferenceHash;
-  let commentflowId;
 
   beforeAll(async (done) => {
     connection = await connectToDb(config);
@@ -99,7 +98,6 @@ describe('should database seeding work', () => {
     expect(imageObjectResponse.hash).toEqual(imageModel[0].hash);
     expect(imageObjectResponse.thumb).toEqual(imageModel[0].thumb);
     expect(imageObjectResponse.commentFlow).toEqual(imageModel[0].commentFlow);
-    commentflowId = imageObjectResponse.commentFlow;
     expect(imageObjectResponse._id.toString()).toEqual(
       imageModel[0]._id.toString(),
     );
@@ -110,11 +108,7 @@ describe('should database seeding work', () => {
     const text = 'some comment';
     const req = await request(server.app)
       .post(
-        `/addToCommentFlow/${JSON.stringify({
-          imageHash: imageObjectReferenceHash,
-          folderHash: innerDirectory.hash,
-          commentFlowHash: commentflowId,
-        })}`,
+        `/addToCommentFlow/${imageObjectReferenceHash}`,
       )
       .set('Accept', 'application/json')
       .set('Content-Type', 'application/json')
@@ -122,9 +116,9 @@ describe('should database seeding work', () => {
 
     const { comments } = JSON.parse(req.text);
 
-    const commentFlow = await connection.models.CommentFlow.findById(
-      commentflowId,
-    ).exec();
+    const commentFlow = await connection.models.CommentFlow.findOne({
+      belongsTo: imageObjectReferenceHash,
+    }).exec();
 
     expect(comments[0].text).toEqual(text);
     expect(comments[0].user).toEqual(user);
@@ -135,15 +129,6 @@ describe('should database seeding work', () => {
     expect(comments[0].text).toEqual(commentFlow.comments[0].text);
     expect(comments[0].user).toEqual(commentFlow.comments[0].user);
     expect(new Date(comments[0].date)).toEqual(commentFlow.comments[0].date);
-  });
-
-  it('after comment has been added folder containing image with new comment should been updated', async () => {
-    const innerDirectoryModel = await connection.models.Folder.find({
-      hash: innerDirectory.hash,
-    }).exec();
-    expect(innerDirectoryModel[0].contains[0].commentFlow.toString()).toEqual(
-      commentflowId.toString(),
-    );
   });
 
   describe('tag mechanism', () => {

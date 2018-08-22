@@ -12,12 +12,12 @@ class DriveRoutes {
         controller: controller.image(),
       },
       {
-        path: '/addToCommentFlow/:hashes',
+        path: '/addToCommentFlow/:imageHash',
         method: 'post',
         controller: controller.addToCommentFlow(),
       },
       {
-        path: '/getCommentFlow/:commentFlowId',
+        path: '/getCommentFlow/:imageHash',
         method: 'get',
         controller: controller.getCommentFlow(),
       },

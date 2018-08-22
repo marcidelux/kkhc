@@ -7,9 +7,9 @@ const connectToDb = (config) => {
     name: String,
     url: String,
     hash: Number,
+    parentHash: Number,
     thumb: String,
     tags: Array,
-    commentFlow: String,
     extension: String,
   });
 
@@ -32,6 +32,7 @@ const connectToDb = (config) => {
 
   const commentFlowSchema = new mongoose.Schema({
     comments: Array,
+    belongsTo: Number,
   });
 
   const tagSchema = new mongoose.Schema({

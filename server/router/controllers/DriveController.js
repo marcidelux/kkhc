@@ -6,9 +6,7 @@ class DriveController extends BaseController {
     return async ({ params }, res) => {
       if (params) {
         try {
-          const searchedFolderObject = await this.models.Folder.findOne({
-            hash: params.folderHash,
-          }).exec();
+          const searchedFolderObject = await this.models.Folder.findOne({ hash: params.folderHash }).exec();
           res.status(200);
           res.json(searchedFolderObject);
         } catch (error) {
@@ -22,9 +20,7 @@ class DriveController extends BaseController {
     return async ({ params }, res) => {
       if (params) {
         try {
-          const searchedImageObject = await this.models.Image.findOne({
-            hash: params.imageHash,
-          }).exec();
+          const searchedImageObject = await this.models.Image.findOne({ hash: params.imageHash }).exec();
           console.log(searchedImageObject);
           res.status(200).json(searchedImageObject);
         } catch (error) {
@@ -35,50 +31,22 @@ class DriveController extends BaseController {
   }
 
   addToCommentFlow() {
-    return async ({ params, body }, res) => {
-      const paramsParsed = JSON.parse(params.hashes);
-      if (paramsParsed.folderHash && paramsParsed.imageHash) {
+    return async ({ params: { imageHash }, body }, res) => {
+      if (imageHash) {
         try {
-          const searchedFolderObject = await this.models.Folder.findOne({
-            hash: paramsParsed.folderHash,
-          }).exec();
-          let indexToSave = -1;
-
-          searchedFolderObject.contains.forEach((file, index) => {
-            if (file.hash === paramsParsed.imageHash) indexToSave = index;
-          });
-
-          const commentFlow = await this.models.CommentFlow.findById(
-            paramsParsed.commentFlowHash,
-          ).exec();
-
-          if (indexToSave > -1) {
-            const newComment = {
-              id: new mongoose.mongo.ObjectId(),
-              text: body.text,
-              user: body.user,
-              date: new Date(),
-            };
-            commentFlow.comments.push(newComment);
-            commentFlow.markModified('comments');
-            await commentFlow.save();
-
-            const searchedImage = await this.models.Image.findOne({
-              hash: paramsParsed.imageHash,
-            }).exec();
-            searchedImage.commentFlow = commentFlow._id;
-            searchedImage.markModified('commentFlow');
-            await searchedImage.save();
-
-            searchedFolderObject.contains[indexToSave].commentFlow = commentFlow._id;
-            searchedFolderObject.markModified('contains');
-            await searchedFolderObject.save();
-            res.status(200).json(commentFlow);
-          } else {
-            res.status(304).send();
-          }
+          const commentFlow = await this.models.CommentFlow.findOne({ belongsTo: imageHash }).exec();
+          const newComment = {
+            id: new mongoose.mongo.ObjectId(),
+            text: body.text,
+            user: body.user,
+            date: new Date(),
+          };
+          commentFlow.comments.push(newComment);
+          commentFlow.markModified('comments');
+          await commentFlow.save();
+          res.status(200).json(commentFlow);
         } catch (error) {
-          console.log(error);
+          res.status(304).json({ error: 'can\'t add to CommentFlow' });
         }
       }
     };
@@ -88,9 +56,7 @@ class DriveController extends BaseController {
     return async ({ params }, res) => {
       if (params) {
         try {
-          const commentFlow = await this.models.CommentFlow.findById(
-            params.commentFlowId,
-          ).exec();
+          const commentFlow = await this.models.CommentFlow.findOne({ belongsTo: params.imageHash }).exec();
           res.status(200).json(commentFlow);
         } catch (error) {
           console.log(error);
@@ -111,9 +77,7 @@ class DriveController extends BaseController {
         });
         await tag.save();
 
-        const image = await this.models.Image.findOne({
-          hash: imageHash,
-        }).exec();
+        const image = await this.models.Image.findOne({ hash: imageHash }).exec();
         image.tags.push({ tagName: tag.name, tagId: tag._id });
         image.markModified('tags');
         await image.save();
@@ -142,9 +106,7 @@ class DriveController extends BaseController {
           existingTag.refersTo.push(Object.assign(reference, { imageHash }));
           existingTag.markModified('refersTo');
 
-          const image = await this.models.Image.findOne({
-            hash: imageHash,
-          }).exec();
+          const image = await this.models.Image.findOne({ hash: imageHash }).exec();
           image.tags.push({
             tagName: existingTag.name,
             tagId: existingTag._id,
