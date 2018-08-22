@@ -10,10 +10,15 @@ import {
 import Image from 'react-native-scalable-image';
 import { BACKEND_API } from 'react-native-dotenv';
 import Comments from './Comments';
+import { NavigationComponent } from 'react-navigation';
 
 export class ImageInspect extends React.Component<any, {
   comments: Array<object>,
   text: string}> {
+
+  static navigationOptions = ({ navigation }: { navigation: NavigationComponent }) => ({
+    title: navigation.state.params.imageObject.name,
+  })
 
   constructor(props: any) {
     super(props);
