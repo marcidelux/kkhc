@@ -36,7 +36,6 @@ const traverse = (dir, result = []) => {
       };
       fileStats = { ...fileStats, ...fileType };
       result.push(fileStats);
-      fs.renameSync(fullPath, `${dir}/${indexHash}.png`);
     }
   });
   return result;
