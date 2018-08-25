@@ -1,8 +1,8 @@
 import {
   createStackNavigator,
   createSwitchNavigator,
-  createBottomTabNavigator,
 } from 'react-navigation';
+import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs',
 import Icon from 'react-native-vector-icons/Feather';
 import React from 'react';
 
@@ -20,7 +20,7 @@ import DriveScreen from './screens/Drive/Drive';
 const AppNavigation = createSwitchNavigator(
   {
     Login: { screen: LoginScreen },
-    MainFlow: createBottomTabNavigator({
+    MainFlow: createMaterialBottomTabNavigator({
         News: {
           screen: NewsScreen,
         },
@@ -41,23 +41,29 @@ const AppNavigation = createSwitchNavigator(
       },
       {
         initialRouteName: 'News',
-        tabBarOptions: {
-          activeTintColor: 'red',
-          inactiveTintColor: 'gray',
+        shifting: true,
+        tabBarColor: 'red',
+        barStyle: {
+            backgroundColor: '#fbffe4',
         },
-        navigationOptions: ({ navigation }) => ({
-          tabBarIcon: ({ focused }) => {
-            const { routeName } = navigation.state;
-            const iconSwitcher = {
-              News: 'cast',
-              Drive: 'box',
-              Chat: 'message-square',
-              Settings: 'shield',
-              Upload: 'aperture',
-            };
-            return <Icon name={(iconSwitcher as any)[routeName]} size={30} color={focused ? 'red' : 'gray'} />;
-          },
-        }),
+        navigationOptions: ({ navigation }) => {
+          const { routeName } = navigation.state;
+          const styleSwitcher = {
+            News: { icon: 'cast', backgroundColor: '#ffffff' },
+            Drive: { icon: 'box', backgroundColor: '#fffaff' },
+            Chat: { icon: 'message-square', backgroundColor: '#fff5ff' },
+            Settings: { icon: 'shield', backgroundColor: '#fff0ff' },
+            Upload: { icon: 'aperture', backgroundColor: '#ffebff' },
+          };
+          return {
+            tabBarColor: (() => {
+              return (styleSwitcher as any)[routeName].backgroundColor;
+            })(),
+            tabBarIcon: ({ focused }) => {
+              return <Icon name={(styleSwitcher as any)[routeName].icon} size={25} color={focused ? '#ff2d70' : '#98979c'} />;
+            },
+          };
+        },
        },
     )},
   { initialRouteName: 'Login' },
@@ -67,7 +73,7 @@ export default class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        <AppNavigation />
+          <AppNavigation />
       </Provider>
     );
   }

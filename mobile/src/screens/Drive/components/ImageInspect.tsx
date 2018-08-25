@@ -11,9 +11,11 @@ import Image from 'react-native-scalable-image';
 import { BACKEND_API } from 'react-native-dotenv';
 import Comments from './Comments';
 import { NavigationComponent } from 'react-navigation';
+import { observer } from 'mobx-react';
+import ImageInspectStore from './imageInspectStore';
 
+@observer
 export class ImageInspect extends React.Component<any, {
-  comments: Array<object>,
   text: string}> {
 
   static navigationOptions = ({ navigation }: { navigation: NavigationComponent }) => ({
@@ -22,32 +24,10 @@ export class ImageInspect extends React.Component<any, {
 
   constructor(props: any) {
     super(props);
+    this.store = new ImageInspectStore(this.props.navigation.state.params.comments),
     this.state = {
-      comments: [...this.props.navigation.state.params.comments],
       text: '',
     };
-  }
-
-  async addComment(hash: number, text: string): Promise<void> {
-    try {
-      const response = await fetch(
-        `${BACKEND_API}/addToCommentFlow/${hash}`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            text,
-            user: 'aargon',
-          }),
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-        },
-      );
-      const { comments } = await response.json();
-      this.setState({ comments });
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   renderTags = () => this.props.navigation.state.params.imageObject.tags.length > 0
@@ -75,11 +55,11 @@ export class ImageInspect extends React.Component<any, {
             }}
           />
           {/* {this.renderTags()} */}
-          <Comments comments={this.state.comments}/>
+          <Comments comments={this.store.comments}/>
           <TouchableOpacity
             onPress={() => this.state.text === ''
             ? null
-            : this.addComment(imageObject.hash, this.state.text)}
+            : this.store.addComment(imageObject.hash, this.state.text)}
             style={{ backgroundColor: 'red' }}>
             <Text style={{ marginBottom: 50 }}>Sub ur Comment</Text>
             <TextInput

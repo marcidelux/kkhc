@@ -26,7 +26,7 @@ class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<an
     ),
   })
 
-  componentWillMount(): void {
+  componentDidMount(): void {
     this.props.fetchFolder(0);
   }
 

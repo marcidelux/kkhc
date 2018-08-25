@@ -40,7 +40,7 @@ class UserController extends BaseController {
             await this.utilities.sendEmail(email, token);
             res.status(200).json({ message: `send link to email: ${email}` });
           } else {
-            res.status(200).json({ error: `can't generate link to ${email}!` });
+            res.status(200).json({ error: `unable to generate link to ${email}` });
           }
         } catch (error) {
           console.log(error);

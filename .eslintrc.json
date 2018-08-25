@@ -2,7 +2,8 @@
     "extends": "airbnb-base",
     "rules": {
         "no-underscore-dangle": [2, { "allow": ["_id", "user_"] }],
-        "no-unused-expressions": [2, { "allowTernary": true }]
+        "no-unused-expressions": [2, { "allowTernary": true }],
+        "max-len": [2, { "code": 120 }]
     },
     "env": {
         "jest": true
