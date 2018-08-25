@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python
 
 import os
 import operator
@@ -11,7 +11,7 @@ else :
   search_path = sys.argv[1]
 
 if not os.path.isdir(search_path):
-    print('Usage : thumbler.py path')
+    print('Usage : stats.py path')
     sys.exit(1)  
 
 stat = {}
