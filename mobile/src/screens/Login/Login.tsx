@@ -134,14 +134,18 @@ export class LoginScreen extends React.Component<any, {
     //   });
 
     return (
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <TouchableWithoutFeedback
+        onPress={() => Keyboard.dismiss()}>
       <View style={styles.main}>
 
         <ForgotPassword
         setModalVisible={this.setModalVisible.bind(this)}
         modalVisible={this.state.modalVisible}/>
 
-        <Animated.View style={{ transform: [{scale: this.state.scale}], height: this.state.imageHeight }}>
+        <Animated.View style={{
+          transform: [{scale: this.state.scale}],
+          height: this.state.imageHeight,
+          }}>
           <Svg
             height='250'
             width='250'>
@@ -198,7 +202,7 @@ export class LoginScreen extends React.Component<any, {
 }
 
 const styles = StyleSheet.create({
-  main : { flex: 1, alignItems: 'center', paddingTop: 20 },
+  main : { flex: 1, alignItems: 'center', paddingTop: 30 },
   input: { height: 40, width: 150, borderColor: 'black', borderWidth: 1 },
   buttonsWrapper : {
     width: '90%',

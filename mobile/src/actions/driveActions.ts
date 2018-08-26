@@ -9,7 +9,7 @@ const fetchFolder = (hash: number) => async (dispatch: Dispatch) => {
       );
       const rootFolder = await response.json();
 
-      dispatch({
+      return dispatch({
         type: 'FETCH_FOLDER',
         payload: { rootFolder, hash },
       });

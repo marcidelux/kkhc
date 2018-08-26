@@ -1,8 +1,9 @@
+import 'es6-symbol/implement';
 import {
   createStackNavigator,
   createSwitchNavigator,
 } from 'react-navigation';
-import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs',
+import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
 import Icon from 'react-native-vector-icons/Feather';
 import React from 'react';
 
@@ -50,7 +51,7 @@ const AppNavigation = createSwitchNavigator(
           const { routeName } = navigation.state;
           const styleSwitcher = {
             News: { icon: 'cast', backgroundColor: '#ffffff' },
-            Drive: { icon: 'box', backgroundColor: '#fffaff' },
+            Drive: { icon: 'cloud', backgroundColor: '#fffaff' },
             Chat: { icon: 'message-square', backgroundColor: '#fff5ff' },
             Settings: { icon: 'shield', backgroundColor: '#fff0ff' },
             Upload: { icon: 'aperture', backgroundColor: '#ffebff' },

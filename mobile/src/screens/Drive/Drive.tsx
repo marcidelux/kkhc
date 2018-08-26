@@ -1,54 +1,64 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Button,
-  ImageBackground,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  TouchableHighlight
-} from 'react-native';
 import { connect } from 'react-redux';
 import { Action } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { FeatherHeaderButtons, Item } from './components/headerButton';
+import { Breadcrumbs } from './components/BreadCrumbs';
 import { breadCrumbNavigation, fetchFolder } from '../../actions/driveActions';
 import FileList from './containers/FileList';
 
 class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<any>, path: any}, placeIndicator: Array<any> }> {
-  static navigationOptions = ({ navigation }: { navigation: { navigate: Function } }) => ({
-    title: 'Drive',
-    headerRight: (
-      <FeatherHeaderButtons>
-        <Item title='Search' iconName='search' onPress={() => navigation.navigate('Search')} />
-      </FeatherHeaderButtons>
-    ),
-  })
+  static navigationOptions = ({ navigation }: { navigation: any }) => {
+    let breadCrumbs: Array<any> = [];
+    if (navigation.state.params) {
+      breadCrumbs = navigation.state.params.rootFolder.path
+        .replace('/opt/images', '')
+        .split('/')
+        .map((button: string, index: number) => ({ title: button, key: index.toString() }));
+    }
+    return {
+      headerLeft: (
+        <Breadcrumbs
+          data={breadCrumbs}
+          goBack={DriveScreen.goBack.bind(DriveScreen)}
+          navigationParams={navigation.state.params} />
+      ),
+      headerRight: (
+        <FeatherHeaderButtons>
+          <Item
+            title='Search'
+            iconName='search'
+            onPress={() => navigation.navigate('Search')} />
+        </FeatherHeaderButtons>
+      ),
+    };
+  }
+
+  static goBack(params: any, index: number): void {
+    const { fetchFolder, breadCrumbNavigation, placeIndicator } = params;
+    if (placeIndicator.length - 1 === index) return;
+    breadCrumbNavigation(index);
+    fetchFolder(placeIndicator[index]);
+  }
 
   componentDidMount(): void {
-    this.props.fetchFolder(0);
-  }
-
-  goBack(hash: any, index: number): void {
-    const { placeIndicator } = this.props;
-    if (placeIndicator.length - 1 === index) return;
-    this.props.breadCrumbNavigation(index);
-    this.props.fetchFolder(hash);
-  }
-
-  renderDirectoryNavigators(): Button {
-    const indicatorButtonList = this.props.rootFolder.path
-      .replace('/opt/images', '')
-      .split('/');
-    return indicatorButtonList.map((button: string, index: number) => {
-      return (
-        <Button
-          key={index}
-          title={button ? button : 'root'}
-          onPress={() => this.goBack(this.props.placeIndicator[index], index)}/>
-      );
+    this.props.fetchFolder(0).then(({ payload }) => {
+      this.props.navigation.setParams({
+        rootFolder: payload.rootFolder,
+        placeIndicator: [],
+        breadCrumbNavigation: this.props.breadCrumbNavigation,
+        fetchFolder: this.props.fetchFolder,
+      });
     });
+  }
+
+  componentDidUpdate(previousProps) {
+    if (previousProps.rootFolder.hash !== this.props.rootFolder.hash) {
+      this.props.navigation.setParams({
+        rootFolder: this.props.rootFolder,
+        placeIndicator: this.props.placeIndicator,
+      });
+    }
   }
 
   render() {
@@ -58,32 +68,15 @@ class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<an
       fetchFolder,
       navigation,
     } = this.props;
+
     if (folderLoading) {
       return null;
     }
     return (
-      <ImageBackground
-        source={require('./../../static/pics.png')}
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#F5FCFF'}}>
-        <View>{this.renderDirectoryNavigators()}</View>
-        <View
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '95%',
-            height: '80%',
-            backgroundColor: 'red'}}>
-          <FileList
-            rootFolder={rootFolder}
-            fetchFolder={fetchFolder}
-            navigation={navigation}/>
-        </View>
-      </ImageBackground>
+        <FileList
+          rootFolder={rootFolder}
+          fetchFolder={fetchFolder}
+          navigation={navigation}/>
     );
   }
 }
@@ -96,7 +89,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<any, null, Action>) => ({
     fetchFolder: (hash: number) => {
-        dispatch(fetchFolder(hash));
+        return dispatch(fetchFolder(hash));
     },
     breadCrumbNavigation: (index: number) => {
       dispatch(breadCrumbNavigation(index));

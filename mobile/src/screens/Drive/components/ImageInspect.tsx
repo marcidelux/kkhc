@@ -30,11 +30,11 @@ export class ImageInspect extends React.Component<any, {
     };
   }
 
-  renderTags = () => this.props.navigation.state.params.imageObject.tags.length > 0
-      ? this.props.navigation.state.params.imageObject.tags.map((tag: {}, index: number) => (
-          <Text key={index}>{tag}</Text>
-        ))
-      : null
+  // renderTags = () => this.props.navigation.state.params.imageObject.tags.length > 0
+  //     ? this.props.navigation.state.params.imageObject.tags.map((tag: {}, index: number) => (
+  //         <Text key={index}>{tag}</Text>
+  //       ))
+  //     : null
 
   render() {
     const imageObject = this.props.navigation.state.params.imageObject;
