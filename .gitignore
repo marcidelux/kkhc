@@ -1,4 +1,5 @@
 node_modules
+test/coverage
 data/db
 .env
 .DS_Store

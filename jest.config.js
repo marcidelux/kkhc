@@ -3,5 +3,8 @@ module.exports = {
   testRegex: '(//.*|(\\.|/)(test|spec))\\.js?$',
   verbose: true,
   testURL: 'http://localhost/',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  moduleFileExtensions: ['js'],
+  collectCoverage: true,
+  coverageDirectory: '<rootDir>/test/coverage',
+  collectCoverageFrom: ['<rootDir>/server/**/*.js'],
 };

@@ -18,4 +18,5 @@ module.exports = {
   EXPRESS_PORT,
   NODE_ENV,
   WEB_URL,
+  PATH_TO_DRIVE: process.env.PATH_TO_DRIVE,
 };

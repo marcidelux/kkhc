@@ -24,7 +24,7 @@ describe('should database seeding work', () => {
     server = new RootServer(1111, connection);
     server.init();
 
-    await populate(traverse('/opt/images'), connection);
+    await populate(traverse(config.PATH_TO_DRIVE), connection);
     return done();
   });
 
@@ -76,6 +76,7 @@ describe('should database seeding work', () => {
     expect(innerDirectoryModel[0].contains[0].commentFlow).toBeFalsy();
 
     imageObjectReferenceHash = innerDirectoryResponse.contains[0].hash;
+
     anotherImageObjectReferenceHash = innerDirectoryResponse.contains[1].hash;
   });
 
