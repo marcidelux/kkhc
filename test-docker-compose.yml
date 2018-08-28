@@ -36,7 +36,7 @@ services:
       - ./server:/opt/server/
       - ./www:/opt/www/
       - ./test/:/opt/test/
-      - ./__mocks__:/__mocks__/
+      - ./mocks/__mocks__:/__mocks__/
       - ./data/test_images:/opt/images/
     ports:
       - 7229-7239:7229-7239
