@@ -1,0 +1,49 @@
+version: '2'
+services:
+
+  test_mongo:
+    image: mongo:latest
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/test/null
+      - MONGO_INITDB_ROOT_USERNAME=test_super
+      - MONGO_INITDB_ROOT_PASSWORD=stub
+      - MONGO_INITDB_DATABASE=test_kkhcfiles
+    volumes:
+      - ./data/mongo/test_docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 127.0.0.1:27018:27018
+    command: mongod --port 27018
+    networks:
+      test_kkhc_net:
+        aliases:
+          - test_db 
+
+  test_server:
+    build:
+      context: ./
+      dockerfile: Integration.Dockerfile
+    environment:
+      - EXPRESS_PORT=3055
+      - MONGO_INITDB_ROOT_USERNAME=test_super
+      - MONGO_INITDB_ROOT_PASSWORD=stub
+      - MONGO_INITDB_DATABASE=test_kkhcfiles
+      - ADMIN_PASSWORD=password123
+      - EXPRESS_SECRET=123
+      - PATH_TO_DRIVE=/opt/images
+    ports:
+      - 7229-7239:7229-7239
+    networks:
+      - test_kkhc_net
+    links:
+      - test_mongo
+    working_dir: /opt
+    command: ./test_startup.sh
+
+networks:
+  test_kkhc_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
