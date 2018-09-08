@@ -30,7 +30,6 @@ const traverse = (dir, result = []) => {
         type: 'file',
         hash: indexHash,
         parentHash,
-        commentFlow: false,
         extension: path.extname(fullPath),
         tags: [],
       };

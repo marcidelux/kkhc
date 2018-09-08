@@ -19,4 +19,5 @@ module.exports = {
   NODE_ENV,
   WEB_URL,
   PATH_TO_DRIVE: process.env.PATH_TO_DRIVE,
+  PATH_TO_AVATARS: process.env.PATH_TO_AVATARS,
 };

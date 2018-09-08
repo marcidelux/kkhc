@@ -1,185 +1,164 @@
-'use strict';
-
-const seedDB = require('../../database/dbSeed').seedDB;
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
-const config = require('./../../envConfig');
 const mongoose = require('mongoose');
-const memDB = require('./../../helpers/InMemoryDB').db;
+
+const config = require('./../../envConfig');
+const { seedDB } = require('../../database/dbSeed');
+const { db: memDB } = require('./../../helpers/InMemoryDB');
 const BaseController = require('./../BaseController');
+const AvatarMapper = require('./../../helpers/AvatarMapper');
 
-// @ todo refact
-
-async function seeder(conn, res) {
-  try {
-    await seedDB(conn);
-    res.json({ msg: "Database successfully seeded" });
-  } catch (err) {
-    res.json({ msg: "Error seeding database"} );
-  }
-}
-
-async function getCollectionsInfo(collList) {
-  const myCollections = [];
-  collList.forEach(async function(collection) {
-    myCollections.push(new Promise ((resolve, reject) => {
-      mongoose.models[collection.name].count({}, (err, sum) => {
-        if (err) {
-          reject({ msg: 'Cannot read database'});
-        } else {
-          resolve({ Name: `${collection.name}  [ ${sum} ]` })
-        }
-      });
-    }));
-  });
-  return Promise.all(myCollections); 
-}
-
+// @todo test this endpoint without jest race-conditions
 class AdminController extends BaseController {
-  
   constructor(dbConnection) {
     super(dbConnection);
-  };
-  
-  admin() {
-    return (req, res) => {
-      if (req.headers.adminpassword === config.ADMIN_PASSWORD) {
-        console.log('/admin BODY :\n', req.body);
-        if (req.body.hasOwnProperty('Command')) {
-          switch(req.body.Command) {
-            
-            case 'list':
-              this.models.User.find()
-              .then(users => res.json(
-                users.map(user => {
-                  return {
-                    "username": user.username
-                  };
-                })
-              ));
-              break;
-            
-            case 'collections':
-              mongoose.connection.db.listCollections().toArray(async function(err, collList) {
-                if (err) {
-                  res.json({ msg: "Cannot read database"})
-                }
-                else {
-                  let response = await getCollectionsInfo(collList)
-                  res.json(response);                
+    this.avatarMapper = new AvatarMapper(this.connection);
+
+    this.utilities = {
+      saltRounds: 10,
+      seeder: async (conn, res) => {
+        try {
+          await seedDB(conn);
+          res.json({ msg: 'Database successfully seeded' });
+        } catch (err) {
+          res.json({ msg: 'Error seeding database' });
+        }
+      },
+      getCollectionsInfo: async (collList) => {
+        const allCollections = [];
+        collList.forEach(async (collection) => {
+          allCollections.push(new Promise((resolve) => {
+            mongoose.models[collection.name].countDocuments({}, (err, sum) => {
+              if (err) {
+                throw new Error('Cannot read database');
+              } else {
+                resolve({ Name: `${collection.name}  [ ${sum} ]` });
+              }
+            });
+          }));
+        });
+        return Promise.all(allCollections);
+      },
+    };
+
+    this.handlers = {
+
+      listCollections: (req, res) => mongoose.connection.db.listCollections()
+        .toArray(async (err, collList) => {
+          if (err) {
+            res.json({ msg: 'Cannot read database' });
+          } else {
+            const response = await this.utilities.getCollectionsInfo(collList);
+            res.json(response);
+          }
+        }),
+
+      seedDbWithDriveFiles: (req, res) => this.utilities.seeder(this.connection, res),
+
+      seedAvatars: async (req, res) => {
+        const savedInstances = await this.avatarMapper.saveAvatarsToDb();
+        res.json({ msg: `saved: ${savedInstances.length} new avatars` });
+      },
+
+      flushDbCollection: (req, res) => {
+        const { body: { collection } } = req;
+        if (!collection) {
+          return res.json({ msg: 'No collection provided' });
+        }
+        mongoose.connection.db.listCollections()
+          .toArray((err, collList) => {
+            if (err) return res.json({ msg: 'Cannot read database' });
+
+            const collectionNames = [...collList.map(c => c.name)];
+            if (collectionNames.includes(collection)) {
+              mongoose.connection.db.dropCollection(collection, (innerErr) => {
+                if (innerErr) {
+                  res.json({ msg: `Cannot flush ${collection}` });
+                } else {
+                  res.json({ msg: `Collection ${collection} has been flushed` });
                 }
               });
-              break;
+            } else {
+              res.json({ msg: `Collection ${collection} cannot be found` });
+            }
+          });
+      },
 
-            case 'seed':
-              seeder(this.connection, res);           
-              break;
+      getUsersInfo: async (req, res) => {
+        const allUsers = await this.models.User.find({}).exec();
+        res.json({ msg: allUsers });
+      },
 
-            case 'flush':
-              if (!req.body.hasOwnProperty('Collection')) {
-                res.json({ msg: 'No colllection provided' });
-                break;
-              }
-              const collections = [];            
-              mongoose.connection.db.listCollections().toArray(function(err, collList) {
-                if (err) {
-                  res.json({ msg: "Cannot read database"})
-                }
-                else {
-                  collList.forEach(function(element) {
-                    collections.push(element.name);
-                  });
-                  let collIndex = collections.indexOf(req.body.Collection);
-                  if (collIndex >= 0) {
-                    mongoose.connection.db.dropCollection(req.body.Collection, (err, result) => {
-                      if (err) {
-                        res.json({ msg: `Cannot flush ${req.body.Collection}`});
-                      } else {
-                        res.json({ msg: `Collection ${req.body.Collection} has been flushed`});                        
-                      }
-                    });
-                  } else {
-                    res.json({ msg: `Collection ${req.body.Collection} cannot be found` });
-                  }
-                }
-              });          
-              break;
-
-            case 'add':
-              if (req.body.Username && req.body.Password) {
-                this.models.User.findOne({username: req.body.Username})
-                .then(user => {
-                  res.json({msg: `User: ${user.username} already exists`});
-                })
-                .catch(err => {
-                  bcrypt.hash(req.body.Password, saltRounds, (err, hash) => {
-                    if (err) {
-                      console.log('ERROR', err);
-                    } else {
-                      let user_ = new this.models.User({
-                        username: req.body.Username,
-                        password: hash,
-                        email: req.body.Email,
-                        enabled: true,
-                      });
-                      user_.save()
-                      .then(() => {
-                        memDB.addNewUser(user_);
-                        res.json({ msg: `User created: ${req.body.Username}` });
-                      })
-                      .catch(err => {
-                        console.log(`DB ERROR !!!!!\n${err}`);
-                        res.json({ msg: 'cannot save to DB'});
-                      });
-                    }
-                  });                  
-                });
-              } else {
-                res.json({ msg: "no username or password provided"});
-              }
-              break;
-
-            case 'reset':
-              if (req.body.Username && req.body.Password) {
-                this.models.User.findOne({ username: req.body.Username })
-                .then(user => {
-                  if (!user) {
-                    throw Error (`User ${req.body.Username} cannot be found`);
-                  } 
-                  bcrypt.hash(req.body.Password, saltRounds, (err, hash) => {
-                    if (err) {
-                      console.log('ERROR', err);
-                    } else {
-                      user.password = hash;
-                      user.save()
-                      .then(() => res.json({ msg: `Password of ${req.body.Username} has been changed.` }))
-                      .catch(err => {
-                        res.json({ msg: 'cannot save to DB'});
-                      });
-                    }
-                  });
-                })
-                .catch(err => {
-                  res.json({msg: `User ${req.body.Username} cannot be found`});                  
-                });
-              } else {
-                res.json({ msg: "no username or password provided"});
-              }
-              break;
-
-            default:
-              res.json({ msg: 'no valid command issued'});
-
+      addUser: async (req, res) => {
+        const { body: { email, password, username } } = req;
+        if (email && password && username) {
+          const userWithSameEmail = await this.models.User.findOne({ email }).exec();
+          if (userWithSameEmail) {
+            res.json({ msg: `User: ${userWithSameEmail.email} already exists` });
+          } else {
+            try {
+              const hash = await bcrypt.hash(password, this.utilities.saltRounds);
+              const user = new this.models.User({
+                username,
+                password: hash,
+                email,
+                avatar: '',
+                color: '',
+                isOnline: false,
+              });
+              await user.save();
+              memDB.addNewUser(user);
+              res.json({ msg: `User created: ${username}` });
+            } catch (error) {
+              console.log(`DB ERROR !!!!!\n${error}`);
+              res.json({ msg: 'cannot save to DB' });
+            }
           }
         } else {
-          res.json({ msg: 'no command issued'});
+          res.json({ msg: 'no username or password provided' });
+        }
+      },
+
+      resetUserPassword: async (req, res) => {
+        const { body: { email, password } } = req;
+        if (email && password) {
+          try {
+            const user = await this.models.User.findOne({ email }).exec();
+            if (!user) throw Error(`User ${email} cannot be found`);
+            const hash = await bcrypt.hash(password, this.utilities.saltRounds);
+
+            user.password = hash;
+            await user.save();
+
+            res.json({ msg: `Password of ${email} has been changed.` });
+          } catch (error) {
+            res.json({ msg: 'cannot save to DB' });
+          }
+        } else {
+          res.json({ msg: 'no username or password provided' });
+        }
+      },
+    };
+  }
+
+  admin() {
+    return async (req, res) => {
+      const {
+        headers: { adminpassword },
+        body: { command },
+      } = req;
+      if (adminpassword === config.ADMIN_PASSWORD) {
+        if (command) {
+          this.handlers[command]
+            ? await this.handlers[command](req, res)
+            : res.json({ msg: 'no valid command issued' });
+        } else {
+          res.json({ msg: 'no command issued' });
         }
       } else {
-        res.json({msg: 'you have no rights to do this'})
+        res.json({ msg: 'you have no rights to do this' });
       }
     };
-  };
-  
+  }
 }
 
 module.exports = AdminController;

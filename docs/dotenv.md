@@ -17,4 +17,5 @@ LETSENCRYPT_HOST=yoursite.com,www.yoursite.com
 LETSENCRYPT_EMAIL=youremail@gmail.com
 ADMIN_PASSWORD=adminpassword
 PATH_TO_DRIVE=/opt/images
+PATH_TO_AVATARS=/opt/server/avatars
 ```

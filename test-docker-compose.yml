@@ -31,6 +31,7 @@ services:
       - ADMIN_PASSWORD=password123
       - EXPRESS_SECRET=123
       - PATH_TO_DRIVE=/opt/images
+      - PATH_TO_AVATARS=/opt/test/testAvatars
 
     volumes:
       - ./server:/opt/server/
