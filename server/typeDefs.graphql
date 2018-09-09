@@ -1,0 +1,54 @@
+type User {
+    id: ID!
+    username: String,
+    avatar: String,
+    color: String,
+    isOnline: Boolean,
+}
+
+type Avatar {
+    nameOnDisc: String,
+    extension: String,
+}
+
+type LoginResponse {
+    status: Boolean!,
+    userId: String,
+}
+
+input ChatMessageInput {
+    userId: ID!,
+    message: String,
+    date: String,
+}
+
+input UserTypeInput {
+    id: ID!
+    username: String,
+    avatar: String,
+    color: String,
+    isOnline: Boolean,
+}
+
+type ChatMessage {
+    userId: ID!,
+    message: String,
+    date: String,
+}
+
+type Query {
+    usersStatus: [User]!
+    getChatMessages(offset: Int): [ChatMessage]
+    availableAvatars: [Avatar]
+}
+
+type Mutation {
+    login(email: String!, password: String!): LoginResponse!
+    updateStatus(user: UserTypeInput): User
+    addChatMessage(chatMessage: ChatMessageInput!): ChatMessage
+}
+
+type Subscription {
+    chatMessageAdded: ChatMessage!
+    userUpdated: User!
+}

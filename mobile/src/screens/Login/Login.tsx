@@ -7,6 +7,7 @@ import {
   Keyboard,
   Easing,
   StyleSheet,
+  AsyncStorage,
 } from 'react-native';
 import { Input, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
@@ -18,13 +19,12 @@ import kkhcLogoSvgPath from './../../static/kkhcLogoSvg';
 export class LoginScreen extends React.Component<any, {
   keyboardWillShowSub: any,
   keyboardWillHideSub: any,
-  userName: string,
+  email: string,
   password: string,
   forgot: string,
   imageHeight: any,
   modalVisible: boolean,
   strokeDashoffset: any,
-  // spinValue: any,
   scale: any,
   strokeDasharray: any,
   initAnimation: any,
@@ -32,13 +32,12 @@ export class LoginScreen extends React.Component<any, {
   constructor(props: any) {
     super(props);
     this.state = {
-      userName: null,
+      email: null,
       password: null,
       forgot: null,
       modalVisible: false,
       keyboardWillShowSub: Keyboard.addListener('keyboardWillShow', this.keyboardWillShow),
       keyboardWillHideSub: Keyboard.addListener('keyboardWillHide', this.keyboardWillHide),
-      // spinValue: new Animated.Value(0),
       imageHeight: new Animated.Value(250),
       scale: new Animated.Value(1),
       strokeDashoffset: 1500,
@@ -68,18 +67,6 @@ export class LoginScreen extends React.Component<any, {
     this.setState({ modalVisible });
   }
 
-  // spin() {
-  //   this.state.spinValue.setValue(0);
-  //   Animated.loop(Animated.timing(
-  //     this.state.spinValue, {
-  //       toValue: 1,
-  //       duration: 8000,
-  //       useNativeDriver: true,
-  //       easing: Easing.linear,
-  //     },
-  //   )).start();
-  // }
-
   keyboardWillShow = (event: { duration: number }) => {
     Animated.timing(this.state.imageHeight, {
       duration: event.duration,
@@ -107,31 +94,51 @@ export class LoginScreen extends React.Component<any, {
   }
 
   login = async () => {
+    const { email, password } = this.state;
     try {
-      // let response = await fetch(`${BACKEND_API}/auth`, {
-      //   method: 'POST',
-      //   body: JSON.stringify({
-      //     password: '123',
-      //     email: 'asd@wasd.gov'
-      //   }),
-      //   headers: {
-      //     'Content-Type': 'application/json; charset=utf-8'
-      //   }
-      // });
-      // let { Success } = await response.json();
-      // if (Success) {
-      this.props.navigation.navigate('MainFlow');
-      // }
+      let response = await fetch(`${BACKEND_API}/mobile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: JSON.stringify({
+          query: `mutation($email: String!, $password: String!) {
+            login(email: $email, password: $password) {
+              status,
+              userId,
+            }
+          }`,
+          variables: {
+            email,
+            password,
+          },
+        }),
+      });
+      const { data } = await response.json();
+      await this.handleClientLogin(data);
+
     } catch (error) {
       console.error(error);
     }
   }
 
+  handleClientLogin = async (data: any) => {
+    if (data) {
+      const { login: { status, userId } } = data;
+      if (status) {
+        try {
+          await AsyncStorage.setItem('loggedInUserId', userId);
+          this.props.navigation.navigate('MainFlow');
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        console.log('password or email is incorrect');
+      }
+    }
+  }
+
   render() {
-    // const spin = this.state.spinValue.interpolate({
-    //   inputRange: [0, 1],
-    //   outputRange: ['0deg', '360deg'],
-    //   });
 
     return (
       <TouchableWithoutFeedback
@@ -163,11 +170,12 @@ export class LoginScreen extends React.Component<any, {
           <Input
             leftIcon={<Icon name='user' size={24} color='black'/>}
             style={styles.input}
-            onChangeText={(userName: string) => this.setState({ userName })}
-            value={this.state.userName}
-            placeholder='You...'
+            onChangeText={(email: string) => this.setState({ email })}
+            value={this.state.email}
+            placeholder='You@...'
+            keyboardType={'email-address'}
             placeholderTextColor='grey'
-            maxLength={20}
+            maxLength={40}
           />
           <Input
             leftIcon={<Icon name='lock' size={24} color='black'/>}
@@ -176,12 +184,16 @@ export class LoginScreen extends React.Component<any, {
             value={this.state.password}
             placeholder='Secret of Choice!'
             placeholderTextColor='grey'
-            maxLength={20}
+            maxLength={40}
             secureTextEntry={true}
           />
           <View style={styles.buttonsWrapper}>
             <Button
-              onPress={() => this.login()}
+              onPress={() => {
+                if (this.state.email && this.state.password) {
+                  this.login();
+                }
+              }}
               icon={<Icon name='anchor' size={24} color='white'/>}
               title={'log me in'}
               buttonStyle={[styles.loginButton, styles.button]}

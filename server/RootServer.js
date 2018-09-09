@@ -1,11 +1,19 @@
+const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
 const express = require('express');
-const path = require('path');
 const exphbs = require('express-handlebars');
 const morgan = require('morgan');
 const favicon = require('serve-favicon');
 const session = require('express-session');
+const { createServer } = require('http');
 const MemoryStore = require('memorystore')(session);
+
+const { ApolloServer } = require('apollo-server-express');
+const { execute, subscribe } = require('graphql');
+const { SubscriptionServer } = require('subscriptions-transport-ws');
+const { makeExecutableSchema } = require('graphql-tools');
+
 const config = require('./envConfig');
 const RouterHub = require('./router/RouterHub');
 
@@ -18,10 +26,17 @@ const hbs = exphbs.create({
   },
 });
 
+const schema = makeExecutableSchema({
+  typeDefs: fs.readFileSync('/opt/server/typeDefs.graphql', 'utf-8'),
+  // eslint-disable-next-line
+  resolvers: require('/opt/server/resolvers'),
+});
+
 class RootServer {
   constructor(port, dbConnection) {
     this.PORT = port;
     this.HOST = '0.0.0.0';
+    this.db = dbConnection;
     this.router = new RouterHub(dbConnection);
   }
 
@@ -29,7 +44,7 @@ class RootServer {
     this.app = express();
 
     /* eslint-disable global-require */
-    this.http = require('http').Server(this.app);
+    this.http = createServer(this.app);
     this.io = require('socket.io')(this.http);
     this.ioHandler = require('./socketIO/ioHandler').handler(this.io);
     /* eslint-enable global-require */
@@ -38,7 +53,7 @@ class RootServer {
     this.app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : ''));
     this.app.use(
       session({
-        name: 'KKHC_Kuk',
+        name: 'KKHC_Sessions',
         store: new MemoryStore({
           checkPeriod: 86400000,
         }),
@@ -52,12 +67,51 @@ class RootServer {
       '/opt/images/',
       express.static(path.join(`${__dirname}/../images`)),
     );
+    this.app.use(
+      config.PATH_TO_AVATARS,
+      express.static('./avatars'),
+    );
     this.app.engine('handlebars', hbs.engine);
     this.app.set('view engine', 'handlebars');
     this.app.set('views', `${__dirname}/../www/views`);
     this.app.use('/', this.router.getRouter());
+
+    const apollo = new ApolloServer({
+      schema,
+      subscriptions: {
+        path: '/subscriptions',
+      },
+      context: ({ req }) => ({
+        db: this.db,
+      }),
+      playground: {
+        settings: {
+          'editor.theme': 'light',
+          'editor.cursorShape': 'line',
+        },
+      },
+    });
+
+    apollo.applyMiddleware({ app: this.app, path: '/mobile' });
+    // apollo.installSubscriptionHandlers(this.app);
+
     this.server = this.http.listen(this.PORT, () => {
-      console.log(`KKHC Server running on http://${this.HOST}:${this.PORT}`);
+      console.log('....running   =', apollo.subscriptionsPath);
+      // eslint-disable-next-line
+      new SubscriptionServer({
+        execute,
+        subscribe,
+        schema,
+        onConnect: (connectionParams, webSocket, context) => {
+          console.log('connect');
+        },
+        onDisconnect: (webSocket, context) => {
+          console.log('disconnect');
+        },
+      }, {
+        server: this.http,
+        path: '/subscriptions',
+      });
     });
   }
 

@@ -42,14 +42,7 @@ class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<an
   }
 
   componentDidMount(): void {
-    this.props.fetchFolder(0).then(({ payload }) => {
-      this.props.navigation.setParams({
-        rootFolder: payload.rootFolder,
-        placeIndicator: [],
-        breadCrumbNavigation: this.props.breadCrumbNavigation,
-        fetchFolder: this.props.fetchFolder,
-      });
-    });
+    this.props.fetchFolder(0);
   }
 
   componentDidUpdate(previousProps) {
@@ -57,6 +50,8 @@ class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<an
       this.props.navigation.setParams({
         rootFolder: this.props.rootFolder,
         placeIndicator: this.props.placeIndicator,
+        breadCrumbNavigation: this.props.breadCrumbNavigation,
+        fetchFolder: this.props.fetchFolder,
       });
     }
   }
