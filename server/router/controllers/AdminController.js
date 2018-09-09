@@ -130,13 +130,16 @@ class AdminController extends BaseController {
         if (email && password) {
           try {
             const user = await this.models.User.findOne({ email }).exec();
-            if (!user) throw Error(`User ${email} cannot be found`);
-            const hash = await bcrypt.hash(password, this.utilities.saltRounds);
+            if (!user) {
+              res.json({ msg: 'can\'t found user' });
+            } else {
+              const hash = await bcrypt.hash(password, this.utilities.saltRounds);
 
-            user.password = hash;
-            await user.save();
+              user.password = hash;
+              await user.save();
 
-            res.json({ msg: `Password of ${email} has been changed.` });
+              res.json({ msg: `Password of ${email} has been changed.` });
+            }
           } catch (error) {
             res.json({ msg: 'cannot save to DB' });
           }
