@@ -48,7 +48,7 @@ class AdminController extends BaseController {
             res.json({ msg: 'Cannot read database' });
           } else {
             const response = await this.utilities.getCollectionsInfo(collList);
-            res.json(response);
+            res.json({ msg: response });
           }
         }),
 
@@ -57,6 +57,12 @@ class AdminController extends BaseController {
       seedAvatars: async (req, res) => {
         const savedInstances = await this.avatarMapper.saveAvatarsToDb();
         res.json({ msg: `saved: ${savedInstances.length} new avatars` });
+      },
+
+      getAvatars: async (req, res) => {
+        const allAvatars = (await this.models.Avatar.find({}).exec())
+          .map(({ nameOnDisc, extension }) => ({ nameOnDisc, extension }));
+        res.json({ msg: allAvatars });
       },
 
       flushDbCollection: (req, res) => {
@@ -84,7 +90,8 @@ class AdminController extends BaseController {
       },
 
       getUsersInfo: async (req, res) => {
-        const allUsers = await this.models.User.find({}).exec();
+        const allUsers = (await this.models.User.find({}).exec())
+          .map(({ username, email }) => ({ username, email }));
         res.json({ msg: allUsers });
       },
 
