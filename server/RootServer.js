@@ -8,6 +8,7 @@ const favicon = require('serve-favicon');
 const session = require('express-session');
 const { createServer } = require('http');
 const MemoryStore = require('memorystore')(session);
+const fileUpload = require("express-fileupload");
 
 const { ApolloServer } = require('apollo-server-express');
 const { execute, subscribe } = require('graphql');
@@ -62,6 +63,7 @@ class RootServer {
     );
     this.app.use(cors());
     this.app.use(express.json());
+    this.app.use(fileUpload())
     this.app.use(express.static('../www/assets'));
     this.app.use(
       '/opt/images/',

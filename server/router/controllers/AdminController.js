@@ -1,3 +1,5 @@
+
+
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 
@@ -6,6 +8,7 @@ const { seedDB } = require('../../database/dbSeed');
 const { db: memDB } = require('./../../helpers/InMemoryDB');
 const BaseController = require('./../BaseController');
 const AvatarMapper = require('./../../helpers/AvatarMapper');
+
 
 // @todo test this endpoint without jest race-conditions
 class AdminController extends BaseController {
@@ -65,6 +68,18 @@ class AdminController extends BaseController {
         res.json({ msg: allAvatars });
       },
 
+      addAvatars: async (req, res) => {
+        if (!req.files) {
+          return res.json({ msg: 'No files were uploaded.' });
+        }
+        try {
+          await this.avatarMapper.addNewAvatarFromRemote(req.files.avatar)
+          res.json({ msg: "Avatar file successfully uploaded"})
+        } catch (err) {
+          res.json({ msg: "Cannot save avatarfile"})
+        }
+      },
+      
       flushDbCollection: (req, res) => {
         const { body: { collection } } = req;
         if (!collection) {
@@ -152,9 +167,12 @@ class AdminController extends BaseController {
 
   admin() {
     return async (req, res) => {
+
+      console.log(req.body)
+
       const {
         headers: { adminpassword },
-        body: { command },
+        headers: { command },
       } = req;
       if (adminpassword === config.ADMIN_PASSWORD) {
         if (command) {

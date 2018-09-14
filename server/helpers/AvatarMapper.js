@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
-
 const config = require('./../envConfig');
 
 class AvatarMapper {
@@ -43,8 +42,11 @@ class AvatarMapper {
     return this.dbConnection.models.Avatar.find({}).exec();
   }
 
-  addNewAvatarFromRemote() {
-    // @todo
+  async addNewAvatarFromRemote(fileObj) {
+    const nameOnDisc = uuidv4();
+    const newAvatar = new this.dbConnection.models.Avatar({ nameOnDisc, extension: '.png' });
+    await fileObj.mv(path.join(config.PATH_TO_AVATARS, nameOnDisc+ '.png'));
+    return newAvatar.save()
   }
 }
 
