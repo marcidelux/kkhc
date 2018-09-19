@@ -30,7 +30,7 @@ const subscription = gql`
   }
 `;
 
-const MessageListView = class extends React.Component {
+const MessageListView = class extends React.Component<any, any> {
   constructor(props) {
     super(props);
     this.state = {
@@ -73,7 +73,7 @@ const MessageListView = class extends React.Component {
   render() {
     const { data } = this.props;
     const unifiedData = [...this.state.additionalMessages, ...data.getChatMessages];
-    console.log(this.props.usersStatus, 'near there')
+
     const userDisplayProperties = this.props.usersStatus.reduce((accumulator, { id, ...rest }) => {
         accumulator[id] = rest;
         return accumulator;

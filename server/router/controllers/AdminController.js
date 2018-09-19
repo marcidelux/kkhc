@@ -73,13 +73,13 @@ class AdminController extends BaseController {
           return res.json({ msg: 'No files were uploaded.' });
         }
         try {
-          await this.avatarMapper.addNewAvatarFromRemote(req.files.avatar)
-          res.json({ msg: "Avatar file successfully uploaded"})
+          await this.avatarMapper.addNewAvatarFromRemote(req.files.avatar);
+          res.json({ msg: 'Avatar file successfully uploaded' });
         } catch (err) {
-          res.json({ msg: "Cannot save avatarfile"})
+          res.json({ msg: 'Cannot save avatarfile' });
         }
       },
-      
+
       flushDbCollection: (req, res) => {
         const { body: { collection } } = req;
         if (!collection) {
@@ -167,12 +167,8 @@ class AdminController extends BaseController {
 
   admin() {
     return async (req, res) => {
-
-      console.log(req.body)
-
       const {
-        headers: { adminpassword },
-        headers: { command },
+        headers: { adminpassword, command },
       } = req;
       if (adminpassword === config.ADMIN_PASSWORD) {
         if (command) {

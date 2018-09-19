@@ -1,6 +1,10 @@
 import React from 'react';
-import { View, Keyboard, Animated, Easing } from 'react-native';
-import { BACKEND_API } from 'react-native-dotenv';
+import {
+  View,
+  Keyboard,
+  Animated,
+  Easing,
+} from 'react-native';
 import { Input } from 'react-native-elements';
 import ChatMessageList from './ChatMessageList';
 
@@ -17,7 +21,6 @@ export class ChatScreen extends React.Component<any, any> {
 
   componentDidMount() {
     this.props.screenProps.subscribeToUsersStatus();
-    console.log(this.props.screenProps.usersStatus);
   }
 
   keyboardWillShow = (event: any) => {
@@ -40,12 +43,15 @@ export class ChatScreen extends React.Component<any, any> {
     this.state.keyboardWillShowSub.remove();
     this.state.keyboardWillHideSub.remove();
   }
+
   render() {
     return (
       <Animated.View
         style={{ height: '100%', backgroundColor: 'pink', flex: 1, transform: [{ translateY: this.state.translateY }] }}
       >
-        <ChatMessageList usersStatus={this.props.screenProps.usersStatus} />
+        <ChatMessageList
+        usersStatus={this.props.screenProps.usersStatus}
+        />
         <View style={{ height: this.state.bottomTabNavigatorHeight, backgroundColor: 'purple' }}>
           <Input
             onChangeText={(messageText: string) => this.setState({ messageText })}

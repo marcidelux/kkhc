@@ -44,9 +44,10 @@ class AvatarMapper {
 
   async addNewAvatarFromRemote(fileObj) {
     const nameOnDisc = uuidv4();
-    const newAvatar = new this.dbConnection.models.Avatar({ nameOnDisc, extension: '.png' });
-    await fileObj.mv(path.join(config.PATH_TO_AVATARS, nameOnDisc+ '.png'));
-    return newAvatar.save()
+    const extension = '.png';
+    const newAvatar = new this.dbConnection.models.Avatar({ nameOnDisc, extension });
+    await fileObj.mv(path.join(config.PATH_TO_AVATARS, nameOnDisc + extension));
+    return newAvatar.save();
   }
 }
 

@@ -13,7 +13,7 @@ const httpLink = new HttpLink({
     uri: `${BACKEND_API}/mobile`,
 });
 const wsLink = new WebSocketLink({
-    uri: `ws://10.1.10.17:3099/subscriptions`,
+    uri: `ws://192.168.0.15:3099/subscriptions`,
     options: {
         reconnect: true,
     },
