@@ -13,6 +13,7 @@ class ImageInspectStore {
   comments: Array<Comment>;
 
   constructor(comments: Array<Comment>) {
+    // what is this??
     this.comments = [...comments];
   }
 

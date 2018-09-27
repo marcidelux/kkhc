@@ -1,6 +1,6 @@
 
 // import { SubscriptionClient, addGraphQLSubscriptions } from 'subscriptions-transport-ws';
-import { BACKEND_API } from 'react-native-dotenv';
+import { BACKEND_API, SUBSCRIPTIONS_API } from 'react-native-dotenv';
 import { WebSocketLink } from 'apollo-link-ws';
 import { ApolloClient } from 'apollo-client';
 
@@ -13,7 +13,7 @@ const httpLink = new HttpLink({
     uri: `${BACKEND_API}/mobile`,
 });
 const wsLink = new WebSocketLink({
-    uri: `ws://192.168.0.15:3099/subscriptions`,
+    uri: `${SUBSCRIPTIONS_API}/subscriptions`,
     options: {
         reconnect: true,
     },

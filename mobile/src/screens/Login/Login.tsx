@@ -112,7 +112,7 @@ export class LoginScreen extends React.Component<any, {
             email: 'andrasnyarai@gmail.com',
             password: 'kacsa',
           },
-        })
+        }),
       });
       const { data } = await response.json();
       await this.handleClientLogin(data);

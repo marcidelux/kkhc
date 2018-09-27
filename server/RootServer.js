@@ -63,7 +63,7 @@ class RootServer {
     );
     this.app.use(cors());
     this.app.use(express.json());
-    this.app.use(fileUpload())
+    this.app.use(fileUpload());
     this.app.use(express.static('../www/assets'));
     this.app.use(
       '/opt/images/',
