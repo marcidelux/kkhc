@@ -1,5 +1,6 @@
 const { PubSub } = require('graphql-subscriptions');
 const bcrypt = require('bcrypt');
+const CONSTANTS = require('./constants');
 
 const OFFSET = 10;
 
@@ -30,6 +31,16 @@ const resolvers = {
       return status
         ? { status, userId: user.id }
         : { status };
+    },
+    changePassword: async (_, { userId, oldPassword, newPassword }, { db }) => {
+      const user = await db.models.User.findById(userId).exec();
+      const status = await bcrypt.compare(oldPassword, user.password);
+      if (status) {
+        user.password = await bcrypt.hash(newPassword, CONSTANTS.SALT_ROUNDS);
+        await user.save();
+        return true;
+      }
+      return false;
     },
     updateStatus: async (_, { user: { id, ...rest } }, { db }) => {
       const user = await db.models.User.findById(id).exec();

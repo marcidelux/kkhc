@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
-
-const saltRounds = 10;
 const mongoose = require('mongoose');
+const CONSTANTS = require('./../../constants');
+
 const memDB = require('./../../helpers/InMemoryDB').db;
 
 // @todo lot of refactoring & update user mechanism
@@ -105,7 +105,7 @@ function updateDB(id, updateObj) {
       .then((user) => {
         for (let key of Object.keys(updateObj)) {
           if (key == 'password') {
-            bcrypt.hash(updateObj.password, saltRounds, (err, hash) => {
+            bcrypt.hash(updateObj.password, CONSTANTS.SALT_ROUNDS, (err, hash) => {
               if (err) {
                 reject(err);
               } else {

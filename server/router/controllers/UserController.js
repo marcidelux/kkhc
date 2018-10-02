@@ -2,7 +2,9 @@ const bcrypt = require('bcrypt');
 const Promise = require('bluebird');
 const crypto = Promise.promisifyAll(require('crypto'));
 const sendGridMail = require('@sendgrid/mail');
-const generateEmailTemplate = require('./../../constants/generateEmailTemplate');
+
+const CONSTANTS = require('./../../constants');
+const generateEmailTemplate = require('./../../modules/generateEmailTemplate');
 const config = require('./../../envConfig');
 
 const BaseController = require('./../BaseController');
@@ -12,10 +14,6 @@ class UserController extends BaseController {
     super(dbConnection);
 
     this.utilities = {
-      unixHalfHour: 1800000,
-      minimumPasswordLength: 6,
-      saltRounds: 10,
-
       generateToken: n => crypto.randomBytesAsync(n)
         .then(buffer => buffer.toString('hex')),
 
@@ -35,7 +33,7 @@ class UserController extends BaseController {
           if (searchedUser) {
             const token = await this.utilities.generateToken(32);
             searchedUser.resetPasswordToken = token;
-            searchedUser.resetPasswordTokenExpires = Date.now() + this.utilities.unixHalfHour;
+            searchedUser.resetPasswordTokenExpires = Date.now() + CONSTANTS.UNIX_HALF_HOUR;
             await searchedUser.save();
             await this.utilities.sendEmail(email, token);
             res.status(200).json({ message: `send link to email: ${email}` });
@@ -51,14 +49,14 @@ class UserController extends BaseController {
 
   resetPassword() {
     return async ({ body: { token, newPassword } }, res) => {
-      if (token && newPassword.length >= this.utilities.minimumPasswordLength) {
+      if (token && newPassword.length >= CONSTANTS.MINIMUM_PASSWORD_LENGTH) {
         try {
           const searchedUser = await this.models.User.findOne({
             resetPasswordToken: token,
             resetPasswordTokenExpires: { $gt: Date.now() },
           }).exec();
           if (searchedUser) {
-            const hash = await bcrypt.hash(newPassword, this.utilities.saltRounds);
+            const hash = await bcrypt.hash(newPassword, CONSTANTS.SALT_ROUNDS);
             searchedUser.password = hash;
             searchedUser.resetPasswordToken = null;
             searchedUser.resetPasswordTokenExpires = null;

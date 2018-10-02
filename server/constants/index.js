@@ -1,0 +1,5 @@
+module.exports = {
+  SALT_ROUNDS: 10,
+  UNIX_HALF_HOUR: 1800000,
+  MINIMUM_PASSWORD_LENGTH: 6,
+};

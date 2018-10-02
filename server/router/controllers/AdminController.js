@@ -8,7 +8,7 @@ const { seedDB } = require('../../database/dbSeed');
 const { db: memDB } = require('./../../helpers/InMemoryDB');
 const BaseController = require('./../BaseController');
 const AvatarMapper = require('./../../helpers/AvatarMapper');
-
+const CONSTANTS = require('./../../constants');
 
 // @todo test this endpoint without jest race-conditions
 class AdminController extends BaseController {
@@ -17,7 +17,6 @@ class AdminController extends BaseController {
     this.avatarMapper = new AvatarMapper(this.connection);
 
     this.utilities = {
-      saltRounds: 10,
       seeder: async (conn, res) => {
         try {
           await seedDB(conn);
@@ -118,7 +117,7 @@ class AdminController extends BaseController {
             res.json({ msg: `User: ${userWithSameEmail.email} already exists` });
           } else {
             try {
-              const hash = await bcrypt.hash(password, this.utilities.saltRounds);
+              const hash = await bcrypt.hash(password, CONSTANTS.SALT_ROUNDS);
               const user = new this.models.User({
                 username,
                 password: hash,
