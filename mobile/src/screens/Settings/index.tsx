@@ -12,12 +12,14 @@ import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
 import { observer } from 'mobx-react';
 import { when } from 'mobx';
-import { AvatarPlayground } from './AvatarPlayground';
-import { ColorSliders } from './ColorSliders';
-import { Indicator } from './Indicator';
-import SettingsStore from './settingsStore';
-import { AvatarSelector } from './AvatarSelector';
-import { ActionButtonsContainer } from './ActionButtonsContainer';
+
+import { ProfileStore } from './ProfileStore';
+import { SystemSettings } from './containers/SystemSettings';
+import { AvatarSelector } from './containers/AvatarSelector';
+import { AvatarPlayground } from './components/AvatarPlayground';
+import { ColorSliders } from './components/ColorSliders';
+import { Indicator } from './components/Indicator';
+import { ActionButtons } from './components/ActionButtons';
 
 enum RGB {
   red,
@@ -28,6 +30,7 @@ enum RGB {
 declare type color = 'red' | 'green' | 'blue';
 
 const screen = Dimensions.get('window');
+
 const TOP_OFFSET = 30;
 const INDICATOR_SIZE = 40;
 const PLAYGROUND_HEIGHT = 175;
@@ -37,8 +40,9 @@ export class SettingsScreen extends React.Component<any, any> {
   constructor(props) {
     super(props);
     this.state = {
-      store: new SettingsStore(),
+      store: new ProfileStore(),
       toggleAvatarSelection: false,
+      systemSettingsModalIsVisible: false,
       AvatarSelectorAnimationValue: new Animated.Value(0),
       canSaveWidgetInAnimationValue: new Animated.Value(0),
       canSaveWidgetOutAnimationValue: new Animated.Value(1),
@@ -86,7 +90,10 @@ export class SettingsScreen extends React.Component<any, any> {
 
   undo() {
     this.state.store.revertBackToInitialState();
-    this.hideCanSaveWidget();
+  }
+
+  save() {
+    this.state.store.sendChangesToServer();
   }
 
   hideCanSaveWidget() {
@@ -111,6 +118,10 @@ export class SettingsScreen extends React.Component<any, any> {
         duration: 10,
       }),
     ];
+  }
+
+  toggleSystemSettingsModal() {
+    this.setState({ systemSettingsModalIsVisible: !this.state.systemSettingsModalIsVisible });
   }
 
   toggleAvatarSelection(): void {
@@ -266,7 +277,7 @@ export class SettingsScreen extends React.Component<any, any> {
     );
 
     when(
-      () => (this.state.store.meId && this.state.store.canSave && this.state.store.remoteAndLocalEquality),
+      () => (this.state.store.meId && this.state.store.remoteAndLocalEquality),
       () => {
         this.hideCanSaveWidget();
       },
@@ -325,8 +336,10 @@ export class SettingsScreen extends React.Component<any, any> {
               setAdditiveColor={this.setAdditiveColor.bind(this)}
             />
 
-            <ActionButtonsContainer
+            <ActionButtons
               toggleAvatarSelection={this.toggleAvatarSelection.bind(this)}
+              toggleSystemSettingsModal={this.toggleSystemSettingsModal.bind(this)}
+              save={this.save.bind(this)}
               undo={this.undo.bind(this)}
               canSaveWidgetOffset={canSaveWidgetOffset}
               canSaveWidgetScale={canSaveWidgetScale}
@@ -334,7 +347,6 @@ export class SettingsScreen extends React.Component<any, any> {
               canSaveWidgetHiglight={canSaveWidgetHiglight}
             />
           </View>
-
 
           <AvatarSelector
             changeAvatar={this.changeAvatar.bind(this)}
@@ -349,6 +361,13 @@ export class SettingsScreen extends React.Component<any, any> {
             offsetFix={indicatorOffsetFix}
             opacity={indicatorOpacity}
           />
+
+          <SystemSettings
+            isVisible={this.state.systemSettingsModalIsVisible}
+            toggle={this.toggleSystemSettingsModal.bind(this)}
+            userId={this.state.store.meId}
+          />
+
         </View>
       </TouchableWithoutFeedback>
     );

@@ -7,7 +7,7 @@ import { NewsScreen } from './screens/News/News';
 import { ImageInspect } from './screens/Drive/components/ImageInspect';
 import { SearchScreen } from './screens/Drive/containers/Search';
 import { ChatScreen } from './screens/Chat/Chat';
-import { SettingsScreen } from './screens/Settings/Settings';
+import { SettingsScreen } from './screens/Settings';
 import { UploadScreen } from './screens/Upload/Upload';
 import DriveScreen from './screens/Drive/Drive';
 

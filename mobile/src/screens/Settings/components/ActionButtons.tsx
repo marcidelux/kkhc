@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/Feather';
 
 const screen = Dimensions.get('window');
 
-export class ActionButtonsContainer extends React.Component<any, any> {
+export class ActionButtons extends React.Component<any, any> {
   render() {
     const {
       canSaveWidgetOffset,
@@ -12,18 +12,20 @@ export class ActionButtonsContainer extends React.Component<any, any> {
       canSaveWidgetOpacity,
       canSaveWidgetHiglight,
       undo,
+      save,
       toggleAvatarSelection,
+      toggleSystemSettingsModal,
     } = this.props;
     return (
       <View style={styles.outerContainer}>
         <View style={styles.leftContainer}>
-          <TouchableOpacity style={{ width: '40%' }} onPress={() => toggleAvatarSelection()}>
-            <Icon style={{ alignSelf: 'center' }} name='maximize' size={30} />
-            <Text style={{ alignSelf: 'center' }}>avatar</Text>
+          <TouchableOpacity style={styles.button} onPress={() => toggleAvatarSelection()}>
+            <Icon style={styles.buttonContent} name='maximize' size={30} />
+            <Text style={styles.buttonContent}>avatar</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{ width: '40%' }}>
-            <Icon style={{ alignSelf: 'center' }} name='cpu' size={30} />
-            <Text style={{ alignSelf: 'center' }}>profile</Text>
+          <TouchableOpacity style={styles.button} onPress={() => toggleSystemSettingsModal()}>
+            <Icon style={styles.buttonContent} name='cpu' size={30} />
+            <Text style={styles.buttonContent}>profile</Text>
           </TouchableOpacity>
         </View>
         <Animated.View
@@ -34,18 +36,18 @@ export class ActionButtonsContainer extends React.Component<any, any> {
               opacity: canSaveWidgetOpacity,
             },
           ]}>
-          <TouchableOpacity style={{ width: '40%' }} onPress={() => undo()}>
-            <Animated.Text style={{ color: canSaveWidgetHiglight, alignSelf: 'center' }}>
+          <TouchableOpacity style={styles.button} onPress={() => undo()}>
+            <Animated.Text style={[{ color: canSaveWidgetHiglight }, styles.buttonContent]}>
               <Icon name='x-square' size={30} />
             </Animated.Text>
-            <Animated.Text style={{ color: canSaveWidgetHiglight, alignSelf: 'center' }}>undo</Animated.Text>
+            <Animated.Text style={[{ color: canSaveWidgetHiglight }, styles.buttonContent]}>undo</Animated.Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ width: '40%' }}>
-            <Animated.Text style={{ color: canSaveWidgetHiglight, alignSelf: 'center' }}>
+          <TouchableOpacity style={styles.button} onPress={() => save()}>
+            <Animated.Text style={[{ color: canSaveWidgetHiglight }, styles.buttonContent]}>
               <Icon name='save' size={30} />
             </Animated.Text>
-            <Animated.Text style={{ color: canSaveWidgetHiglight, alignSelf: 'center' }}>keep</Animated.Text>
+            <Animated.Text style={[{ color: canSaveWidgetHiglight }, styles.buttonContent]}>keep</Animated.Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -61,4 +63,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     flexDirection: 'row',
   },
+  button: { width: '40%' },
+  buttonContent: { alignSelf: 'center' },
 });

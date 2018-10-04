@@ -110,7 +110,7 @@ export class LoginScreen extends React.Component<any, {
           }`,
           variables: {
             email: 'andrasnyarai@gmail.com',
-            password: 'kacsa',
+            password: 'kacsakacsa',
           },
         }),
       });
@@ -146,8 +146,8 @@ export class LoginScreen extends React.Component<any, {
       <View style={styles.main}>
 
         <ForgotPassword
-        setModalVisible={this.setModalVisible.bind(this)}
-        modalVisible={this.state.modalVisible}/>
+          setModalVisible={this.setModalVisible.bind(this)}
+          modalVisible={this.state.modalVisible}/>
 
         <Animated.View style={{
           transform: [{scale: this.state.scale}],

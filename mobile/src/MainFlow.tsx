@@ -4,27 +4,27 @@ import gql from 'graphql-tag';
 import { MainRouter } from './MainRouter';
 
 const subscription = gql`
-  subscription {
-    userUpdated {
-      id
-      username
-      avatar
-      isOnline
-      color
-    }
+subscription {
+  userUpdated {
+    id
+    username
+    avatar
+    isOnline
+    color
   }
+}
 `;
 
 const query = gql`
-  {
-    usersStatus {
-      id
-      username
-      avatar
-      isOnline
-      color
-    }
+{
+  usersStatus {
+    id,
+    username,
+    avatar,
+    isOnline,
+    color,
   }
+}
 `;
 
 export default class MainFlow extends React.Component<any, any> {
@@ -51,8 +51,8 @@ export default class MainFlow extends React.Component<any, any> {
             });
           return (
             <MainRouter
-            navigation={this.props.navigation}
-            screenProps={{subscribeToUsersStatus, usersStatus}}/>
+              navigation={this.props.navigation}
+              screenProps={{subscribeToUsersStatus, usersStatus}}/>
           );
         }}
       </Query>
