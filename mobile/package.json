@@ -52,6 +52,7 @@
     "apollo-link-http": "^1.5.4",
     "apollo-link-ws": "^1.0.8",
     "apollo-utilities": "^1.0.20",
+    "autobind-decorator": "^2.1.0",
     "es6-symbol": "^3.1.1",
     "expo": "^27.0.1",
     "graphql": "^14.0.0",

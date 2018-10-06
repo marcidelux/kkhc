@@ -7,6 +7,8 @@ import {
 import { BACKEND_API } from 'react-native-dotenv';
 import { AsyncStorage } from 'react-native';
 
+const CAN_SAVE_WIDGET_OUT_DURATION = 250;
+
 export class ProfileStore {
   @observable meId: String = null;
   @observable remoteUsername: String = null;
@@ -18,6 +20,7 @@ export class ProfileStore {
   @observable red: Number = null;
   @observable green: Number = null;
   @observable blue: Number = null;
+  @observable saving: Boolean = null;
 
   constructor() {
     reaction(
@@ -67,13 +70,12 @@ export class ProfileStore {
   }
 
   @action async sendChangesToServer() {
-    // @todo show spinner
+    this.saving = true;
     const {
       localUsername: username,
       localAvatar: avatar,
       localColor: color,
     } = this;
-
     try {
       let response = await fetch(`${BACKEND_API}/mobile`, {
         method: 'POST',
@@ -100,6 +102,7 @@ export class ProfileStore {
         }),
       });
       const { data } = await response.json();
+      setTimeout(() => this.saving = null, CAN_SAVE_WIDGET_OUT_DURATION);
     } catch (error) {
       console.log(error);
     }

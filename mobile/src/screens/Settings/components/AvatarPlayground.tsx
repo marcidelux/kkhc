@@ -10,6 +10,7 @@ import { BACKEND_API } from 'react-native-dotenv';
 
 const PLAYGROUND_HEIGHT = 175;
 const IMAGE_DIMENSION = 75;
+
 export class AvatarPlayground extends React.Component<any, any> {
   render() {
       const {
