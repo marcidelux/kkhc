@@ -9,6 +9,8 @@ import { AsyncStorage } from 'react-native';
 
 const CAN_SAVE_WIDGET_OUT_DURATION = 250;
 
+type ProfileProperty = 'Avatar' | 'Username' | 'Color';
+
 export class ProfileStore {
   @observable meId: String = null;
   @observable remoteUsername: String = null;
@@ -21,6 +23,7 @@ export class ProfileStore {
   @observable green: Number = null;
   @observable blue: Number = null;
   @observable saving: Boolean = null;
+  properties: Array<ProfileProperty> = ['Avatar', 'Username', 'Color'];
 
   constructor() {
     reaction(
@@ -50,6 +53,10 @@ export class ProfileStore {
     this.red = null;
     this.green = null;
     this.blue = null;
+  }
+
+  @action revertBackToInitialState() {
+    this.initialState();
   }
 
   @action async getLoggedInUserId(usersStatus: any) {
@@ -108,33 +115,23 @@ export class ProfileStore {
     }
   }
 
-  propertyIsEqualToNull(propertyName: string): Boolean {
-    return (<any>this)[propertyName] === null;
-  }
-
   @computed get canSave(): Boolean {
-    return (
-      !this.propertyIsEqualToNull('localAvatar') ||
-      !this.propertyIsEqualToNull('localColor') ||
-      !this.propertyIsEqualToNull('localUsername')
-    );
+    return this.properties
+      .some(p => !this.propertyIsEqualToNull.call(this, `local${p}`));
   }
 
-  @computed get remoteAndLocalEquality(): Boolean {
-    return (
-      this.remoteAvatar === (this.propertyIsEqualToNull('localAvatar')
-        ? this.remoteAvatar
-        : this.localAvatar) &&
-      this.remoteColor === (this.propertyIsEqualToNull('localColor')
-        ? this.remoteColor
-        : this.localColor) &&
-      this.remoteUsername === (this.propertyIsEqualToNull('localUsername')
-        ? this.remoteUsername
-        : this.localUsername)
-    );
+  @computed get remoteAndLocalEquality(): boolean {
+    return this.properties
+        .every(p => this.remoteAndLocalPropertyEquality.call(this, p));
   }
 
-  @action revertBackToInitialState() {
-    this.initialState();
+  remoteAndLocalPropertyEquality(propertyName: ProfileProperty): boolean {
+    return this.propertyIsEqualToNull(`local${propertyName}`)
+      ? true
+      : (<any>this)[`remote${propertyName}`] === (<any>this)[`local${propertyName}`];
+  }
+
+  propertyIsEqualToNull(fullPropertyName: string): Boolean {
+    return (<any>this)[fullPropertyName] === null;
   }
 }
