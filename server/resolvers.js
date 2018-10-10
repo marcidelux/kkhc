@@ -2,7 +2,7 @@ const { PubSub } = require('graphql-subscriptions');
 const bcrypt = require('bcrypt');
 const CONSTANTS = require('./constants');
 
-const OFFSET = 10;
+const CHAT_MESSAGE_LOAD_LIMIT = 10;
 
 const pubsub = new PubSub();
 const NEW_CHAT_MESSAGE = 'NEW_CHAT_MESSAGE';
@@ -18,7 +18,7 @@ const resolvers = {
       const messages = await db.models.ChatMessage.find({})
         .sort({ _id: -1 })
         .skip(offset)
-        .limit(OFFSET)
+        .limit(CHAT_MESSAGE_LOAD_LIMIT)
         .exec();
       return messages.reverse();
     },
