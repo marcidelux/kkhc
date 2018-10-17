@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const CONSTANTS = require('./../constants');
 
 let indexHash = 0;
 let parentHash = indexHash;
@@ -17,7 +18,7 @@ const traverse = (dir, result = []) => {
       if (fs.statSync(fullPath).isDirectory()) {
         parentHash = indexHash;
         const dirType = {
-          type: 'dir',
+          type: CONSTANTS.DRIVE_FILE_TYPES.FOLDER,
           files: [],
           hash: indexHash,
         };
@@ -26,14 +27,15 @@ const traverse = (dir, result = []) => {
         return traverse(fullPath, fileStats.files);
       }
 
-      const fileType = {
-        type: 'file',
+      const imageType = {
+        // here newwds to be converted to each file type,
+        // because of contains care only if it is a folder, so after effects in mongodb dont work...
+        type: CONSTANTS.DRIVE_FILE_TYPES.IMAGE,
         hash: indexHash,
         parentHash,
         extension: path.extname(fullPath),
-        tags: [],
       };
-      fileStats = { ...fileStats, ...fileType };
+      fileStats = { ...fileStats, ...imageType };
       result.push(fileStats);
     }
   });

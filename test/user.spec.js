@@ -4,7 +4,7 @@ const request = require('supertest');
 const sendGridMail = require('@sendgrid/mail');
 const RootServer = require('./../server/RootServer');
 const connectToDb = require('./../server/database/connectToDb');
-const config = require('./../server/envConfig');
+const config = require('../server/environmentConfig');
 const generateEmailTemplate = require('./../server/modules/generateEmailTemplate');
 
 Object.assign(config, {

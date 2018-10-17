@@ -1,11 +1,8 @@
-
-
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 
-const config = require('./../../envConfig');
+const config = require('./../../environmentConfig');
 const { seedDB } = require('../../database/dbSeed');
-const { db: memDB } = require('./../../helpers/InMemoryDB');
 const BaseController = require('./../BaseController');
 const AvatarMapper = require('./../../helpers/AvatarMapper');
 const CONSTANTS = require('./../../constants');
@@ -127,7 +124,6 @@ class AdminController extends BaseController {
                 isOnline: false,
               });
               await user.save();
-              memDB.addNewUser(user);
               res.json({ msg: `User created: ${username}` });
             } catch (error) {
               console.log(`DB ERROR !!!!!\n${error}`);

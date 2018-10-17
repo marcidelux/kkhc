@@ -16,6 +16,42 @@ type LoginResponse {
     userId: String,
 }
 
+type Folder {
+    name: String,
+    path: String,
+    contains: [FolderContent]
+    hash: Int,
+    type: String,
+}
+
+type Image {
+    name: String,
+    path: String,
+    hash: Int,
+    parentHash: Int,
+    type: String,
+    extension: String,
+}
+
+union FolderContent = Folder | Image
+
+type CommentPayload {
+    text: String,
+    userId: String,
+    id: String,
+    date: String,
+}
+
+input CommentInput {
+    text: String,
+    userId: String,
+}
+
+type CommentFlow {
+    comments: [CommentPayload]!,
+    belongsTo: Int!,
+}
+
 input ChatMessageInput {
     userId: ID!,
     message: String,
@@ -40,6 +76,9 @@ type Query {
     usersStatus: [User]!
     getChatMessages(offset: Int): [ChatMessage]
     availableAvatars: [Avatar]
+    getFolderContent(hash: Int!): Folder
+    getImage(hash: Int!): Image
+    getCommentFlow(imageHash: Int!): CommentFlow
 }
 
 type Mutation {
@@ -47,9 +86,11 @@ type Mutation {
     changePassword(userId: ID!, oldPassword: String, newPassword: String): Boolean!
     updateStatus(user: UserTypeInput): User
     addChatMessage(chatMessage: ChatMessageInput!): ChatMessage
+    addToCommentFlow(imageHash: Int!, comment: CommentInput!): CommentFlow!
 }
 
 type Subscription {
     chatMessageAdded: ChatMessage!
     userUpdated: User!
+    newCommentAddedToFile(imageHash: Int!): CommentPayload!
 }

@@ -1,15 +1,21 @@
 const { PubSub } = require('graphql-subscriptions');
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 const CONSTANTS = require('./constants');
 
-const CHAT_MESSAGE_LOAD_LIMIT = 10;
-
 const pubsub = new PubSub();
-const NEW_CHAT_MESSAGE = 'NEW_CHAT_MESSAGE';
-const USER_UPDATED = 'USER_UPDATED';
 
 const resolvers = {
+  FolderContent: {
+    __resolveType: object => (
+      CONSTANTS.DRIVE_FILE_TYPES[object.type.toUpperCase()]
+        ? CONSTANTS.DRIVE_FILE_TYPES[object.type.toUpperCase()]
+        : null
+    ),
+  },
   Query: {
+    getFolderContent: async (_, { hash }, { db }) => db.models.Folder.findOne({ hash }).exec(),
+    getImage: async (_, { hash }, { db }) => db.models.Image.findOne({ hash }).exec(),
     usersStatus: async (_, __, { db }) => {
       const usersStatus = await db.models.User.find({}).exec();
       return usersStatus;
@@ -18,10 +24,13 @@ const resolvers = {
       const messages = await db.models.ChatMessage.find({})
         .sort({ _id: -1 })
         .skip(offset)
-        .limit(CHAT_MESSAGE_LOAD_LIMIT)
+        .limit(CONSTANTS.CHAT_MESSAGE_LOAD_LIMIT)
         .exec();
       return messages.reverse();
     },
+    getCommentFlow: async (_, { imageHash: belongsTo }, { db }) => (
+      db.models.CommentFlow.findOne({ belongsTo }).exec()
+    ),
     availableAvatars: async (_, __, { db }) => db.models.Avatar.find({}).exec(),
   },
   Mutation: {
@@ -50,7 +59,7 @@ const resolvers = {
         }
       });
       await user.save();
-      pubsub.publish(USER_UPDATED, { userUpdated: user });
+      pubsub.publish(CONSTANTS.SUBSCRIPTION_TRIGGER.USER_UPDATED, { userUpdated: user });
       return user;
     },
     addChatMessage: async (_, { chatMessage }, { db }) => {
@@ -58,16 +67,36 @@ const resolvers = {
         ...chatMessage,
       });
       await newChatMessage.save();
-      pubsub.publish(NEW_CHAT_MESSAGE, { chatMessageAdded: newChatMessage });
+      pubsub.publish(CONSTANTS.SUBSCRIPTION_TRIGGER.NEW_CHAT_MESSAGE, { chatMessageAdded: newChatMessage });
       return newChatMessage;
+    },
+    addToCommentFlow: async (_, { imageHash: belongsTo, comment }, { db }) => {
+      const commentFlow = await db.models.CommentFlow.findOne({ belongsTo }).exec();
+      const newComment = {
+        id: new mongoose.mongo.ObjectId().toString(),
+        ...comment,
+        date: new Date().toLocaleString('us'),
+      };
+      commentFlow.comments.push(newComment);
+      commentFlow.markModified('comments');
+      await commentFlow.save();
+      pubsub.publish(CONSTANTS.SUBSCRIPTION_TRIGGER.NEW_COMMENT_ADDED + belongsTo,
+        { newCommentAddedToFile: newComment });
+      // @Todo this can be a lot of traffic ?
+      return commentFlow;
     },
   },
   Subscription: {
     chatMessageAdded: {
-      subscribe: () => pubsub.asyncIterator(NEW_CHAT_MESSAGE),
+      subscribe: () => pubsub.asyncIterator(CONSTANTS.SUBSCRIPTION_TRIGGER.NEW_CHAT_MESSAGE),
     },
     userUpdated: {
-      subscribe: () => pubsub.asyncIterator(USER_UPDATED),
+      subscribe: () => pubsub.asyncIterator(CONSTANTS.SUBSCRIPTION_TRIGGER.USER_UPDATED),
+    },
+    newCommentAddedToFile: {
+      subscribe: (_, { imageHash: belongsTo }) => (
+        pubsub.asyncIterator(CONSTANTS.SUBSCRIPTION_TRIGGER.NEW_COMMENT_ADDED + belongsTo)
+      ),
     },
   },
 };

@@ -1,34 +1,44 @@
+const CONSTANTS = require('./../constants');
+
 const populate = async (traversedDirectory, dbConnection) => {
   const pendingSaves = [];
   const connection = dbConnection;
-  const recursiveModelMaker = (model) => {
-    if (model.type === 'file') {
+  const recursiveModelMaker = ({
+    type,
+    hash,
+    name,
+    path,
+    files,
+    parentHash,
+    extension,
+  }) => {
+    if (type === CONSTANTS.DRIVE_FILE_TYPES.IMAGE) {
       const newCommentFlow = new connection.models.CommentFlow({
         comments: [],
-        belongsTo: model.hash,
+        belongsTo: hash,
       });
       pendingSaves.push(newCommentFlow.save());
 
       const newImage = new connection.models.Image({
-        name: model.name,
-        url: model.path,
-        hash: model.hash,
-        thumb: '',
-        tags: [],
+        name,
+        path,
+        hash,
+        extension,
+        parentHash,
       });
       pendingSaves.push(newImage.save());
     }
 
-    if (model.type === 'dir') {
+    if (type === CONSTANTS.DRIVE_FILE_TYPES.FOLDER) {
       const newFolderCollection = new connection.models.Folder({
-        name: model.name,
-        path: model.path,
-        contains: [...model.files.map(({ files, ...rest }) => rest)],
-        hash: model.hash,
+        name,
+        path,
+        contains: [...files.map(({ files: _files, ...rest }) => rest)],
+        hash,
       });
       pendingSaves.push(newFolderCollection.save());
 
-      model.files.forEach((subModel) => {
+      files.forEach((subModel) => {
         recursiveModelMaker(subModel);
       });
     }

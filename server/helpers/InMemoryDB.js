@@ -1,6 +1,6 @@
 'use strict';
 
-const dev = (require('./../envConfig').NODE_ENV == 'development');
+const dev = (require('../environmentConfig').NODE_ENV == 'development');
 
 const _ = require('lodash');
 
