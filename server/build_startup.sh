@@ -9,4 +9,4 @@ done
 cd server
 
 echo "Starting Server..."
-node app.js
+pm2 start app.js
