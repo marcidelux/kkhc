@@ -4,11 +4,11 @@
   "description": "kkhc site",
   "scripts": {
     "jest": "jest",
-    "integration": "docker-compose -f integration-docker-compose.yml down && docker-compose -f integration-docker-compose.yml up --build test_server",
-    "test": "docker-compose -f test-docker-compose.yml down && docker-compose -f test-docker-compose.yml up test_server",
-    "dev": "docker-compose -f docker-compose.yml down && docker-compose -f docker-compose.yml up -d server",
-    "build": "docker-compose -f build-docker-compose.yml down && docker-compose -f build-docker-compose.yml build && docker-compose -f build-docker-compose.yml up -d server",
-    "stop": "docker-compose -f docker-compose.yml down "
+    "integration": "docker-compose -f docker/integration-docker-compose.yml down && docker-compose -f docker/integration-docker-compose.yml up --build test_server",
+    "test": "docker-compose -f docker/test-docker-compose.yml down && docker-compose -f docker/test-docker-compose.yml up test_server",
+    "dev": "docker-compose -f docker/docker-compose.yml down && docker-compose -f docker/docker-compose.yml up -d server",
+    "build": "docker-compose -f docker/build-docker-compose.yml down && docker-compose -f docker/build-docker-compose.yml build && docker-compose -f docker/build-docker-compose.yml up -d server",
+    "stop": "docker-compose -f docker/docker-compose.yml down "
   },
   "repository": {
     "type": "git",

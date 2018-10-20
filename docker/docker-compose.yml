@@ -5,10 +5,10 @@ services:
   mongo:
     image: mongo:latest
     env_file:
-      - ./.env
+      - ./../.env
     volumes:
-      - ./data/db:/data/db
-      - ./data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./../data/db:/data/db
+      - ./../data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - 27019:27019
     command: mongod --port 27019
@@ -19,14 +19,14 @@ services:
 
   server:
     build:
-      context: ./
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/Dockerfile
     env_file:
-      - ./.env
+      - ./../.env
     volumes:
-      - ./server:/opt/server/
-      - ./www:/opt/www/
-      - ./data/test_images:/opt/images/
+      - ./../server:/opt/server/
+      - ./../www:/opt/www/
+      - ./../data/test_images:/opt/images/
     ports:
       - 3099:3099
       - 8229-8239:9229-9239

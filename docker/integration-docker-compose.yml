@@ -10,7 +10,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=stub
       - MONGO_INITDB_DATABASE=test_kkhcfiles
     volumes:
-      - ./data/mongo/test_docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./../data/mongo/test_docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - 127.0.0.1:27018:27018
     command: mongod --port 27018
@@ -21,8 +21,8 @@ services:
 
   test_server:
     build:
-      context: ./
-      dockerfile: Integration.Dockerfile
+      context: ../
+      dockerfile: docker/Integration.Dockerfile
     environment:
       - EXPRESS_PORT=3055
       - MONGO_INITDB_ROOT_USERNAME=test_super
