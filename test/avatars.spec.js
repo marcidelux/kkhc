@@ -1,14 +1,13 @@
 const mongoose = require('mongoose');
 
 const connectToDb = require('./../server/database/connectToDb');
-const config = require('./../server/envConfig');
+const config = require('./../server/environmentConfig');
 const AvatarMapper = require('./../server/helpers/AvatarMapper');
 
 Object.assign(config, {
   DB_ALIAS: 'test_db',
   MONGO_PORT: '27018',
 });
-
 
 jest.mock('uuid/v4', () => {
   let uuidCounter = -1;

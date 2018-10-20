@@ -1,15 +1,31 @@
 const { PubSub } = require('graphql-subscriptions');
 const bcrypt = require('bcrypt');
-const CONSTANTS = require('./constants');
-
-const CHAT_MESSAGE_LOAD_LIMIT = 10;
+const mongoose = require('mongoose');
+const {
+  DRIVE_FILE_TYPES,
+  CHAT_MESSAGE_LOAD_LIMIT,
+  SALT_ROUNDS,
+  SUBSCRIPTION_TRIGGER: {
+    USER_UPDATED,
+    NEW_CHAT_MESSAGE,
+    NEW_COMMENT_ADDED,
+    NEW_TAG_ADDED,
+  },
+} = require('./constants');
 
 const pubsub = new PubSub();
-const NEW_CHAT_MESSAGE = 'NEW_CHAT_MESSAGE';
-const USER_UPDATED = 'USER_UPDATED';
 
 const resolvers = {
+  FolderContent: {
+    __resolveType: object => (
+      DRIVE_FILE_TYPES[object.type.toUpperCase()]
+        ? DRIVE_FILE_TYPES[object.type.toUpperCase()]
+        : null
+    ),
+  },
   Query: {
+    getFolderContent: async (_, { hash }, { db }) => db.models.Folder.findOne({ hash }).exec(),
+    getImage: async (_, { hash }, { db }) => db.models.Image.findOne({ hash }).exec(),
     usersStatus: async (_, __, { db }) => {
       const usersStatus = await db.models.User.find({}).exec();
       return usersStatus;
@@ -22,7 +38,20 @@ const resolvers = {
         .exec();
       return messages.reverse();
     },
+    getCommentFlow: async (_, { fileHash: belongsTo }, { db }) => (
+      db.models.CommentFlow.findOne({ belongsTo }).exec()
+    ),
+    getTagFlow: async (_, { fileHash: belongsTo }, { db }) => (
+      db.models.TagFlow.findOne({ belongsTo }).exec()
+    ),
     availableAvatars: async (_, __, { db }) => db.models.Avatar.find({}).exec(),
+    availableTags: async (_, __, { db }) => db.models.Tag.find({}).exec(),
+    getTagContent: async (_, { tagName: name }, { db }) => {
+      const tag = await db.models.Tag.findOne({ name }).exec();
+      return Promise
+        .all(tag.fileReferences
+          .map(({ hash, type }) => db.models[type].findOne({ hash }).exec()));
+    },
   },
   Mutation: {
     login: async (_, { email, password }, { db }) => {
@@ -36,7 +65,7 @@ const resolvers = {
       const user = await db.models.User.findById(userId).exec();
       const status = await bcrypt.compare(oldPassword, user.password);
       if (status) {
-        user.password = await bcrypt.hash(newPassword, CONSTANTS.SALT_ROUNDS);
+        user.password = await bcrypt.hash(newPassword, SALT_ROUNDS);
         await user.save();
         return true;
       }
@@ -61,6 +90,54 @@ const resolvers = {
       pubsub.publish(NEW_CHAT_MESSAGE, { chatMessageAdded: newChatMessage });
       return newChatMessage;
     },
+    updateCommentFlow: async (_, { fileHash: belongsTo, comment }, { db }) => {
+      const commentFlow = await db.models.CommentFlow.findOne({ belongsTo }).exec();
+      const newComment = {
+        id: new mongoose.mongo.ObjectId().toString(),
+        ...comment,
+        date: new Date().toLocaleString('us'),
+      };
+      commentFlow.comments.push(newComment);
+      commentFlow.markModified('comments');
+      await commentFlow.save();
+      pubsub.publish(NEW_COMMENT_ADDED + belongsTo, { newCommentAddedToFile: newComment });
+      // @Todo this can be a lot of traffic ?
+      return commentFlow;
+    },
+    updateTagFlow: async (_, { fileLookup: { hash: belongsTo, type }, name, userId }, { db }) => {
+      // @todo able to handle multiple tagcreations/taginsert at once
+      const tagFlow = await db.models.TagFlow.findOne({ belongsTo }).exec();
+
+      if (tagFlow.tagNames.includes(name)) {
+        // escape and validate ...
+        return tagFlow;
+      }
+
+      const existingTag = await db.models.Tag.findOne({ name }).exec();
+      if (existingTag) {
+        existingTag.fileReferences.push({
+          hash: belongsTo,
+          type,
+        });
+        tagFlow.tagNames.push(name);
+        await Promise.all([existingTag.save(), tagFlow.save()]);
+      } else {
+        // publish new Tag created !
+        const newTag = new db.models.Tag({
+          name,
+          fileReferences: [{
+            hash: belongsTo,
+            type,
+          }],
+          userId,
+        });
+        tagFlow.tagNames.push(name);
+        await Promise.all([newTag.save(), tagFlow.save()]);
+      }
+      pubsub.publish(NEW_TAG_ADDED + belongsTo, { newTagAddedToFile: name });
+      // @Todo this can be a lot of traffic ?
+      return tagFlow;
+    },
   },
   Subscription: {
     chatMessageAdded: {
@@ -68,6 +145,16 @@ const resolvers = {
     },
     userUpdated: {
       subscribe: () => pubsub.asyncIterator(USER_UPDATED),
+    },
+    newCommentAddedToFile: {
+      subscribe: (_, { fileHash: belongsTo }) => (
+        pubsub.asyncIterator(NEW_COMMENT_ADDED + belongsTo)
+      ),
+    },
+    newTagAddedToFile: {
+      subscribe: (_, { fileHash: belongsTo }) => (
+        pubsub.asyncIterator(NEW_TAG_ADDED + belongsTo)
+      ),
     },
   },
 };

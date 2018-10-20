@@ -5,7 +5,7 @@ const sendGridMail = require('@sendgrid/mail');
 
 const CONSTANTS = require('./../../constants');
 const generateEmailTemplate = require('./../../modules/generateEmailTemplate');
-const config = require('./../../envConfig');
+const config = require('./../../environmentConfig');
 
 const BaseController = require('./../BaseController');
 

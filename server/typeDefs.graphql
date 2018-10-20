@@ -16,6 +16,63 @@ type LoginResponse {
     userId: String,
 }
 
+type Folder {
+    name: String,
+    path: String,
+    contains: [FolderContent]
+    hash: Int,
+    type: String,
+}
+
+type Image {
+    name: String,
+    path: String,
+    hash: Int,
+    parentHash: Int,
+    type: String,
+    extension: String,
+}
+
+union FolderContent = Folder | Image
+
+type CommentPayload {
+    text: String,
+    userId: String,
+    id: String,
+    date: String,
+}
+
+input CommentInput {
+    text: String,
+    userId: String,
+}
+
+type CommentFlow {
+    comments: [CommentPayload]!,
+    belongsTo: Int!,
+}
+
+type TagFlow {
+    tagNames: [String]!
+    belongsTo: Int!
+}
+
+type FileLookup {
+    hash: Int!,
+    type: String!,
+}
+
+input FileLookupInput {
+    hash: Int!,
+    type: String!, 
+}
+
+type Tag {
+    name: String!
+    fileReferences: [FileLookup]!,
+    userId: String!,
+}
+
 input ChatMessageInput {
     userId: ID!,
     message: String,
@@ -40,6 +97,12 @@ type Query {
     usersStatus: [User]!
     getChatMessages(offset: Int): [ChatMessage]
     availableAvatars: [Avatar]
+    getFolderContent(hash: Int!): Folder
+    getImage(hash: Int!): Image
+    getCommentFlow(fileHash: Int!): CommentFlow
+    getTagFlow(fileHash: Int!): TagFlow
+    availableTags: [Tag]
+    getTagContent(tagName: String!): [FolderContent]
 }
 
 type Mutation {
@@ -47,9 +110,13 @@ type Mutation {
     changePassword(userId: ID!, oldPassword: String, newPassword: String): Boolean!
     updateStatus(user: UserTypeInput): User
     addChatMessage(chatMessage: ChatMessageInput!): ChatMessage
+    updateCommentFlow(fileHash: Int!, comment: CommentInput!): CommentFlow!
+    updateTagFlow(fileLookup: FileLookupInput, name: String!, userId: String!): TagFlow!
 }
 
 type Subscription {
     chatMessageAdded: ChatMessage!
     userUpdated: User!
+    newCommentAddedToFile(fileHash: Int!): CommentPayload!
+    newTagAddedToFile(fileHash: Int!): String!
 }

@@ -1,11 +1,9 @@
-
-
 const bcrypt = require('bcrypt');
+const R = require('ramda');
 const mongoose = require('mongoose');
 
-const config = require('./../../envConfig');
+const config = require('./../../environmentConfig');
 const { seedDB } = require('../../database/dbSeed');
-const { db: memDB } = require('./../../helpers/InMemoryDB');
 const BaseController = require('./../BaseController');
 const AvatarMapper = require('./../../helpers/AvatarMapper');
 const CONSTANTS = require('./../../constants');
@@ -17,42 +15,34 @@ class AdminController extends BaseController {
     this.avatarMapper = new AvatarMapper(this.connection);
 
     this.utilities = {
-      seeder: async (conn, res) => {
+      seeder: async (connection, res) => {
         try {
-          await seedDB(conn);
+          await seedDB(connection);
           res.json({ msg: 'Database successfully seeded' });
-        } catch (err) {
-          res.json({ msg: 'Error seeding database' });
+        } catch (error) {
+          res.json({ msg: error });
         }
       },
-      getCollectionsInfo: async (collList) => {
-        const allCollections = [];
-        collList.forEach(async (collection) => {
-          allCollections.push(new Promise((resolve) => {
-            mongoose.models[collection.name].countDocuments({}, (err, sum) => {
-              if (err) {
-                throw new Error('Cannot read database');
-              } else {
-                resolve({ Name: `${collection.name}  [ ${sum} ]` });
-              }
-            });
-          }));
-        });
-        return Promise.all(allCollections);
+
+      formatCollectionInfo: (name, sum) => ({ Name: `${name}  [ ${sum} ]` }),
+
+      getCollectionsInfo: async (collectionNames) => {
+        const documentCounts = await Promise
+          .all(collectionNames.map(c => mongoose.models[c].countDocuments({})));
+        return R
+          .zipWith(this.utilities.formatCollectionInfo, collectionNames, documentCounts);
       },
     };
 
     this.handlers = {
-
-      listCollections: (req, res) => mongoose.connection.db.listCollections()
-        .toArray(async (err, collList) => {
-          if (err) {
-            res.json({ msg: 'Cannot read database' });
-          } else {
-            const response = await this.utilities.getCollectionsInfo(collList);
-            res.json({ msg: response });
-          }
-        }),
+      listCollections: async (req, res) => {
+        try {
+          const collectionNames = Object.keys(this.connection.models);
+          res.json({ msg: (await this.utilities.getCollectionsInfo(collectionNames)) });
+        } catch (error) {
+          res.json({ msg: 'Cannot read Database.' });
+        }
+      },
 
       seedDbWithDriveFiles: (req, res) => this.utilities.seeder(this.connection, res),
 
@@ -69,38 +59,26 @@ class AdminController extends BaseController {
 
       addAvatars: async (req, res) => {
         if (!req.files) {
-          return res.json({ msg: 'No files were uploaded.' });
+          return res.json({ msg: 'No files were found to upload.' });
         }
         try {
           await this.avatarMapper.addNewAvatarFromRemote(req.files.avatar);
           res.json({ msg: 'Avatar file successfully uploaded' });
-        } catch (err) {
-          res.json({ msg: 'Cannot save avatarfile' });
+        } catch (error) {
+          res.json({ msg: 'Cannot save avatar' });
         }
       },
 
-      flushDbCollection: (req, res) => {
-        const { body: { collection } } = req;
-        if (!collection) {
-          return res.json({ msg: 'No collection provided' });
+      flushDbCollection: ({ body: { collection: collectionName } }, res) => {
+        // @todo flush multiple at once
+        if (!collectionName) return res.json({ msg: 'No collection provided' });
+        const collectionNames = Object.keys(this.connection.models);
+        if (collectionNames.includes(collectionName)) {
+          this.connection.models[collectionName].collection.drop();
+          res.json({ msg: `Collection ${collectionName} has been flushed` });
+        } else {
+          res.json({ msg: `Collection ${collectionName} cannot be found` });
         }
-        mongoose.connection.db.listCollections()
-          .toArray((err, collList) => {
-            if (err) return res.json({ msg: 'Cannot read database' });
-
-            const collectionNames = [...collList.map(c => c.name)];
-            if (collectionNames.includes(collection)) {
-              mongoose.connection.db.dropCollection(collection, (innerErr) => {
-                if (innerErr) {
-                  res.json({ msg: `Cannot flush ${collection}` });
-                } else {
-                  res.json({ msg: `Collection ${collection} has been flushed` });
-                }
-              });
-            } else {
-              res.json({ msg: `Collection ${collection} cannot be found` });
-            }
-          });
       },
 
       getUsersInfo: async (req, res) => {
@@ -109,8 +87,7 @@ class AdminController extends BaseController {
         res.json({ msg: allUsers });
       },
 
-      addUser: async (req, res) => {
-        const { body: { email, password, username } } = req;
+      addUser: async ({ body: { email, password, username } }, res) => {
         if (email && password && username) {
           const userWithSameEmail = await this.models.User.findOne({ email }).exec();
           if (userWithSameEmail) {
@@ -127,10 +104,8 @@ class AdminController extends BaseController {
                 isOnline: false,
               });
               await user.save();
-              memDB.addNewUser(user);
               res.json({ msg: `User created: ${username}` });
             } catch (error) {
-              console.log(`DB ERROR !!!!!\n${error}`);
               res.json({ msg: 'cannot save to DB' });
             }
           }
@@ -139,8 +114,7 @@ class AdminController extends BaseController {
         }
       },
 
-      resetUserPassword: async (req, res) => {
-        const { body: { email, password } } = req;
+      resetUserPassword: async ({ body: { email, password } }, res) => {
         if (email && password) {
           try {
             const user = await this.models.User.findOne({ email }).exec();
@@ -165,20 +139,20 @@ class AdminController extends BaseController {
   }
 
   admin() {
-    return async (req, res) => {
+    return async (request, response) => {
       const {
         headers: { adminpassword, command },
-      } = req;
+      } = request;
       if (adminpassword === config.ADMIN_PASSWORD) {
         if (command) {
           this.handlers[command]
-            ? await this.handlers[command](req, res)
-            : res.json({ msg: 'no valid command issued' });
+            ? await this.handlers[command](request, response)
+            : response.json({ msg: 'no valid command issued' });
         } else {
-          res.json({ msg: 'no command issued' });
+          response.json({ msg: 'no command issued' });
         }
       } else {
-        res.json({ msg: 'you have no rights to do this' });
+        response.json({ msg: 'you have no rights to do this' });
       }
     };
   }

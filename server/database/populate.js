@@ -1,34 +1,65 @@
+const {
+  DRIVE_FILE_TYPES: {
+    FOLDER,
+    IMAGE,
+  },
+} = require('./../constants');
+const {
+  PATH_TO_DRIVE,
+} = require('./../environmentConfig');
+
 const populate = async (traversedDirectory, dbConnection) => {
   const pendingSaves = [];
-  const connection = dbConnection;
-  const recursiveModelMaker = (model) => {
-    if (model.type === 'file') {
-      const newCommentFlow = new connection.models.CommentFlow({
+  const {
+    models: {
+      CommentFlow,
+      TagFlow,
+      Image,
+      Folder,
+    },
+  } = dbConnection;
+  const recursiveModelMaker = ({
+    type,
+    hash,
+    name,
+    path,
+    files,
+    parentHash,
+    extension,
+  }) => {
+    if (type === IMAGE) {
+      const newCommentFlow = new CommentFlow({
         comments: [],
-        belongsTo: model.hash,
+        belongsTo: hash,
       });
       pendingSaves.push(newCommentFlow.save());
 
-      const newImage = new connection.models.Image({
-        name: model.name,
-        url: model.path,
-        hash: model.hash,
-        thumb: '',
-        tags: [],
+      const newTagFlow = new TagFlow({
+        tagNames: [],
+        belongsTo: hash,
+      });
+      pendingSaves.push(newTagFlow.save());
+
+      const newImage = new Image({
+        name,
+        path,
+        hash,
+        extension,
+        parentHash,
       });
       pendingSaves.push(newImage.save());
     }
 
-    if (model.type === 'dir') {
-      const newFolderCollection = new connection.models.Folder({
-        name: model.name,
-        path: model.path,
-        contains: [...model.files.map(({ files, ...rest }) => rest)],
-        hash: model.hash,
+    if (type === FOLDER) {
+      const newFolderCollection = new Folder({
+        name,
+        path,
+        contains: files.map(({ files: _files, ...rest }) => rest),
+        hash,
       });
       pendingSaves.push(newFolderCollection.save());
 
-      model.files.forEach((subModel) => {
+      files.forEach((subModel) => {
         recursiveModelMaker(subModel);
       });
     }
@@ -38,15 +69,15 @@ const populate = async (traversedDirectory, dbConnection) => {
     recursiveModelMaker(model);
   });
 
-  return Promise.all(pendingSaves).then(async () => {
-    const ROOT = new connection.models.Folder({
-      name: 'kkhc',
-      path: '/opt/images',
-      contains: [...traversedDirectory.map(({ files, ...rest }) => rest)],
-      hash: 0,
-    });
-    await ROOT.save();
+  const ROOT = new Folder({
+    name: 'kkhc',
+    path: PATH_TO_DRIVE,
+    contains: traversedDirectory.map(({ files, ...rest }) => rest),
+    hash: 0,
   });
+
+  pendingSaves.push(ROOT.save());
+  return Promise.all(pendingSaves);
 };
 
 module.exports = populate;

@@ -8,14 +8,14 @@ const favicon = require('serve-favicon');
 const session = require('express-session');
 const { createServer } = require('http');
 const MemoryStore = require('memorystore')(session);
-const fileUpload = require("express-fileupload");
+const fileUpload = require('express-fileupload');
 
 const { ApolloServer } = require('apollo-server-express');
 const { execute, subscribe } = require('graphql');
 const { SubscriptionServer } = require('subscriptions-transport-ws');
 const { makeExecutableSchema } = require('graphql-tools');
 
-const config = require('./envConfig');
+const config = require('./environmentConfig');
 const RouterHub = require('./router/RouterHub');
 
 const hbs = exphbs.create({
@@ -28,7 +28,7 @@ const hbs = exphbs.create({
 });
 
 const schema = makeExecutableSchema({
-  typeDefs: fs.readFileSync('/opt/server/typeDefs.graphql', 'utf-8'),
+  typeDefs: [fs.readFileSync('/opt/server/typeDefs.graphql', 'utf-8')],
   // eslint-disable-next-line
   resolvers: require('/opt/server/resolvers'),
 });

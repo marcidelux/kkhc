@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
-const config = require('./../envConfig');
+const config = require('../environmentConfig');
 
 class AvatarMapper {
   constructor(dbConnection) {

@@ -1,4 +1,4 @@
-const config = require('./envConfig');
+const config = require('./environmentConfig');
 const RootServer = require('./RootServer');
 const connectToDb = require('./database/connectToDb');
 
