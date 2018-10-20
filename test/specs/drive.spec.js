@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 const request = require('supertest');
 
-const RootServer = require('./../server/RootServer');
-const connectToDb = require('./../server/database/connectToDb');
-const config = require('../server/environmentConfig');
-const populate = require('./../server/database/populate');
-const traverse = require('./../server/database/traverser');
+const RootServer = require('./../../server/RootServer');
+const connectToDb = require('./../../server/database/connectToDb');
+const config = require('./../../server/environmentConfig');
+const populate = require('./../../server/database/populate');
+const traverse = require('./../../server/database/traverser');
 const {
   DRIVE_FILE_TYPES: {
     IMAGE,
   },
-} = require('./../server/constants');
+} = require('./../../server/constants');
 
 Object.assign(config, {
   DB_ALIAS: 'test_db',

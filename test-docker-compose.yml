@@ -36,8 +36,10 @@ services:
     volumes:
       - ./server:/opt/server/
       - ./www:/opt/www/
-      - ./test/:/opt/test/
-      - ./mocks/__mocks__:/__mocks__/
+      - ./test/coverage/:/opt/test/coverage/
+      - ./test/mocks/__mocks__:/__mocks__/
+      - ./test/specs/:/opt/test/specs/
+      - ./test/testAvatars/:/opt/test/testAvatars/
       - ./data/test_images:/opt/images/
     ports:
       - 7229-7239:7229-7239

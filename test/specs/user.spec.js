@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const request = require('supertest');
 const sendGridMail = require('@sendgrid/mail');
-const RootServer = require('./../server/RootServer');
-const connectToDb = require('./../server/database/connectToDb');
-const config = require('./../server/environmentConfig');
-const generateEmailTemplate = require('./../server/modules/generateEmailTemplate');
+const RootServer = require('./../../server/RootServer');
+const connectToDb = require('./../../server/database/connectToDb');
+const config = require('./../../server/environmentConfig');
+const generateEmailTemplate = require('./../../server/modules/generateEmailTemplate');
 
 Object.assign(config, {
   DB_ALIAS: 'test_db',
