@@ -52,6 +52,27 @@ type CommentFlow {
     belongsTo: Int!,
 }
 
+type TagFlow {
+    tagNames: [String]!
+    belongsTo: Int!
+}
+
+type FileLookup {
+    hash: Int!,
+    type: String!,
+}
+
+input FileLookupInput {
+    hash: Int!,
+    type: String!, 
+}
+
+type Tag {
+    name: String!
+    fileReferences: [FileLookup]!,
+    userId: String!,
+}
+
 input ChatMessageInput {
     userId: ID!,
     message: String,
@@ -78,7 +99,10 @@ type Query {
     availableAvatars: [Avatar]
     getFolderContent(hash: Int!): Folder
     getImage(hash: Int!): Image
-    getCommentFlow(imageHash: Int!): CommentFlow
+    getCommentFlow(fileHash: Int!): CommentFlow
+    getTagFlow(fileHash: Int!): TagFlow
+    availableTags: [Tag]
+    getTagContent(tagName: String!): [FolderContent]
 }
 
 type Mutation {
@@ -86,11 +110,13 @@ type Mutation {
     changePassword(userId: ID!, oldPassword: String, newPassword: String): Boolean!
     updateStatus(user: UserTypeInput): User
     addChatMessage(chatMessage: ChatMessageInput!): ChatMessage
-    addToCommentFlow(imageHash: Int!, comment: CommentInput!): CommentFlow!
+    updateCommentFlow(fileHash: Int!, comment: CommentInput!): CommentFlow!
+    updateTagFlow(fileLookup: FileLookupInput, name: String!, userId: String!): TagFlow!
 }
 
 type Subscription {
     chatMessageAdded: ChatMessage!
     userUpdated: User!
-    newCommentAddedToFile(imageHash: Int!): CommentPayload!
+    newCommentAddedToFile(fileHash: Int!): CommentPayload!
+    newTagAddedToFile(fileHash: Int!): String!
 }

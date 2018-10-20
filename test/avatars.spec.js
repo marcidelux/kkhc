@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const connectToDb = require('./../server/database/connectToDb');
-const config = require('../server/environmentConfig');
+const config = require('./../server/environmentConfig');
 const AvatarMapper = require('./../server/helpers/AvatarMapper');
 
 Object.assign(config, {

@@ -1,8 +1,23 @@
-const CONSTANTS = require('./../constants');
+const {
+  DRIVE_FILE_TYPES: {
+    FOLDER,
+    IMAGE,
+  },
+} = require('./../constants');
+const {
+  PATH_TO_DRIVE,
+} = require('./../environmentConfig');
 
 const populate = async (traversedDirectory, dbConnection) => {
   const pendingSaves = [];
-  const connection = dbConnection;
+  const {
+    models: {
+      CommentFlow,
+      TagFlow,
+      Image,
+      Folder,
+    },
+  } = dbConnection;
   const recursiveModelMaker = ({
     type,
     hash,
@@ -12,14 +27,20 @@ const populate = async (traversedDirectory, dbConnection) => {
     parentHash,
     extension,
   }) => {
-    if (type === CONSTANTS.DRIVE_FILE_TYPES.IMAGE) {
-      const newCommentFlow = new connection.models.CommentFlow({
+    if (type === IMAGE) {
+      const newCommentFlow = new CommentFlow({
         comments: [],
         belongsTo: hash,
       });
       pendingSaves.push(newCommentFlow.save());
 
-      const newImage = new connection.models.Image({
+      const newTagFlow = new TagFlow({
+        tagNames: [],
+        belongsTo: hash,
+      });
+      pendingSaves.push(newTagFlow.save());
+
+      const newImage = new Image({
         name,
         path,
         hash,
@@ -29,8 +50,8 @@ const populate = async (traversedDirectory, dbConnection) => {
       pendingSaves.push(newImage.save());
     }
 
-    if (type === CONSTANTS.DRIVE_FILE_TYPES.FOLDER) {
-      const newFolderCollection = new connection.models.Folder({
+    if (type === FOLDER) {
+      const newFolderCollection = new Folder({
         name,
         path,
         contains: [...files.map(({ files: _files, ...rest }) => rest)],
@@ -48,15 +69,15 @@ const populate = async (traversedDirectory, dbConnection) => {
     recursiveModelMaker(model);
   });
 
-  return Promise.all(pendingSaves).then(async () => {
-    const ROOT = new connection.models.Folder({
-      name: 'kkhc',
-      path: '/opt/images',
-      contains: [...traversedDirectory.map(({ files, ...rest }) => rest)],
-      hash: 0,
-    });
-    await ROOT.save();
+  const ROOT = new Folder({
+    name: 'kkhc',
+    path: PATH_TO_DRIVE,
+    contains: [...traversedDirectory.map(({ files, ...rest }) => rest)],
+    hash: 0,
   });
+
+  pendingSaves.push(ROOT.save());
+  return Promise.all(pendingSaves);
 };
 
 module.exports = populate;

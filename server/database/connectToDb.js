@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
-const CONSTANTS = require('./../constants');
+const {
+  DRIVE_FILE_TYPES: {
+    FOLDER,
+    IMAGE,
+  },
+} = require('./../constants');
 
 const connectToDb = (config) => {
   const connection = mongoose.connect(
@@ -14,7 +19,7 @@ const connectToDb = (config) => {
     Image: new mongoose.Schema({
       name: String,
       path: String,
-      type: { type: String, default: CONSTANTS.DRIVE_FILE_TYPES.IMAGE },
+      type: { type: String, default: IMAGE },
       hash: { type: Number, index: { unique: true } },
       parentHash: Number,
       extension: String,
@@ -23,7 +28,7 @@ const connectToDb = (config) => {
     Folder: new mongoose.Schema({
       name: String,
       path: String,
-      type: { type: String, default: CONSTANTS.DRIVE_FILE_TYPES.FOLDER },
+      type: { type: String, default: FOLDER },
       contains: Array,
       hash: { type: Number, index: { unique: true } },
     }),
@@ -51,10 +56,16 @@ const connectToDb = (config) => {
       belongsTo: { type: Number, index: { unique: true } },
     }),
 
+    TagFlow: new mongoose.Schema({
+      tagNames: Array,
+      belongsTo: { type: Number, index: { unique: true } },
+    }),
+
     Tag: new mongoose.Schema({
-      name: { type: String, index: { unique: true } },
-      refersTo: Array,
-      originalAuthor: String,
+      // @todo - before create handler ... for 'ATB' 'atb' 'Atb' |> to result to 'atb' !
+      name: { type: String, unique: true },
+      fileReferences: Array,
+      userId: String,
     }),
 
     Avatar: new mongoose.Schema({

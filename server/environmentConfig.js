@@ -6,6 +6,7 @@ module.exports = (({
 }) => ({
   ...REST,
   NODE_ENV,
+  EXPRESS_PORT,
   DB_ALIAS,
   WEB_URL: NODE_ENV === 'development'
     ? `http://localhost:${EXPRESS_PORT}`

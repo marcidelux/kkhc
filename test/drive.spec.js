@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
 const request = require('supertest');
+
 const RootServer = require('./../server/RootServer');
 const connectToDb = require('./../server/database/connectToDb');
 const config = require('../server/environmentConfig');
 const populate = require('./../server/database/populate');
 const traverse = require('./../server/database/traverser');
+const {
+  DRIVE_FILE_TYPES: {
+    IMAGE,
+  },
+} = require('./../server/constants');
 
 Object.assign(config, {
   DB_ALIAS: 'test_db',
@@ -50,9 +56,9 @@ describe('should database seeding work', () => {
     }
   }`;
 
-  const commentFlowQuery = `
-  mutation addToCommentFlow($imageHash: Int!, $comment: CommentInput!) {
-    addToCommentFlow(imageHash: $imageHash, comment: $comment) {
+  const updateCommentFlowMutation = `
+  mutation updateCommentFlow($fileHash: Int!, $comment: CommentInput!) {
+    updateCommentFlow(fileHash: $fileHash, comment: $comment) {
       comments {
         id,
         date,
@@ -68,7 +74,6 @@ describe('should database seeding work', () => {
 
   let innerDirectory;
   let imageObjectReferenceHash;
-  let anotherImageObjectReferenceHash;
 
   beforeAll(async (done) => {
     // @todo have a proper setup
@@ -85,6 +90,7 @@ describe('should database seeding work', () => {
     await connection.models.Folder.collection.drop();
     await connection.models.Image.collection.drop();
     await connection.models.CommentFlow.collection.drop();
+    await connection.models.TagFlow.collection.drop();
     await connection.models.Tag.collection.drop();
     await mongoose.connection.close(true);
     server.close();
@@ -97,11 +103,12 @@ describe('should database seeding work', () => {
 
     const req = await request(server.app)
       .post('/mobile')
+      .set('Accept', 'application/json')
       .send({
         query: folderQuery,
         variables: { hash: 0 },
-      })
-      .set('Accept', 'application/json');
+      });
+
     const { data: { getFolderContent } } = JSON.parse(req.text);
 
     expect(getFolderContent.hash).toEqual(rootFolder.hash);
@@ -116,11 +123,11 @@ describe('should database seeding work', () => {
 
     const req = await request(server.app)
       .post('/mobile')
+      .set('Accept', 'application/json')
       .send({
         query: folderQuery,
         variables: { hash: innerDirectory.hash },
-      })
-      .set('Accept', 'application/json');
+      });
 
     const { data: { getFolderContent } } = JSON.parse(req.text);
 
@@ -134,11 +141,10 @@ describe('should database seeding work', () => {
       ));
 
     ({
-      contains: [{
-        hash: imageObjectReferenceHash,
-      }, {
-        hash: anotherImageObjectReferenceHash,
-      }],
+      contains: [
+        { hash: imageObjectReferenceHash },
+        { hash: anotherImageObjectReferenceHash },
+      ],
     } = getFolderContent);
   });
 
@@ -148,11 +154,11 @@ describe('should database seeding work', () => {
 
     const req = await request(server.app)
       .post('/mobile')
+      .set('Accept', 'application/json')
       .send({
         query: imageQuery,
         variables: { hash: imageObjectReferenceHash },
-      })
-      .set('Accept', 'application/json');
+      });
 
     const { data: { getImage } } = JSON.parse(req.text);
 
@@ -160,18 +166,18 @@ describe('should database seeding work', () => {
       .forEach(property => expect(getImage[property]).toEqual(imageFromDb[property]));
   });
 
-  it('addToCommentFlow should find proper image and add comment', async () => {
+  it('updateCommentFlow should find proper image and add comment', async () => {
     const userId = '1ab2c3';
     const text = 'some comment';
     const req = await request(server.app)
       .post('/mobile')
       .set('Accept', 'application/json')
       .send({
-        query: commentFlowQuery,
-        variables: { imageHash: imageObjectReferenceHash, comment: { userId, text } },
+        query: updateCommentFlowMutation,
+        variables: { fileHash: imageObjectReferenceHash, comment: { userId, text } },
       });
 
-    const { data: { addToCommentFlow: { comments: [commentFromResponse] } } } = JSON.parse(req.text);
+    const { data: { updateCommentFlow: { comments: [commentFromResponse] } } } = JSON.parse(req.text);
 
     const { comments: [commentFromDb] } = await connection.models.CommentFlow
       .findOne({ belongsTo: imageObjectReferenceHash }).exec();
@@ -183,126 +189,104 @@ describe('should database seeding work', () => {
       .forEach(property => expect(commentFromResponse[property]).toEqual(commentFromDb[property]));
   });
 
-  // describe('tag mechanism', () => {
-  //   const newTagName = 'ppl on the moon';
-  //   const author = 'Oberon';
-  //   const imageUrl = 'opt/use/misc/dunno';
-  //   let insertedTagId;
+  describe('tag mechanism', () => {
+    const updateTagFlowMutation = `
+    mutation updateTagFlow($fileLookup: FileLookupInput, $name: String!, $userId: String!) {
+      updateTagFlow(fileLookup: $fileLookup, name: $name, userId: $userId) {
+        tagNames
+        belongsTo
+      }
+    }`;
 
-  //   it('create should work', async () => {
-  //     const req = await request(server.app)
-  //       .post(`/createTag/${imageObjectReferenceHash}`)
-  //       .set('Accept', 'application/json')
-  //       .set('Content-Type', 'application/json')
-  //       .send({
-  //         name: newTagName,
-  //         originalAuthor: author,
-  //         reference: {
-  //           url: imageUrl,
-  //         },
-  //       });
+    const getTagContentQuery = `
+    query getTagContent($tagName: String!) {
+      getTagContent(tagName: $tagName) {
+        ... on Image {
+          name
+          path
+          hash
+          parentHash
+          type
+          extension
+        }
+      }
+    }`;
 
-  //     const newTag = JSON.parse(req.text);
-  //     expect(newTag.name).toBe(newTagName);
-  //     expect(newTag.originalAuthor).toBe(author);
-  //     expect(Number(newTag.refersTo[0].imageHash)).toBe(
-  //       imageObjectReferenceHash,
-  //     );
-  //     expect(newTag.refersTo[0].url).toBe(imageUrl);
-  //   });
+    const newTagName = 'ppl on the moon';
+    const userId = 'xcv123';
+    let updatedTagFlow;
+    let _fileLookup;
 
-  //   it('can\'t add same tag twice', async () => {
-  //     const req = await request(server.app)
-  //       .post(`/createTag/${imageObjectReferenceHash}`)
-  //       .set('Accept', 'application/json')
-  //       .set('Content-Type', 'application/json')
-  //       .send({
-  //         name: newTagName,
-  //         originalAuthor: author,
-  //         reference: {
-  //           url: imageUrl,
-  //         },
-  //       });
-  //     expect(req.status).toBe(304);
-  //   });
+    it('creating new Tag to file should work', async () => {
+      const fileLookup = {
+        hash: imageObjectReferenceHash,
+        type: IMAGE,
+      };
+      _fileLookup = fileLookup;
 
-  //   it('imageObject should update with new Tag', async () => {
-  //     const [imageModel] = await connection.models.Image.find({
-  //       hash: imageObjectReferenceHash,
-  //     }).exec();
-  //     expect(imageModel.tags[0].tagName).toBe(newTagName);
-  //     insertedTagId = imageModel.tags[0].tagId;
-  //   });
+      const req = await request(server.app)
+        .post('/mobile')
+        .set('Accept', 'application/json')
+        .send({
+          query: updateTagFlowMutation,
+          variables: {
+            fileLookup,
+            name: newTagName,
+            userId,
+          },
+        });
 
-  //   it('can\'t insert same picture to Tag references', async () => {
-  //     const req = await request(server.app)
-  //       .put(`/insertIntoTag/${imageObjectReferenceHash}`)
-  //       .set('Accept', 'application/json')
-  //       .set('Content-Type', 'application/json')
-  //       .send({
-  //         name: newTagName,
-  //         reference: {
-  //           url: imageUrl,
-  //         },
-  //       });
-  //     expect(req.status).toBe(304);
-  //   });
+      const { data: { updateTagFlow } } = JSON.parse(req.text);
+      updatedTagFlow = updateTagFlow;
 
-  //   it('insert another picture to Tag references', async () => {
-  //     const req = await request(server.app)
-  //       .put(`/insertIntoTag/${anotherImageObjectReferenceHash}`)
-  //       .set('Accept', 'application/json')
-  //       .set('Content-Type', 'application/json')
-  //       .send({
-  //         name: newTagName,
-  //         reference: {
-  //           url: `${imageUrl}!`,
-  //         },
-  //       });
-  //     const existingTag = JSON.parse(req.text);
-  //     expect(Number(existingTag.refersTo[0].imageHash)).toBe(
-  //       imageObjectReferenceHash,
-  //     );
-  //     expect(Number(existingTag.refersTo[1].imageHash)).toBe(
-  //       anotherImageObjectReferenceHash,
-  //     );
-  //   });
+      expect(updateTagFlow.belongsTo).toBe(imageObjectReferenceHash);
+      expect(updateTagFlow.tagNames).toEqual([newTagName]);
 
-  //   it('get specific Tag', async () => {
-  //     const req = await request(server.app)
-  //       .get(`/getSpecificTag/${insertedTagId}`)
-  //       .set('Accept', 'application/json');
+      const newTag = await connection.models.Tag.findOne({ name: newTagName }).exec();
 
-  //     const tag = JSON.parse(req.text);
-  //     expect(tag._id.toString()).toBe(insertedTagId.toString());
-  //     expect(tag.name).toBe(newTagName);
-  //     expect(tag.originalAuthor).toBe(author);
-  //     expect(Number(tag.refersTo[0].imageHash)).toBe(imageObjectReferenceHash);
-  //     expect(Number(tag.refersTo[1].imageHash)).toBe(
-  //       anotherImageObjectReferenceHash,
-  //     );
-  //   });
+      expect(JSON.stringify(newTag.fileReferences))
+        .toEqual(JSON.stringify([fileLookup]));
+      expect(newTag.name).toBe(newTagName);
+      expect(newTag.userId).toBe(userId);
+    });
 
-  //   it('find all tags should work', async () => {
-  //     let i = 0;
-  //     const tagArray = [];
-  //     while (i < 10) {
-  //       i += 1;
-  //       const tag = new connection.models.Tag({
-  //         name: i,
-  //         refersTo: [],
-  //         originalAuthor: author,
-  //       });
-  //       tagArray.push(tag.save());
-  //     }
+    it('can\'t add same tag twice', async () => {
+      const req = await request(server.app)
+        .post('/mobile')
+        .set('Accept', 'application/json')
+        .send({
+          query: updateTagFlowMutation,
+          variables: {
+            fileLookup: _fileLookup,
+            name: newTagName,
+            userId,
+          },
+        });
+      const { data: { updateTagFlow } } = JSON.parse(req.text);
 
-  //     await Promise.all(tagArray);
-  //     const req = await request(server.app)
-  //       .get('/getExistingTags')
-  //       .set('Accept', 'application/json');
+      expect(JSON.stringify(updateTagFlow))
+        .toEqual(JSON.stringify(updatedTagFlow));
+    });
 
-  //     const tags = JSON.parse(req.text);
-  //     expect(tags.length).toBe(11);
-  //   });
-  // });
+    it('get specific Tag Content', async () => {
+      const req = await request(server.app)
+        .post('/mobile')
+        .set('Accept', 'application/json')
+        .send({
+          query: getTagContentQuery,
+          variables: {
+            tagName: newTagName,
+          },
+        });
+
+      const { data: { getTagContent: [fileFromResponse] } } = JSON.parse(req.text);
+      const fileFromDB = await connection.models[_fileLookup.type]
+        .findOne({ hash: _fileLookup.hash }).exec();
+
+      Object.keys(fileFromResponse)
+        .forEach(property => expect(fileFromResponse[property]).toEqual(fileFromDB[property]));
+    });
+
+    describe.skip('subscriptions api should work', () => {});
+  });
 });
