@@ -54,7 +54,7 @@ const populate = async (traversedDirectory, dbConnection) => {
       const newFolderCollection = new Folder({
         name,
         path,
-        contains: [...files.map(({ files: _files, ...rest }) => rest)],
+        contains: files.map(({ files: _files, ...rest }) => rest),
         hash,
       });
       pendingSaves.push(newFolderCollection.save());
@@ -72,7 +72,7 @@ const populate = async (traversedDirectory, dbConnection) => {
   const ROOT = new Folder({
     name: 'kkhc',
     path: PATH_TO_DRIVE,
-    contains: [...traversedDirectory.map(({ files, ...rest }) => rest)],
+    contains: traversedDirectory.map(({ files, ...rest }) => rest),
     hash: 0,
   });
 
