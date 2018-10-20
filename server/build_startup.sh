@@ -9,4 +9,4 @@ done
 cd server
 
 echo "Starting Server..."
-pm2 start app.js
+forever app.js

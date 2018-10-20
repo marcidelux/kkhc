@@ -6,4 +6,4 @@ COPY . .
 
 RUN npm install
 
-RUN npm install pm2 -g
+RUN npm install forever -g
