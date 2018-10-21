@@ -1,20 +1,6 @@
 version: '2'
-services:
 
-  mongo:
-    restart: always
-    image: mongo:latest
-    env_file:
-      - ./../.env
-    volumes:
-      - /mnt/Twins/KKHC_DB:/data/db
-      - ./../data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    ports:
-      - 27017:27017
-    networks:
-      kkhc_net:
-        aliases:
-          - db
+services:
 
   server:
     restart: always
@@ -27,42 +13,18 @@ services:
       - /mnt/Twins/KKHC:/opt/images
     ports:
       - 8081:3099
-      # - 9229-9239:9229-9239
     networks:
-      - kkhc_net
-      - nginxproxy
+      - docker_kkhc_net
+      - docker_nginxproxy
     links:
       - mongo
     working_dir: /opt
     command: ./server/build_startup.sh
 
-  nginx-proxy:
-    restart: always
-    image: jwilder/nginx-proxy
-    container_name: NginX_Proxy
-    ports:
-      - 80:80
-      - 443:443
-    networks:
-      - nginxproxy
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - /etc/nginx/vhost.d
-      - /usr/share/nginx/html
-      - /data/letsencrypt-nginx-proxy-companion/certs/:/etc/nginx/certs:ro
-    labels:
-      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
-
-  letsencrypt-nginx-proxy-companion:
-    restart: always
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    container_name: letsencrypt-companion
-    volumes_from:
-      - nginx-proxy
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /data/letsencrypt-nginx-proxy-companion/certs/:/etc/nginx/certs:rw
-
 networks:
-  kkhc_net:
-  nginxproxy:
+
+  docker_kkhc_net:
+    external: true
+
+  docker_nginxproxy:
+    external: true
