@@ -99,6 +99,9 @@ class RootServer {
 
     this.server = this.http.listen(this.PORT, () => {
       console.log('....running   =', apollo.subscriptionsPath);
+      console.log(`
+KKHC Server running in ${config.NODE_ENV} mode, listening on PORT ${this.PORT}
+      `);
       // eslint-disable-next-line
       new SubscriptionServer({
         execute,
