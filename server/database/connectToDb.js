@@ -46,6 +46,7 @@ const connectToDb = (config) => {
     }),
 
     ChatMessage: new mongoose.Schema({
+      id: { type: Number, index: { unique: true } },
       userId: String,
       message: String,
       date: String,
@@ -69,7 +70,7 @@ const connectToDb = (config) => {
     }),
 
     Avatar: new mongoose.Schema({
-      nameOnDisc: String,
+      nameOnDisc: { type: String, index: { unique: true } },
       extension: String,
     }),
   };

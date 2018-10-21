@@ -16,8 +16,6 @@ services:
     networks:
       - docker_kkhc_net
       - docker_nginxproxy
-    links:
-      - mongo
     working_dir: /opt
     command: ./server/build_startup.sh
 
