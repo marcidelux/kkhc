@@ -23,15 +23,11 @@ services:
       dockerfile: docker/Build.Dockerfile
     env_file:
       - ./../.env
-    environment:
-      - VIRTUAL_HOST=kkhc.eu,www.kkhc.eu
-      - LETSENCRYPT_HOST=kkhc.eu,www.kkhc.eu
-      - LETSENCRYPT_EMAIL=kkhc_bot@gmail.com
     volumes:
       - /mnt/Twins/KKHC:/opt/images
     ports:
-      - 3099:8080
-      - 9229-9239:9229-9239
+      - 8080:3099
+      # - 9229-9239:9229-9239
     networks:
       - kkhc_net
       - nginxproxy
@@ -69,10 +65,4 @@ services:
 
 networks:
   kkhc_net:
-    driver: bridge
-    driver_opts:
-      com.docker.network.enable_ipv6: "false"
-    ipam:
-      driver: default
-      
   nginxproxy:
