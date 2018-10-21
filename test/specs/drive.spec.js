@@ -81,7 +81,10 @@ describe('should database seeding work', () => {
   const updateTagFlowMutation = `
     mutation updateTagFlow($fileLookup: FileLookupInput, $name: String!, $userId: String!) {
       updateTagFlow(fileLookup: $fileLookup, name: $name, userId: $userId) {
-        tagNames
+        tagPrimitives {
+          name,
+          userId,
+        }
         belongsTo
       }
     }`;
@@ -248,7 +251,7 @@ describe('should database seeding work', () => {
       updatedTagFlow = updateTagFlow;
 
       expect(updateTagFlow.belongsTo).toBe(imageObjectReferenceHash);
-      expect(updateTagFlow.tagNames).toEqual([newTagName]);
+      expect(updateTagFlow.tagPrimitives).toEqual([{ name: newTagName, userId }]);
 
       const newTag = await connection.models.Tag.findOne({ name: newTagName }).exec();
 
@@ -322,7 +325,10 @@ describe('should database seeding work', () => {
       const subscriptionPromise = new Promise((resolve, reject) => client.subscribe({
         query: gql`
         subscription newTagAddedToFile($fileHash: Int!) {
-          newTagAddedToFile(fileHash: $fileHash)
+          newTagAddedToFile(fileHash: $fileHash) {
+            name,
+            userId,
+          }
         }`,
         variables: { fileHash: imageObjectReferenceHash },
       }).subscribe({
@@ -340,16 +346,20 @@ describe('should database seeding work', () => {
               hash: imageObjectReferenceHash,
               type: IMAGE,
             },
-            name: 'kacsa',
+            name: newTagName,
             userId,
           },
         });
 
-      expect(await subscriptionPromise).toEqual({
-        data: {
-          newTagAddedToFile: newTagName,
-        },
-      });
+      const { data: { newTagAddedToFile } } = await subscriptionPromise;
+
+      expect(newTagAddedToFile.name).toBe(newTagName);
+      expect(newTagAddedToFile.userId).toBe(userId);
+      // expect().toEqual({
+      //   data: {
+      //     newTagAddedToFile: { name: newTagName, userId },
+      //   },
+      // });
     });
   });
 });

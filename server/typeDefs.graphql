@@ -53,7 +53,7 @@ type CommentFlow {
 }
 
 type TagFlow {
-    tagNames: [String]!
+    tagPrimitives: [TagPrimitive]!
     belongsTo: Int!
 }
 
@@ -67,7 +67,17 @@ input FileLookupInput {
     type: String!, 
 }
 
-type Tag {
+interface TagBody {
+    name: String!,
+    userId: String!,
+}
+
+type TagPrimitive implements TagBody {
+    name: String!,
+    userId: String!,
+}
+
+type Tag implements TagBody {
     name: String!
     fileReferences: [FileLookup]!,
     userId: String!,
@@ -118,5 +128,5 @@ type Subscription {
     chatMessageAdded: ChatMessage!
     userUpdated: User!
     newCommentAddedToFile(fileHash: Int!): CommentPayload!
-    newTagAddedToFile(fileHash: Int!): String!
+    newTagAddedToFile(fileHash: Int!): TagPrimitive!
 }

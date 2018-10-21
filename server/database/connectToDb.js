@@ -58,7 +58,7 @@ const connectToDb = (config) => {
     }),
 
     TagFlow: new mongoose.Schema({
-      tagNames: Array,
+      tagPrimitives: Array,
       belongsTo: { type: Number, index: { unique: true } },
     }),
 
