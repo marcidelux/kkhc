@@ -16,7 +16,7 @@ const connectToDb = (config) => {
   );
 
   const schemas = {
-    Image: new mongoose.Schema({
+    [IMAGE]: new mongoose.Schema({
       name: String,
       path: String,
       type: { type: String, default: IMAGE },
@@ -25,7 +25,7 @@ const connectToDb = (config) => {
       extension: String,
     }),
 
-    Folder: new mongoose.Schema({
+    [FOLDER]: new mongoose.Schema({
       name: String,
       path: String,
       type: { type: String, default: FOLDER },
