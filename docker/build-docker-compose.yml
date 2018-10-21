@@ -72,4 +72,4 @@ networks:
     ipam:
       driver: default
       
-  nginx_nginxproxy:
+  nginxproxy:
