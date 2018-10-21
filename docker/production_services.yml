@@ -2,21 +2,6 @@ version: '2'
 
 services:
 
-  mongo:
-    restart: always
-    image: mongo:latest
-    env_file:
-      - ./../.env
-    volumes:
-      - /mnt/Twins/KKHC_DB:/data/db
-      - ./../data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    ports:
-      - 27017:27017
-    networks:
-      kkhc_net:
-        aliases:
-          - db
-
   nginx-proxy:
     restart: always
     image: jwilder/nginx-proxy
@@ -46,5 +31,3 @@ services:
 
 networks:
   nginxproxy:
-  kkhc_net:
-  

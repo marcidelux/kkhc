@@ -2,6 +2,21 @@ version: '2'
 
 services:
 
+  mongo:
+    image: mongo:latest
+    env_file:
+      - ./../.env
+    volumes:
+      - ./../data/db:/data/db
+      - ./../data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 27019:27019
+    command: mongod --port 27019
+    networks:
+      kkhc_net:
+        aliases:
+          - db
+          
   server:
     restart: always
     build:
@@ -14,17 +29,21 @@ services:
     ports:
       - 8081:3099
     networks:
-      - docker_kkhc_net
+      - kkhc_net
       - docker_nginxproxy
+    links:
+      - mongo
     working_dir: /opt
-    external_links:
-      - mongo_1
     command: ./server/build_startup.sh
 
 networks:
-
-  docker_kkhc_net:
-    external: true
+  
+  kkhc_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
 
   docker_nginxproxy:
     external: true
