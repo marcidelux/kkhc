@@ -6,4 +6,4 @@ COPY . .
 
 RUN npm install
 
-RUN npm install forever -g
+# RUN npm install forever -g
