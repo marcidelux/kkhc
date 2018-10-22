@@ -1,6 +1,15 @@
 const mongoose = require('mongoose');
 const request = require('supertest');
 
+const fetch = require('node-fetch');
+const { ApolloClient } = require('apollo-client');
+const { WebSocketLink } = require('apollo-link-ws');
+const { split } = require('apollo-link');
+const { HttpLink } = require('apollo-link-http');
+const { getMainDefinition } = require('apollo-utilities');
+const { InMemoryCache } = require('apollo-cache-inmemory');
+const gql = require('graphql-tag');
+
 const RootServer = require('./../../server/RootServer');
 const connectToDb = require('./../../server/database/connectToDb');
 const config = require('./../../server/environmentConfig');
@@ -69,6 +78,17 @@ describe('should database seeding work', () => {
     }
   }`;
 
+  const updateTagFlowMutation = `
+    mutation updateTagFlow($fileLookup: FileLookupInput, $name: String!, $userId: String!) {
+      updateTagFlow(fileLookup: $fileLookup, name: $name, userId: $userId) {
+        tagPrimitives {
+          name,
+          userId,
+        }
+        belongsTo
+      }
+    }`;
+
   let connection;
   let server;
 
@@ -78,7 +98,7 @@ describe('should database seeding work', () => {
   beforeAll(async (done) => {
     // @todo have a proper setup
     connection = await connectToDb(config);
-    server = new RootServer(1111, connection);
+    server = new RootServer(config.EXPRESS_PORT, connection);
     server.init();
 
     await populate(traverse(config.PATH_TO_DRIVE), connection);
@@ -143,7 +163,6 @@ describe('should database seeding work', () => {
     ({
       contains: [
         { hash: imageObjectReferenceHash },
-        { hash: anotherImageObjectReferenceHash },
       ],
     } = getFolderContent);
   });
@@ -190,14 +209,6 @@ describe('should database seeding work', () => {
   });
 
   describe('tag mechanism', () => {
-    const updateTagFlowMutation = `
-    mutation updateTagFlow($fileLookup: FileLookupInput, $name: String!, $userId: String!) {
-      updateTagFlow(fileLookup: $fileLookup, name: $name, userId: $userId) {
-        tagNames
-        belongsTo
-      }
-    }`;
-
     const getTagContentQuery = `
     query getTagContent($tagName: String!) {
       getTagContent(tagName: $tagName) {
@@ -240,7 +251,7 @@ describe('should database seeding work', () => {
       updatedTagFlow = updateTagFlow;
 
       expect(updateTagFlow.belongsTo).toBe(imageObjectReferenceHash);
-      expect(updateTagFlow.tagNames).toEqual([newTagName]);
+      expect(updateTagFlow.tagPrimitives).toEqual([{ name: newTagName, userId }]);
 
       const newTag = await connection.models.Tag.findOne({ name: newTagName }).exec();
 
@@ -286,7 +297,69 @@ describe('should database seeding work', () => {
       Object.keys(fileFromResponse)
         .forEach(property => expect(fileFromResponse[property]).toEqual(fileFromDB[property]));
     });
+  });
 
-    describe.skip('subscriptions api should work', () => {});
+  describe('subscriptions api should work', () => {
+    let client;
+
+    beforeAll(async () => {
+      const httpLink = new HttpLink({ uri: `http://localhost:${config.EXPRESS_PORT}/mobile`, fetch });
+      const wsLink = new WebSocketLink({
+        uri: `ws://localhost:${config.EXPRESS_PORT}/subscriptions`,
+        options: { reconnect: true },
+      });
+      const link = split(
+        ({ query }) => {
+          const { kind, operation } = getMainDefinition(query);
+          return kind === 'OperationDefinition' && operation === 'subscription';
+        },
+        wsLink,
+        httpLink,
+      );
+      client = new ApolloClient({ link, cache: new InMemoryCache() });
+    });
+
+    it('should get newly added tag on subscription', async () => {
+      const newTagName = 'kacsa';
+      const userId = 'xyz123';
+      const subscriptionPromise = new Promise((resolve, reject) => client.subscribe({
+        query: gql`
+        subscription newTagAddedToFile($fileHash: Int!) {
+          newTagAddedToFile(fileHash: $fileHash) {
+            name,
+            userId,
+          }
+        }`,
+        variables: { fileHash: imageObjectReferenceHash },
+      }).subscribe({
+        next: resolve,
+        error: reject,
+      }));
+
+      await request(server.app)
+        .post('/mobile')
+        .set('Accept', 'application/json')
+        .send({
+          query: updateTagFlowMutation,
+          variables: {
+            fileLookup: {
+              hash: imageObjectReferenceHash,
+              type: IMAGE,
+            },
+            name: newTagName,
+            userId,
+          },
+        });
+
+      const { data: { newTagAddedToFile } } = await subscriptionPromise;
+
+      expect(newTagAddedToFile.name).toBe(newTagName);
+      expect(newTagAddedToFile.userId).toBe(userId);
+      // expect().toEqual({
+      //   data: {
+      //     newTagAddedToFile: { name: newTagName, userId },
+      //   },
+      // });
+    });
   });
 });

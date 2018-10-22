@@ -35,7 +35,7 @@ const populate = async (traversedDirectory, dbConnection) => {
       pendingSaves.push(newCommentFlow.save());
 
       const newTagFlow = new TagFlow({
-        tagNames: [],
+        tagPrimitives: [],
         belongsTo: hash,
       });
       pendingSaves.push(newTagFlow.save());

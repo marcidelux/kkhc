@@ -36,7 +36,6 @@ const schema = makeExecutableSchema({
 class RootServer {
   constructor(port, dbConnection) {
     this.PORT = port;
-    this.HOST = '0.0.0.0';
     this.db = dbConnection;
     this.router = new RouterHub(dbConnection);
   }
@@ -95,13 +94,9 @@ class RootServer {
     });
 
     apollo.applyMiddleware({ app: this.app, path: '/mobile' });
-    // apollo.installSubscriptionHandlers(this.app);
 
     this.server = this.http.listen(this.PORT, () => {
-      console.log('....running   =', apollo.subscriptionsPath);
-      console.log(`
-KKHC Server running in ${config.NODE_ENV} mode, listening on PORT ${this.PORT}
-      `);
+      console.log(`KKHC Server running in ${config.NODE_ENV} mode, listening on PORT ${this.PORT}`);
       // eslint-disable-next-line
       new SubscriptionServer({
         execute,

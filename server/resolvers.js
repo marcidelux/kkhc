@@ -48,18 +48,23 @@ const resolvers = {
     availableTags: async (_, __, { db }) => db.models.Tag.find({}).exec(),
     getTagContent: async (_, { tagName: name }, { db }) => {
       const tag = await db.models.Tag.findOne({ name }).exec();
-      return Promise
-        .all(tag.fileReferences
-          .map(({ hash, type }) => db.models[type].findOne({ hash }).exec()));
+      if (tag) {
+        return Promise
+          .all(tag.fileReferences
+            .map(({ hash, type }) => db.models[type].findOne({ hash }).exec()));
+      }
     },
   },
   Mutation: {
     login: async (_, { email, password }, { db }) => {
       const user = await db.models.User.findOne({ email }).exec();
-      const status = await bcrypt.compare(password, user.password);
-      return status
-        ? { status, userId: user.id }
-        : { status };
+      if (user) {
+        const status = await bcrypt.compare(password, user.password);
+        return status
+          ? { status, userId: user.id }
+          : { status };
+      }
+      return { status: false };
     },
     changePassword: async (_, { userId, oldPassword, newPassword }, { db }) => {
       const user = await db.models.User.findById(userId).exec();
@@ -108,18 +113,19 @@ const resolvers = {
       // @todo able to handle multiple tagcreations/taginsert at once
       const tagFlow = await db.models.TagFlow.findOne({ belongsTo }).exec();
 
-      if (tagFlow.tagNames.includes(name)) {
+      if (tagFlow.tagPrimitives.find(t => t.name === name)) {
         // escape and validate ...
         return tagFlow;
       }
 
+      const tagPrimitive = { name, userId };
       const existingTag = await db.models.Tag.findOne({ name }).exec();
       if (existingTag) {
         existingTag.fileReferences.push({
           hash: belongsTo,
           type,
         });
-        tagFlow.tagNames.push(name);
+        tagFlow.tagPrimitives.push(tagPrimitive);
         await Promise.all([existingTag.save(), tagFlow.save()]);
       } else {
         // publish new Tag created !
@@ -131,10 +137,10 @@ const resolvers = {
           }],
           userId,
         });
-        tagFlow.tagNames.push(name);
+        tagFlow.tagPrimitives.push(tagPrimitive);
         await Promise.all([newTag.save(), tagFlow.save()]);
       }
-      pubsub.publish(NEW_TAG_ADDED + belongsTo, { newTagAddedToFile: name });
+      pubsub.publish(NEW_TAG_ADDED + belongsTo, { newTagAddedToFile: tagPrimitive });
       // @Todo this can be a lot of traffic ?
       return tagFlow;
     },
