@@ -7,7 +7,7 @@ services:
     env_file:
       - ./../.env
     volumes:
-      - ./../data/db:/data/db
+      - /mnt/Twins/KKHC_DB:/data/db
       - ./../data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - 27017:27017
@@ -17,12 +17,11 @@ services:
           - db
 
   server:
-    restart: always
     build:
       context: ../
       dockerfile: docker/Build.Dockerfile
     env_file:
-      - ./../.env
+      - ../.env
     volumes:
       - /mnt/Twins/KKHC:/opt/images
     ports:
@@ -33,16 +32,12 @@ services:
     links:
       - mongo
     working_dir: /opt
-    command: ./server/build_startup.sh
+    command: 
 
 networks:
   
   kkhc_net:
     driver: bridge
-    driver_opts:
-      com.docker.network.enable_ipv6: "false"
-    ipam:
-      driver: default
 
   docker_nginxproxy:
     external: true

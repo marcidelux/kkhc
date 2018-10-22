@@ -20,7 +20,7 @@ class AdminController extends BaseController {
           await seedDB(connection);
           res.json({ msg: 'Database successfully seeded' });
         } catch (error) {
-          res.json({ msg: error });
+          res.json({ msg: String(error) });
         }
       },
 
