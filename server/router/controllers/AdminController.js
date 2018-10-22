@@ -121,7 +121,7 @@ class AdminController extends BaseController {
             if (!user) {
               res.json({ msg: 'can\'t found user' });
             } else {
-              const hash = await bcrypt.hash(password, this.utilities.saltRounds);
+              const hash = await bcrypt.hash(password, CONSTANTS.SALT_ROUNDS);
 
               user.password = hash;
               await user.save();

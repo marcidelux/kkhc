@@ -355,11 +355,6 @@ describe('should database seeding work', () => {
 
       expect(newTagAddedToFile.name).toBe(newTagName);
       expect(newTagAddedToFile.userId).toBe(userId);
-      // expect().toEqual({
-      //   data: {
-      //     newTagAddedToFile: { name: newTagName, userId },
-      //   },
-      // });
     });
   });
 });
