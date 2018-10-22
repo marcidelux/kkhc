@@ -32,7 +32,7 @@ services:
     links:
       - mongo
     working_dir: /opt
-    command: 
+    command: ./server/build_startup.sh
 
 networks:
   
