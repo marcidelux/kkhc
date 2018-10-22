@@ -32,6 +32,7 @@ class AdminController extends BaseController {
         return R
           .zipWith(this.utilities.formatCollectionInfo, collectionNames, documentCounts);
       },
+
     };
 
     this.handlers = {

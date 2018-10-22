@@ -6,7 +6,8 @@ do
     sleep 1
 done
 
+echo "Starting Server..."
+
 cd server
 
-echo "Starting Server..."
 forever app.js
