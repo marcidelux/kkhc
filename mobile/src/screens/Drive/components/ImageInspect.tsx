@@ -12,7 +12,31 @@ import { BACKEND_API } from 'react-native-dotenv';
 import Comments from './Comments';
 import { NavigationComponent } from 'react-navigation';
 import { observer } from 'mobx-react';
-import ImageInspectStore from './imageInspectStore';
+import { Query } from 'react-apollo';
+import gql from 'graphql-tag';
+
+const GET_COMMENTFLOW = gql`
+query getCommentFlow($fileHash: Int!) {
+  getCommentFlow(fileHash: $fileHash) {
+    comments {
+      text,
+      userId,
+      date,
+      id
+    }
+    belongsTo
+  }
+}`;
+
+const COMMENTFLOW_SUBSCRIPTION = gql`
+subscription newCommentAddedToFile($fileHash: Int!) {
+  newCommentAddedToFile(fileHash: $fileHash) {
+    text,
+    userId,
+    id,
+    date,
+  }
+}`;
 
 @observer
 export class ImageInspect extends React.Component<any, {
@@ -24,7 +48,7 @@ export class ImageInspect extends React.Component<any, {
 
   constructor(props: any) {
     super(props);
-    this.store = new ImageInspectStore(this.props.navigation.state.params.comments),
+    // this.store = new ImageInspectStore(this.props.navigation.state.params.comments),
     this.state = {
       text: '',
     };
@@ -51,15 +75,40 @@ export class ImageInspect extends React.Component<any, {
           <Image
             width={Dimensions.get('window').width}
             source={{
-              uri: `${BACKEND_API}${imageObject.path}`,
+              uri: `${BACKEND_API}${imageObject.path.replace()}`,
             }}
           />
           {/* {this.renderTags()} */}
-          <Comments comments={this.store.comments}/>
+          <Query query={GET_COMMENTFLOW} variables={{ fileHash: imageObject.hash }}>
+            {({ loading, error, data, subscribeToMore }) => {
+              if (loading) return 'Loading...';
+              if (error) return `Error! ${error.message}`;
+
+              const subscribeToMoreComments = () => subscribeToMore({
+                document: COMMENTFLOW_SUBSCRIPTION,
+                variables: { fileHash: imageObject.hash },
+                updateQuery: (previous, { subscriptionData }) => {
+                  if (!subscriptionData.data) return previous;
+                  const { newCommentAddedToFile } = subscriptionData.data;
+                  //   console.log(subscriptionData.data)
+                  //   if (mutation !== 'CREATED') return prev;
+                  return Object.assign({}, previous, {
+                    getCommentFlow: {
+                      ...previous.getCommentFlow,
+                      comments: [...previous.getCommentFlow.comments, newCommentAddedToFile],
+                    },
+                  });
+                },
+              });
+              return (
+                <Comments comments={data.getCommentFlow.comments} more={subscribeToMoreComments}/>
+              );
+            }}
+          </Query>
           <TouchableOpacity
-            onPress={() => this.state.text === ''
-            ? null
-            : this.store.addComment(imageObject.hash, this.state.text)}
+            // onPress={() => this.state.text === ''
+            // ? null
+            // : this.store.addComment(imageObject.hash, this.state.text)}
             style={{ backgroundColor: 'red' }}>
             <Text style={{ marginBottom: 50 }}>Sub ur Comment</Text>
             <TextInput

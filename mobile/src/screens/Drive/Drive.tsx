@@ -1,16 +1,43 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Action } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import gql from 'graphql-tag';
+import R from 'ramda';
+import autobind from 'autobind-decorator';
+
 import { FeatherHeaderButtons, Item } from './components/headerButton';
 import { Breadcrumbs } from './components/BreadCrumbs';
-import { breadCrumbNavigation, fetchFolder } from '../../actions/driveActions';
 import FileList from './containers/FileList';
+import client from './../../client';
 
-class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<any>, path: any}, placeIndicator: Array<any> }> {
+const GET_FOLDER_CONTENT = gql`
+query getFolderContent($hash: Int!) {
+  getFolderContent(hash: $hash) {
+    name,
+    path,
+    hash,
+    type,
+    contains {
+      ... on Folder {
+    			name,
+    			path,
+    			hash,
+    			type,
+      }
+      ... on Image {
+        name,
+        hash,
+        path,
+        parentHash,
+        type,
+        extension,
+      }
+    }
+  }
+}`;
+
+export class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<any>, path: any}, placeIndicators: Array<any> }> {
   static navigationOptions = ({ navigation }: { navigation: any }) => {
     let breadCrumbs: Array<any> = [];
-    if (navigation.state.params) {
+    if (navigation.state.params && navigation.state.params.rootFolder) {
       breadCrumbs = navigation.state.params.rootFolder.path
         .replace('/opt/images', '')
         .split('/')
@@ -20,7 +47,7 @@ class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<an
       headerLeft: (
         <Breadcrumbs
           data={breadCrumbs}
-          goBack={DriveScreen.goBack.bind(DriveScreen)}
+          goBack={DriveScreen.goBack}
           navigationParams={navigation.state.params} />
       ),
       headerRight: (
@@ -34,61 +61,69 @@ class DriveScreen extends React.Component<any, { rootFolder: {contains: Array<an
     };
   }
 
-  static goBack(params: any, index: number): void {
-    const { fetchFolder, breadCrumbNavigation, placeIndicator } = params;
-    if (placeIndicator.length - 1 === index) return;
+  @autobind
+  static goBack({ fetchFolder, breadCrumbNavigation, placeIndicators }: any, index: number): void {
+    if (placeIndicators.length - 1 === index) return;
     breadCrumbNavigation(index);
-    fetchFolder(placeIndicator[index]);
+    fetchFolder(placeIndicators[index]);
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      rootFolder: null,
+      placeIndicators: [],
+    };
   }
 
   componentDidMount(): void {
-    this.props.fetchFolder(0);
+    const {
+      fetchFolder,
+      breadCrumbNavigation,
+    } = this;
+    fetchFolder(0);
+    this.props.navigation.setParams({
+      fetchFolder,
+      breadCrumbNavigation,
+    });
   }
 
-  componentDidUpdate(previousProps) {
-    if (previousProps.rootFolder.hash !== this.props.rootFolder.hash) {
-      this.props.navigation.setParams({
-        rootFolder: this.props.rootFolder,
-        placeIndicator: this.props.placeIndicator,
-        breadCrumbNavigation: this.props.breadCrumbNavigation,
-        fetchFolder: this.props.fetchFolder,
-      });
-    }
+  @autobind
+  breadCrumbNavigation(index: number) {
+    this.setState({
+      placeIndicators: R
+        .dropLast(this.state.placeIndicators.length - index, this.state.placeIndicators),
+    });
+  }
+
+  @autobind
+  async fetchFolder(hash: number): Promise<void> {
+    const { data: { getFolderContent } } = await client.query({
+      query: GET_FOLDER_CONTENT,
+      variables: { hash },
+    });
+
+    this.setState({
+      rootFolder: getFolderContent,
+      placeIndicators: [...this.state.placeIndicators, getFolderContent.hash],
+    });
+    this.props.navigation.setParams({
+      ...this.state,
+    });
   }
 
   render() {
     const {
-      folderLoading,
-      rootFolder,
-      fetchFolder,
       navigation,
     } = this.props;
 
-    if (folderLoading) {
-      return null;
-    }
+    if (this.state.rootFolder === null) return null;
+
     return (
-        <FileList
-          rootFolder={rootFolder}
-          fetchFolder={fetchFolder}
-          navigation={navigation}/>
+      <FileList
+        rootFolder={this.state.rootFolder}
+        fetchFolder={this.fetchFolder}
+        navigation={navigation}/>
     );
   }
 }
-
-const mapStateToProps = (state) => ({
-  rootFolder: state.drive.rootFolder,
-  placeIndicator: state.drive.placeIndicator,
-  folderLoading: state.drive.folderLoading,
-});
-
-const mapDispatchToProps = (dispatch: ThunkDispatch<any, null, Action>) => ({
-    fetchFolder: (hash: number) => {
-        return dispatch(fetchFolder(hash));
-    },
-    breadCrumbNavigation: (index: number) => {
-      dispatch(breadCrumbNavigation(index));
-    },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(DriveScreen);

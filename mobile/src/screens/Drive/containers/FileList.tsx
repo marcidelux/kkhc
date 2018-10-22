@@ -9,11 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { BACKEND_API } from 'react-native-dotenv';
-import { ThunkDispatch } from 'redux-thunk';
-import { Action } from 'redux';
-import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/Feather';
-import { getComments } from '../../../actions/FileListActions';
 
 declare type FileObject = { name: string, hash: number, type: string, path: string };
 
@@ -22,9 +18,9 @@ const divider = 4;
 const space = divider - 1;
 const imageSize = screen.width / 3 - divider;
 
-class FileList extends React.Component<any, any> {
+export default class FileList extends React.Component<any, any> {
 
-  renderImages(): any {
+  renderFiles(): any {
     const sortedFiles = this.props.rootFolder.contains
       .reduce(this.sortFiles.bind(this), { folders: [], files: [] });
     return [
@@ -34,7 +30,7 @@ class FileList extends React.Component<any, any> {
   }
 
   sortFiles(accumulator: any, fileObject: FileObject) {
-    fileObject.type === 'file'
+    fileObject.type === 'Image'
     ? accumulator.files.push(this.createImage(fileObject))
     : accumulator.folders.push(this.createFolder(fileObject));
     return accumulator;
@@ -75,9 +71,9 @@ class FileList extends React.Component<any, any> {
   }
 
   inspectImage(imageObject: any): void {
-    this.props.getComments(imageObject.hash).then(({ payload }) => {
-      this.props.navigation.navigate('ImageInspect', { imageObject, comments: payload.comments });
-    });
+    // this.props.getComments(imageObject.hash).then(({ payload }) => {
+      this.props.navigation.navigate('ImageInspect', { imageObject });
+    // });
   }
 
   render() {
@@ -85,19 +81,11 @@ class FileList extends React.Component<any, any> {
       <ScrollView
         style={styles.main}
         contentContainerStyle={styles.mainContentContainer}>
-        {this.renderImages()}
+        {this.renderFiles()}
       </ScrollView>
     );
   }
 }
-
-const mapDispatchToProps = (dispatch: ThunkDispatch<any, null, Action>) => ({
-    getComments: (hash: number) => {
-      return dispatch(getComments(hash));
-    },
-});
-
-export default connect(null, mapDispatchToProps)(FileList);
 
 const styles = StyleSheet.create({
   main: {

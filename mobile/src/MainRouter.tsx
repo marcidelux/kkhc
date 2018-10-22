@@ -9,7 +9,7 @@ import { SearchScreen } from './screens/Drive/containers/Search';
 import { ChatScreen } from './screens/Chat/Chat';
 import { SettingsScreen } from './screens/Settings';
 import { UploadScreen } from './screens/Upload/Upload';
-import DriveScreen from './screens/Drive/Drive';
+import { DriveScreen } from './screens/Drive/Drive';
 
 export const MainRouter = createMaterialBottomTabNavigator(
     {

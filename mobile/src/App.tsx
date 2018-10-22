@@ -6,8 +6,6 @@ import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import client from './client';
 
-import store from './store';
-import { Provider } from 'react-redux';
 import { LoginScreen } from './screens/Login/Login';
 import MainFlow from './MainFlow';
 
@@ -22,11 +20,9 @@ const AppNavigation = createSwitchNavigator(
 export default class App extends React.Component {
   render() {
     return (
-      <Provider store={store}>
-        <ApolloProvider client={client}>
-          <AppNavigation />
-        </ApolloProvider>
-      </Provider>
+      <ApolloProvider client={client}>
+        <AppNavigation />
+      </ApolloProvider>
     );
   }
 }
