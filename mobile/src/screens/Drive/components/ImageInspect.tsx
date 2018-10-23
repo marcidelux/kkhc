@@ -38,7 +38,6 @@ subscription newCommentAddedToFile($fileHash: Int!) {
   }
 }`;
 
-@observer
 export class ImageInspect extends React.Component<any, {
   text: string}> {
 
@@ -48,10 +47,12 @@ export class ImageInspect extends React.Component<any, {
 
   constructor(props: any) {
     super(props);
-    // this.store = new ImageInspectStore(this.props.navigation.state.params.comments),
     this.state = {
       text: '',
     };
+  }
+
+  componentDidMount() {
   }
 
   // renderTags = () => this.props.navigation.state.params.imageObject.tags.length > 0
@@ -62,6 +63,10 @@ export class ImageInspect extends React.Component<any, {
 
   render() {
     const imageObject = this.props.navigation.state.params.imageObject;
+    const userDisplayProperties = this.props.screenProps.usersStatus.reduce((accumulator, { id, ...rest }) => {
+      accumulator[id] = rest;
+      return accumulator;
+  }, {});
     return (
       <View style={{ flex: 0.2, position: 'absolute' }}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -101,7 +106,10 @@ export class ImageInspect extends React.Component<any, {
                 },
               });
               return (
-                <Comments comments={data.getCommentFlow.comments} more={subscribeToMoreComments}/>
+                <Comments
+                  userStatus={userDisplayProperties}
+                  comments={data.getCommentFlow.comments}
+                  more={subscribeToMoreComments}/>
               );
             }}
           </Query>

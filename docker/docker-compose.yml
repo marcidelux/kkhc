@@ -25,6 +25,7 @@ services:
       - ./../.env
     volumes:
       - ./../server:/opt/server/
+      - ./../shared:/opt/shared/
       - ./../www:/opt/www/
       - ./../data/test_images:/opt/images/
     ports:

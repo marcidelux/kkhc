@@ -7,6 +7,7 @@ ADD ./package.json .
 ADD ./jest.config.js .
 ADD ./test/test_startup.sh .
 COPY ./server ./server/
+COPY ./shared ./shared/
 COPY ./test/specs ./test/specs
 COPY ./test/testAvatars ./test/testAvatars
 COPY ./data ./data/

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { BACKEND_API } from 'react-native-dotenv';
 import Icon from 'react-native-vector-icons/Feather';
+import CONSTANTS from './../../../constants';
 
 declare type FileObject = { name: string, hash: number, type: string, path: string };
 
@@ -30,7 +31,7 @@ export default class FileList extends React.Component<any, any> {
   }
 
   sortFiles(accumulator: any, fileObject: FileObject) {
-    fileObject.type === 'Image'
+    fileObject.type === CONSTANTS.DRIVE_FILE_TYPES.IMAGE
     ? accumulator.files.push(this.createImage(fileObject))
     : accumulator.folders.push(this.createFolder(fileObject));
     return accumulator;
@@ -71,9 +72,7 @@ export default class FileList extends React.Component<any, any> {
   }
 
   inspectImage(imageObject: any): void {
-    // this.props.getComments(imageObject.hash).then(({ payload }) => {
-      this.props.navigation.navigate('ImageInspect', { imageObject });
-    // });
+    this.props.navigation.navigate('ImageInspect', { imageObject });
   }
 
   render() {

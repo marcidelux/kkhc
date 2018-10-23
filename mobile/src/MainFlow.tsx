@@ -38,11 +38,11 @@ export default class MainFlow extends React.Component<any, any> {
           const subscribeToUsersStatus = () =>
             subscribeToMore({
               document: subscription,
-              updateQuery: (prev, { subscriptionData }) => {
-                if (!subscriptionData.data) return prev;
+              updateQuery: (previous, { subscriptionData }) => {
+                if (!subscriptionData.data) return previous;
                 const { userUpdated } = subscriptionData.data;
-                return Object.assign({}, prev, {
-                  usersStatus: [...prev.usersStatus]
+                return Object.assign({}, previous, {
+                  usersStatus: [...previous.usersStatus]
                     .map((user) => user.id === userUpdated.id
                       ? userUpdated
                       : user),
