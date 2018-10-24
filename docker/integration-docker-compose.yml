@@ -30,7 +30,7 @@ services:
       - MONGO_INITDB_DATABASE=test_kkhcfiles
       - ADMIN_PASSWORD=password123
       - EXPRESS_SECRET=123
-      - PATH_TO_DRIVE=/opt/data/test_images
+      - PATH_TO_DRIVE=/opt/data/test_files
       - PATH_TO_AVATARS=/opt/test/testAvatars
     ports:
       - 7229-7239:7229-7239

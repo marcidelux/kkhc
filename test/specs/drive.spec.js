@@ -14,9 +14,9 @@ const RootServer = require('./../../server/RootServer');
 const connectToDb = require('./../../server/database/connectToDb');
 const config = require('./../../server/environmentConfig');
 const populate = require('./../../server/database/populate');
-const traverse = require('./../../server/database/traverser');
+const traverse = require('./../../server/database/traverse');
 const {
-  DRIVE_FILE_TYPES: {
+  DRIVE_FILES: {
     IMAGE,
   },
 } = require('./../../server/constants');
@@ -34,14 +34,24 @@ describe('should database seeding work', () => {
       path,
       hash,
       type,
+      hashPath,
       contains {
         ... on Folder {
-            name,
-            path,
-            hash,
-            type,
+          name,
+          path,
+          hash,
+          type,
+          hashPath,
         }
         ... on Image {
+          name,
+          path,
+          type,
+          hash,
+          parentHash,
+          extension,
+        }
+        ... on Video {
           name,
           path,
           type,
@@ -220,6 +230,14 @@ describe('should database seeding work', () => {
           type
           extension
         }
+        ... on Video {
+          name,
+          path,
+          type,
+          hash,
+          parentHash,
+          extension,
+        }
       }
     }`;
 
@@ -231,7 +249,7 @@ describe('should database seeding work', () => {
     it('creating new Tag to file should work', async () => {
       const fileLookup = {
         hash: imageObjectReferenceHash,
-        type: IMAGE,
+        type: IMAGE.TYPE,
       };
       _fileLookup = fileLookup;
 
@@ -344,7 +362,7 @@ describe('should database seeding work', () => {
           variables: {
             fileLookup: {
               hash: imageObjectReferenceHash,
-              type: IMAGE,
+              type: IMAGE.TYPE,
             },
             name: newTagName,
             userId,

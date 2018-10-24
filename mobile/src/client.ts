@@ -7,6 +7,8 @@ import { HttpLink } from 'apollo-link-http';
 import { getMainDefinition } from 'apollo-utilities';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 
+import CONSTANTS from './constants';
+
 const httpLink = new HttpLink({
   uri: `${BACKEND_API}/mobile`,
 });
@@ -35,10 +37,10 @@ const cache = new InMemoryCache({
             name: 'FolderContent',
             possibleTypes: [
               {
-                name: 'Folder',
+                name: CONSTANTS.DRIVE_FILES.FOLDER.TYPE,
               },
               {
-                name: 'Image',
+                name: CONSTANTS.DRIVE_FILES.IMAGE.TYPE,
               },
             ],
           },

@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const {
-  DRIVE_FILE_TYPES: {
+  DRIVE_FILES: {
     FOLDER,
     IMAGE,
+    VIDEO,
   },
 } = require('./../constants');
 
@@ -16,21 +17,31 @@ const connectToDb = (config) => {
   );
 
   const schemas = {
-    [IMAGE]: new mongoose.Schema({
+    [IMAGE.TYPE]: new mongoose.Schema({
       name: String,
       path: String,
-      type: { type: String, default: IMAGE },
+      type: { type: String, default: IMAGE.TYPE },
       hash: { type: Number, index: { unique: true } },
       parentHash: Number,
       extension: String,
     }),
 
-    [FOLDER]: new mongoose.Schema({
+    [VIDEO.TYPE]: new mongoose.Schema({
       name: String,
       path: String,
-      type: { type: String, default: FOLDER },
+      type: { type: String, default: VIDEO.TYPE },
+      hash: { type: Number, index: { unique: true } },
+      parentHash: Number,
+      extension: String,
+    }),
+
+    [FOLDER.TYPE]: new mongoose.Schema({
+      name: String,
+      path: String,
+      type: { type: String, default: FOLDER.TYPE },
       contains: Array,
       hash: { type: Number, index: { unique: true } },
+      hashPath: Array,
     }),
 
     User: new mongoose.Schema({

@@ -1,7 +1,8 @@
 const {
-  DRIVE_FILE_TYPES: {
+  DRIVE_FILES: {
     FOLDER,
     IMAGE,
+    VIDEO,
   },
 } = require('./../constants');
 const {
@@ -16,6 +17,7 @@ const populate = async (traversedDirectory, dbConnection) => {
       TagFlow,
       Image,
       Folder,
+      Video,
     },
   } = dbConnection;
   const recursiveModelMaker = ({
@@ -25,9 +27,10 @@ const populate = async (traversedDirectory, dbConnection) => {
     path,
     files,
     parentHash,
+    hashPath,
     extension,
   }) => {
-    if (type === IMAGE) {
+    if (type !== FOLDER.TYPE) {
       const newCommentFlow = new CommentFlow({
         comments: [],
         belongsTo: hash,
@@ -40,21 +43,31 @@ const populate = async (traversedDirectory, dbConnection) => {
       });
       pendingSaves.push(newTagFlow.save());
 
-      const newImage = new Image({
-        name,
-        path,
-        hash,
-        extension,
-        parentHash,
-      });
-      pendingSaves.push(newImage.save());
-    }
-
-    if (type === FOLDER) {
+      let newFile;
+      if (type === IMAGE.TYPE) {
+        newFile = new Image({
+          name,
+          path,
+          hash,
+          extension,
+          parentHash,
+        });
+      } else if (type === VIDEO.TYPE) {
+        newFile = new Video({
+          name,
+          path,
+          hash,
+          extension,
+          parentHash,
+        });
+      }
+      pendingSaves.push(newFile.save());
+    } else if (type === FOLDER.TYPE) {
       const newFolderCollection = new Folder({
         name,
         path,
         contains: files.map(({ files: _files, ...rest }) => rest),
+        hashPath,
         hash,
       });
       pendingSaves.push(newFolderCollection.save());
@@ -73,6 +86,7 @@ const populate = async (traversedDirectory, dbConnection) => {
     name: 'kkhc',
     path: PATH_TO_DRIVE,
     contains: traversedDirectory.map(({ files, ...rest }) => rest),
+    hashPath: [],
     hash: 0,
   });
 

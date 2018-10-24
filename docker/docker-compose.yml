@@ -27,7 +27,7 @@ services:
       - ./../server:/opt/server/
       - ./../shared:/opt/shared/
       - ./../www:/opt/www/
-      - ./../data/test_images:/opt/images/
+      - ./../data/test_files:/opt/files/
     ports:
       - 3099:3099
       - 8229-8239:9229-9239

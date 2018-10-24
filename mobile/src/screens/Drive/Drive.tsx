@@ -15,19 +15,29 @@ query getFolderContent($hash: Int!) {
     path,
     hash,
     type,
+    hashPath,
     contains {
       ... on Folder {
-    			name,
-    			path,
-    			hash,
-    			type,
+        name,
+        path,
+        hash,
+        type,
+        hashPath,
       }
       ... on Image {
         name,
-        hash,
         path,
-        parentHash,
+        hash,
         type,
+        parentHash,
+        extension,
+      }
+      ... on Video {
+        name,
+        path,
+        hash,
+        type,
+        parentHash,
         extension,
       }
     }
@@ -39,7 +49,7 @@ export class DriveScreen extends React.Component<any, { rootFolder: {contains: A
     let breadCrumbs: Array<any> = [];
     if (navigation.state.params && navigation.state.params.rootFolder) {
       breadCrumbs = navigation.state.params.rootFolder.path
-        .replace('/opt/images', '')
+        .replace('/opt/files', '')
         .split('/')
         .map((button: string, index: number) => ({ title: button, key: index.toString() }));
     }

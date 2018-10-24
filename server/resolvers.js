@@ -2,7 +2,7 @@ const { PubSub } = require('graphql-subscriptions');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const {
-  DRIVE_FILE_TYPES,
+  DRIVE_FILES,
   CHAT_MESSAGE_LOAD_LIMIT,
   SALT_ROUNDS,
   SUBSCRIPTION_TRIGGER: {
@@ -18,8 +18,8 @@ const pubsub = new PubSub();
 const resolvers = {
   FolderContent: {
     __resolveType: object => (
-      DRIVE_FILE_TYPES[object.type.toUpperCase()]
-        ? DRIVE_FILE_TYPES[object.type.toUpperCase()]
+      DRIVE_FILES[object.type.toUpperCase()]
+        ? DRIVE_FILES[object.type.toUpperCase()].TYPE
         : null
     ),
   },

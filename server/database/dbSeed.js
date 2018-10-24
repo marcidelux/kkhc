@@ -1,5 +1,5 @@
 const populate = require('./populate');
-const traverse = require('./traverser');
+const traverse = require('./traverse');
 const config = require('./../environmentConfig');
 
 function seedDB(dbConnection) {

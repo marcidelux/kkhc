@@ -22,7 +22,7 @@ export default class Comments extends React.Component<any, any> {
         containerStyle={{backgroundColor: this.props.userStatus[comment.userId].color }}
         />
         <Text key={comment.id}>
-          | {comment.text} | {comment.date}
+        {this.props.userStatus[comment.userId].username} | {comment.text} | {comment.date}
         </Text>
       </View>
     ));

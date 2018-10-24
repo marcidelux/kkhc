@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import React from 'react';
 
 import { NewsScreen } from './screens/News/News';
-import { ImageInspect } from './screens/Drive/components/ImageInspect';
+import { FileInspect } from './screens/Drive/components/FileInspect';
 import { SearchScreen } from './screens/Drive/containers/Search';
 import { ChatScreen } from './screens/Chat/Chat';
 import { SettingsScreen } from './screens/Settings';
@@ -18,7 +18,7 @@ export const MainRouter = createMaterialBottomTabNavigator(
       },
       Drive: createStackNavigator({
         screen: DriveScreen,
-        ImageInspect: { screen: ImageInspect },
+        FileInspect: { screen: FileInspect },
         Search: { screen: SearchScreen },
       }),
       Chat: {

@@ -23,7 +23,7 @@ services:
     env_file:
       - ../.env
     volumes:
-      - /mnt/Twins/KKHC:/opt/images
+      - /mnt/Twins/KKHC:/opt/files
     ports:
       - 8081:3099
     networks:

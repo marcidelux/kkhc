@@ -31,27 +31,50 @@ export default class FileList extends React.Component<any, any> {
   }
 
   sortFiles(accumulator: any, fileObject: FileObject) {
-    fileObject.type === CONSTANTS.DRIVE_FILE_TYPES.IMAGE
-    ? accumulator.files.push(this.createImage(fileObject))
-    : accumulator.folders.push(this.createFolder(fileObject));
+    fileObject.type === CONSTANTS.DRIVE_FILES.FOLDER.TYPE
+      ? accumulator.folders.push(this.createFolder(fileObject))
+      : accumulator.files.push(this.createFile(fileObject));
     return accumulator;
   }
 
-  createImage(fileObject: FileObject) {
+  createFile(fileObject: FileObject) {
     const pathToImage = `${fileObject.name.slice(0, fileObject.name.lastIndexOf('.'))}_thumb.png`;
-    return (
-    <TouchableHighlight
-      style={styles.imageWrapper}
-      onPress={() => this.inspectImage(fileObject)}
-      key={fileObject.hash}>
-      <Image
-        resizeMode={'contain'}
-        source={{
-          uri: `${BACKEND_API}${this.props.rootFolder.path}/${pathToImage}`,
-        }}
-        style={styles.image}/>
-    </TouchableHighlight>
-    );
+    if (fileObject.type === CONSTANTS.DRIVE_FILES.IMAGE.TYPE) {
+      return (
+      <TouchableHighlight
+        style={styles.imageWrapper}
+        onPress={() => this.inspectImage(fileObject)}
+        key={fileObject.hash}>
+        <Image
+          resizeMode={'contain'}
+          source={{
+            uri: `${BACKEND_API}${this.props.rootFolder.path}/${pathToImage}`,
+          }}
+          style={styles.image}/>
+      </TouchableHighlight>
+      );
+    } else if (fileObject.type === CONSTANTS.DRIVE_FILES.VIDEO.TYPE) {
+      return (
+        <TouchableHighlight
+          style={{
+            backgroundColor: 'red',
+            borderRadius: 5,
+            marginLeft: space,
+            width: imageSize,
+            marginTop: space / 2,
+            marginBottom: space / 2,
+          }}
+          onPress={() => this.inspectImage(fileObject)}
+          key={fileObject.hash}>
+          <Image
+            resizeMode={'contain'}
+            source={{
+              uri: `${BACKEND_API}${this.props.rootFolder.path}/${pathToImage}`,
+            }}
+            style={styles.image}/>
+        </TouchableHighlight>
+        );
+    }
   }
 
   createFolder(fileObject: FileObject) {
@@ -71,8 +94,8 @@ export default class FileList extends React.Component<any, any> {
     );
   }
 
-  inspectImage(imageObject: any): void {
-    this.props.navigation.navigate('ImageInspect', { imageObject });
+  inspectImage(fileObject: any): void {
+    this.props.navigation.navigate('FileInspect', { fileObject });
   }
 
   render() {

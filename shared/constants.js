@@ -1,6 +1,16 @@
 module.exports = {
-  DRIVE_FILE_TYPES: {
-    IMAGE: 'Image',
-    FOLDER: 'Folder',
+  MINIMUM_PASSWORD_LENGTH: 6,
+  DRIVE_FILES: {
+    IMAGE: {
+      TYPE: 'Image',
+      EXTENSIONS: ['png'],
+    },
+    VIDEO: {
+      TYPE: 'Video',
+      EXTENSIONS: ['avi', 'mp4'],
+    },
+    FOLDER: {
+      TYPE: 'Folder',
+    },
   },
 };

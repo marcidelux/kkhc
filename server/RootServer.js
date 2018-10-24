@@ -65,8 +65,8 @@ class RootServer {
     this.app.use(fileUpload());
     this.app.use(express.static('../www/assets'));
     this.app.use(
-      '/opt/images/',
-      express.static(path.join(`${__dirname}/../images`)),
+      config.PATH_TO_DRIVE,
+      express.static(path.join(`${__dirname}/../files`)),
     );
     this.app.use(
       config.PATH_TO_AVATARS,
@@ -103,10 +103,10 @@ class RootServer {
         subscribe,
         schema,
         onConnect: (connectionParams, webSocket, context) => {
-          console.log('connect');
+          console.log('connect', connectionParams, webSocket, context);
         },
         onDisconnect: (webSocket, context) => {
-          console.log('disconnect');
+          console.log('disconnect', webSocket, context);
         },
       }, {
         server: this.http,
