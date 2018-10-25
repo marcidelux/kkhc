@@ -23,9 +23,9 @@ services:
     command: ./server/prod_startup.sh
 
 networks:
-  kkhc_net:
+  docker_kkhc_net:
     external: true
-  nginxproxy:
+  docker_nginxproxy:
     external: true
 
     

@@ -5,7 +5,7 @@ services:
 # Ultimate Jenkins
   jenkins:
     container_name: Ultimmate_Jenkins
-    image: jenkins:lts
+    image: jenkins:latest
     restart: always
     ports:
       - 7474:8080    
@@ -63,9 +63,12 @@ services:
         aliases:
           - db
 
+volumes:
+  jenkins_home:
+    driver: local
+
 networks:
   jenkins_bridge:
   nginxproxy:
-    name: nginxproxy
   kkhc_net:
-    name: kkhc_net
+
