@@ -1,13 +1,11 @@
 const {
+  PATH_TO_DRIVE,
   DRIVE_FILES: {
     FOLDER,
     IMAGE,
     VIDEO,
   },
 } = require('./../constants');
-const {
-  PATH_TO_DRIVE,
-} = require('./../environmentConfig');
 
 const populate = async (traversedDirectory, dbConnection) => {
   const pendingSaves = [];

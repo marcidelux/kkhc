@@ -14,7 +14,8 @@ import Icon from 'react-native-vector-icons/Feather';
 import Svg, { Path } from 'react-native-svg';
 import { BACKEND_API } from 'react-native-dotenv';
 import { ForgotPassword } from './ForgotPassword';
-import kkhcLogoSvgPath from './../../static/kkhcLogoSvg';
+import { kkhcLogoSvgPath } from './../../static/kkhcLogoSvg';
+import CONSTANTS from './../../constants';
 
 export class LoginScreen extends React.Component<any, {
   keyboardWillShowSub: any,
@@ -96,7 +97,7 @@ export class LoginScreen extends React.Component<any, {
   login = async () => {
     const { email, password } = this.state;
     try {
-      let response = await fetch(`${BACKEND_API}/mobile`, {
+      let response = await fetch(BACKEND_API + CONSTANTS.GRAPHQL_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
