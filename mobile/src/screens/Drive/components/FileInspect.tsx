@@ -175,7 +175,7 @@ export class FileInspect extends React.Component<any, {
           }}>
           <Image
             width={width}
-            source={{ uri: `${BACKEND_API}${fileObject.path}` }}
+            source={{ uri: BACKEND_API + fileObject.path }}
           />
           {this.tagFlowWrapper(fileObject, userDisplayProperties)}
           {this.commentFlowWrapper(fileObject, userDisplayProperties)}

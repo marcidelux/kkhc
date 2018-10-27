@@ -2,17 +2,17 @@ const bcrypt = require('bcrypt');
 const R = require('ramda');
 const mongoose = require('mongoose');
 
-const config = require('./../../environmentConfig');
+const { ADMIN_PASSWORD } = require('./../../environmentConfig');
 const { seedDB } = require('../../database/dbSeed');
 const BaseController = require('./../BaseController');
 const AvatarMapper = require('./../../helpers/AvatarMapper');
-const CONSTANTS = require('./../../constants');
+const { SALT_ROUNDS, PATH_TO_AVATARS } = require('./../../constants');
 
 // @todo test this endpoint without jest race-conditions
 class AdminController extends BaseController {
   constructor(dbConnection) {
     super(dbConnection);
-    this.avatarMapper = new AvatarMapper(this.connection);
+    this.avatarMapper = new AvatarMapper(this.connection, PATH_TO_AVATARS);
 
     this.utilities = {
       seeder: async (connection, res) => {
@@ -95,7 +95,7 @@ class AdminController extends BaseController {
             res.json({ msg: `User: ${userWithSameEmail.email} already exists` });
           } else {
             try {
-              const hash = await bcrypt.hash(password, CONSTANTS.SALT_ROUNDS);
+              const hash = await bcrypt.hash(password, SALT_ROUNDS);
               const user = new this.models.User({
                 username,
                 password: hash,
@@ -122,7 +122,7 @@ class AdminController extends BaseController {
             if (!user) {
               res.json({ msg: 'can\'t found user' });
             } else {
-              const hash = await bcrypt.hash(password, CONSTANTS.SALT_ROUNDS);
+              const hash = await bcrypt.hash(password, SALT_ROUNDS);
 
               user.password = hash;
               await user.save();
@@ -144,7 +144,7 @@ class AdminController extends BaseController {
       const {
         headers: { adminpassword, command },
       } = request;
-      if (adminpassword === config.ADMIN_PASSWORD) {
+      if (adminpassword === ADMIN_PASSWORD) {
         if (command) {
           this.handlers[command]
             ? await this.handlers[command](request, response)

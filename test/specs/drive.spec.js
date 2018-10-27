@@ -16,6 +16,9 @@ const config = require('./../../server/environmentConfig');
 const populate = require('./../../server/database/populate');
 const traverse = require('./../../server/database/traverse');
 const {
+  PATH_TO_DRIVE,
+  GRAPHQL_ENDPOINT,
+  GRAPHQL_SUBSCRIPTIONS,
   DRIVE_FILES: {
     IMAGE,
   },
@@ -111,7 +114,7 @@ describe('should database seeding work', () => {
     server = new RootServer(config.EXPRESS_PORT, connection);
     server.init();
 
-    await populate(traverse(config.PATH_TO_DRIVE), connection);
+    await populate(traverse(PATH_TO_DRIVE), connection);
     return done();
   });
 
@@ -132,7 +135,7 @@ describe('should database seeding work', () => {
       .findOne({ hash: 0 }).exec();
 
     const req = await request(server.app)
-      .post('/mobile')
+      .post(GRAPHQL_ENDPOINT)
       .set('Accept', 'application/json')
       .send({
         query: folderQuery,
@@ -152,7 +155,7 @@ describe('should database seeding work', () => {
       .findOne({ hash: innerDirectory.hash }).exec();
 
     const req = await request(server.app)
-      .post('/mobile')
+      .post(GRAPHQL_ENDPOINT)
       .set('Accept', 'application/json')
       .send({
         query: folderQuery,
@@ -182,7 +185,7 @@ describe('should database seeding work', () => {
       .findOne({ hash: imageObjectReferenceHash }).exec();
 
     const req = await request(server.app)
-      .post('/mobile')
+      .post(GRAPHQL_ENDPOINT)
       .set('Accept', 'application/json')
       .send({
         query: imageQuery,
@@ -199,7 +202,7 @@ describe('should database seeding work', () => {
     const userId = '1ab2c3';
     const text = 'some comment';
     const req = await request(server.app)
-      .post('/mobile')
+      .post(GRAPHQL_ENDPOINT)
       .set('Accept', 'application/json')
       .send({
         query: updateCommentFlowMutation,
@@ -254,7 +257,7 @@ describe('should database seeding work', () => {
       _fileLookup = fileLookup;
 
       const req = await request(server.app)
-        .post('/mobile')
+        .post(GRAPHQL_ENDPOINT)
         .set('Accept', 'application/json')
         .send({
           query: updateTagFlowMutation,
@@ -281,7 +284,7 @@ describe('should database seeding work', () => {
 
     it('can\'t add same tag twice', async () => {
       const req = await request(server.app)
-        .post('/mobile')
+        .post(GRAPHQL_ENDPOINT)
         .set('Accept', 'application/json')
         .send({
           query: updateTagFlowMutation,
@@ -299,7 +302,7 @@ describe('should database seeding work', () => {
 
     it('get specific Tag Content', async () => {
       const req = await request(server.app)
-        .post('/mobile')
+        .post(GRAPHQL_ENDPOINT)
         .set('Accept', 'application/json')
         .send({
           query: getTagContentQuery,
@@ -321,9 +324,9 @@ describe('should database seeding work', () => {
     let client;
 
     beforeAll(async () => {
-      const httpLink = new HttpLink({ uri: `http://localhost:${config.EXPRESS_PORT}/mobile`, fetch });
+      const httpLink = new HttpLink({ uri: `http://localhost:${config.EXPRESS_PORT + GRAPHQL_ENDPOINT}`, fetch });
       const wsLink = new WebSocketLink({
-        uri: `ws://localhost:${config.EXPRESS_PORT}/subscriptions`,
+        uri: `ws://localhost:${config.EXPRESS_PORT + GRAPHQL_SUBSCRIPTIONS}`,
         options: { reconnect: true },
       });
       const link = split(
@@ -355,7 +358,7 @@ describe('should database seeding work', () => {
       }));
 
       await request(server.app)
-        .post('/mobile')
+        .post(GRAPHQL_ENDPOINT)
         .set('Accept', 'application/json')
         .send({
           query: updateTagFlowMutation,

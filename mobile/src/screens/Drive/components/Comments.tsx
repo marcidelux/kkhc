@@ -2,6 +2,7 @@ import { Text, View } from 'react-native';
 import React from 'react';
 import { Avatar } from 'react-native-elements';
 import { BACKEND_API } from 'react-native-dotenv';
+import CONSTANTS from './../../../constants';
 
 export default class Comments extends React.Component<any, any> {
   componentDidMount() {
@@ -16,7 +17,7 @@ export default class Comments extends React.Component<any, any> {
       <View>
         <Avatar
         avatarStyle={{opacity: .7, transform: [{scale: .9}] }}
-        source={{uri: `${BACKEND_API}/opt/server/avatars/${this.props.userStatus[comment.userId].avatar}.png` }}
+        source={{uri: `${BACKEND_API + CONSTANTS.PATH_TO_AVATARS}/${this.props.userStatus[comment.userId].avatar}.png` }}
         size={'small'}
         rounded
         containerStyle={{backgroundColor: this.props.userStatus[comment.userId].color }}

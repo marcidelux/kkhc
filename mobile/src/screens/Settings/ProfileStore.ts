@@ -5,6 +5,7 @@ import {
   reaction,
 } from 'mobx';
 import { BACKEND_API } from 'react-native-dotenv';
+import CONSTANTS from './../../constants';
 import { AsyncStorage } from 'react-native';
 
 const CAN_SAVE_WIDGET_OUT_DURATION = 250;
@@ -84,7 +85,7 @@ export class ProfileStore {
       localColor: color,
     } = this;
     try {
-      let response = await fetch(`${BACKEND_API}/mobile`, {
+      let response = await fetch(BACKEND_API + CONSTANTS.GRAPHQL_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',

@@ -6,6 +6,7 @@ const {
     VIDEO,
   },
 } = require('./../constants');
+const { NODE_ENV } = require('./../environmentConfig');
 
 const connectToDb = (config) => {
   const connection = mongoose.connect(
@@ -13,8 +14,17 @@ const connectToDb = (config) => {
     {
       poolSize: 10,
       useNewUrlParser: true,
+      useCreateIndex: true,
     },
   );
+
+  const logCommand = (collectionName, method, query, document) => {
+    console.log(`${collectionName}.${method}`, JSON.stringify(query), document);
+  };
+
+  if (NODE_ENV === 'development') {
+    mongoose.set('debug', logCommand);
+  }
 
   const schemas = {
     [IMAGE.TYPE]: new mongoose.Schema({

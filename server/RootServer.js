@@ -15,6 +15,12 @@ const { execute, subscribe } = require('graphql');
 const { SubscriptionServer } = require('subscriptions-transport-ws');
 const { makeExecutableSchema } = require('graphql-tools');
 
+const {
+  PATH_TO_DRIVE,
+  PATH_TO_AVATARS,
+  GRAPHQL_ENDPOINT,
+  GRAPHQL_SUBSCRIPTIONS,
+} = require('./constants');
 const config = require('./environmentConfig');
 const RouterHub = require('./router/RouterHub');
 
@@ -65,11 +71,11 @@ class RootServer {
     this.app.use(fileUpload());
     this.app.use(express.static('../www/assets'));
     this.app.use(
-      config.PATH_TO_DRIVE,
+      PATH_TO_DRIVE,
       express.static(path.join(`${__dirname}/../files`)),
     );
     this.app.use(
-      config.PATH_TO_AVATARS,
+      PATH_TO_AVATARS,
       express.static('./avatars'),
     );
     this.app.engine('handlebars', hbs.engine);
@@ -80,7 +86,8 @@ class RootServer {
     const apollo = new ApolloServer({
       schema,
       subscriptions: {
-        path: '/subscriptions',
+        // @todo check if this declaration is needed ?
+        path: GRAPHQL_SUBSCRIPTIONS,
       },
       context: ({ req }) => ({
         db: this.db,
@@ -93,7 +100,7 @@ class RootServer {
       },
     });
 
-    apollo.applyMiddleware({ app: this.app, path: '/mobile' });
+    apollo.applyMiddleware({ app: this.app, path: GRAPHQL_ENDPOINT });
 
     this.server = this.http.listen(this.PORT, () => {
       console.log(`KKHC Server running in ${config.NODE_ENV} mode, listening on PORT ${this.PORT}`);
@@ -103,14 +110,14 @@ class RootServer {
         subscribe,
         schema,
         onConnect: (connectionParams, webSocket, context) => {
-          console.log('connect', connectionParams, webSocket, context);
+          // console.log('connect', connectionParams, webSocket, context);
         },
         onDisconnect: (webSocket, context) => {
-          console.log('disconnect', webSocket, context);
+          // console.log('disconnect', webSocket, context);
         },
       }, {
         server: this.http,
-        path: '/subscriptions',
+        path: GRAPHQL_SUBSCRIPTIONS,
       });
     });
   }

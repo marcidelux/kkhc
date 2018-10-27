@@ -48,7 +48,7 @@ export default class FileList extends React.Component<any, any> {
         <Image
           resizeMode={'contain'}
           source={{
-            uri: `${BACKEND_API}${this.props.rootFolder.path}/${pathToImage}`,
+            uri: `${BACKEND_API + this.props.rootFolder.path}/${pathToImage}`,
           }}
           style={styles.image}/>
       </TouchableHighlight>
@@ -69,7 +69,7 @@ export default class FileList extends React.Component<any, any> {
           <Image
             resizeMode={'contain'}
             source={{
-              uri: `${BACKEND_API}${this.props.rootFolder.path}/${pathToImage}`,
+              uri: `${BACKEND_API + this.props.rootFolder.path}/${pathToImage}`,
             }}
             style={styles.image}/>
         </TouchableHighlight>
