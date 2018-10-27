@@ -4,9 +4,11 @@ services:
 
 # Ultimate Jenkins
   jenkins:
-    container_name: Ultimmate_Jenkins
-    image: jenkins:lts
+    container_name: Ultimate_Jenkins
+    image: donbattery/jenkins
+    user: root
     restart: always
+    privileged: true
     ports:
       - 7474:8080    
       - 50000:50000
@@ -55,7 +57,7 @@ services:
       - ./../.env
     volumes:
       - /mnt/Twins/KKHC_DB:/data/db
-      - ./../data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ../data/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - 27017:27017
     networks:
@@ -63,9 +65,11 @@ services:
         aliases:
           - db
 
+volumes:
+  jenkins_home:
+    driver: local
+
 networks:
   jenkins_bridge:
   nginxproxy:
-    name: nginxproxy
   kkhc_net:
-    name: kkhc_net
