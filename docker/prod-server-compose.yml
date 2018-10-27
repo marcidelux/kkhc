@@ -28,4 +28,3 @@ networks:
   docker_nginxproxy:
     external: true
 
-    
