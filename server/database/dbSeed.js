@@ -1,10 +1,8 @@
 const populate = require('./populate');
 const traverse = require('./traverse');
-const config = require('./../environmentConfig');
-const { PATH_TO_DRIVE } = require('./../constants');
 
-function seedDB(dbConnection) {
-  return populate(traverse(PATH_TO_DRIVE), dbConnection);
+function seedDB(dbConnection, path) {
+  return populate(traverse(path), dbConnection);
 }
 
 module.exports = {

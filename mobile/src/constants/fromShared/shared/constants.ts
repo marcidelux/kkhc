@@ -7,7 +7,7 @@ module.exports = {
   DRIVE_FILES: {
     IMAGE: {
       TYPE: 'Image',
-      EXTENSIONS: ['png', 'jpg', 'JPG', 'jpeg', 'gif', 'bmp', 'BMP'],
+      EXTENSIONS: ['png'],
     },
     VIDEO: {
       TYPE: 'Video',

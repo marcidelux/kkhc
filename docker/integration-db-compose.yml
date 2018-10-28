@@ -1,0 +1,24 @@
+version: '2'
+services:
+
+  test_mongo:
+    image: mongo:latest
+    env_file:
+      - ../.env
+    volumes:
+      - ../data/mongo/test_docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 127.0.0.1:27018:27018
+    command: mongod --port 27018
+    networks:
+      test_kkhc_net:
+        aliases:
+          - test_db 
+
+networks:
+  test_kkhc_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
