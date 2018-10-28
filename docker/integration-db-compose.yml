@@ -4,6 +4,7 @@ services:
 
   test_mongo:
     image: mongo:latest
+    container_name: test_mongo
     env_file:
       - ../.env
     volumes:
