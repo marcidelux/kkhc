@@ -9,6 +9,7 @@ import {
 import { BACKEND_API } from 'react-native-dotenv';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
+import CONSTANTS from './../../../constants';
 
 const GET_AVATARS = gql`
 {
@@ -28,7 +29,7 @@ export class AvatarSelector extends React.Component<any, any> {
           onPress={() => this.props.changeAvatar(item.nameOnDisc)}>
           <Image
            style={{ width: 50, height: 50 }}
-           source={{ uri: `${BACKEND_API}/opt/server/avatars/${item.nameOnDisc + item.extension}` }}
+           source={{ uri: `${BACKEND_API + CONSTANTS.PATH_TO_AVATARS}/${item.nameOnDisc + item.extension}` }}
            />
        </TouchableOpacity>
       );

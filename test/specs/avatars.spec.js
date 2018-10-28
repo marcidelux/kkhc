@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const connectToDb = require('./../../server/database/connectToDb');
 const config = require('./../../server/environmentConfig');
 const AvatarMapper = require('./../../server/helpers/AvatarMapper');
+const CONSTANTS = require('./../../server/constants');
 
 Object.assign(config, {
   DB_ALIAS: 'test_db',
@@ -26,7 +27,7 @@ describe('avatars mapping', () => {
     connection = await connectToDb(config);
     originalRenameFileToUuid = AvatarMapper.renameFileToUuid;
     AvatarMapper.renameFileToUuid = jest.fn(() => {});
-    mapper = new AvatarMapper(connection);
+    mapper = new AvatarMapper(connection, '/opt/test/testAvatars');
 
     return done();
   });

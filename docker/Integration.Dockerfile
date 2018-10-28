@@ -11,6 +11,7 @@ COPY ./shared ./shared/
 COPY ./test/specs ./test/specs
 COPY ./test/testAvatars ./test/testAvatars
 COPY ./data ./data/
+COPY ./data/test_files ./opt/files
 COPY ./www ./www/
 RUN chmod +x test_startup.sh
 

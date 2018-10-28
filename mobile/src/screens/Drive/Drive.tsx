@@ -7,6 +7,7 @@ import { FeatherHeaderButtons, Item } from './components/headerButton';
 import { Breadcrumbs } from './components/BreadCrumbs';
 import FileList from './containers/FileList';
 import client from './../../client';
+import CONSTANTS from './../../constants';
 
 const GET_FOLDER_CONTENT = gql`
 query getFolderContent($hash: Int!) {
@@ -49,7 +50,7 @@ export class DriveScreen extends React.Component<any, { rootFolder: {contains: A
     let breadCrumbs: Array<any> = [];
     if (navigation.state.params && navigation.state.params.rootFolder) {
       breadCrumbs = navigation.state.params.rootFolder.path
-        .replace('/opt/files', '')
+        .replace(CONSTANTS.PATH_TO_DRIVE, '')
         .split('/')
         .map((button: string, index: number) => ({ title: button, key: index.toString() }));
     }

@@ -15,8 +15,8 @@ services:
     ports:
       - 8081:3099
     networks:
-      - kkhc_net
-      - nginxproxy
+      - docker_kkhc_net
+      - docker_nginxproxy
     external_links:
       - kkhc-mongo-prod:db
     working_dir: /opt
@@ -28,4 +28,3 @@ networks:
   docker_nginxproxy:
     external: true
 
-    

@@ -12,7 +12,7 @@ services:
     volumes:
       - ./../data/mongo/test_docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
-      - 127.0.0.1:27018:27018
+      - 27018:27018
     command: mongod --port 27018
     networks:
       test_kkhc_net:
@@ -30,8 +30,6 @@ services:
       - MONGO_INITDB_DATABASE=test_kkhcfiles
       - ADMIN_PASSWORD=password123
       - EXPRESS_SECRET=123
-      - PATH_TO_DRIVE=/opt/files
-      - PATH_TO_AVATARS=/opt/test/testAvatars
 
     volumes:
       - ./../server:/opt/server/
@@ -47,7 +45,7 @@ services:
     networks:
       - test_kkhc_net
     links:
-      - test_mongo
+      - test_mongo:test_db
     working_dir: /opt
     command: ./test_startup.sh
 

@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
-const config = require('../environmentConfig');
+const { PATH_TO_AVATARS } = require('./../constants');
 
 class AvatarMapper {
-  constructor(dbConnection) {
-    this.pathToSeed = config.PATH_TO_AVATARS;
+  constructor(dbConnection, pathToAvatars) {
+    this.pathToSeed = pathToAvatars;
     this.dbConnection = dbConnection;
   }
 
@@ -46,7 +46,7 @@ class AvatarMapper {
     const nameOnDisc = uuidv4();
     const extension = '.png';
     const newAvatar = new this.dbConnection.models.Avatar({ nameOnDisc, extension });
-    await fileObj.mv(path.join(config.PATH_TO_AVATARS, nameOnDisc + extension));
+    await fileObj.mv(path.join(PATH_TO_AVATARS, nameOnDisc + extension));
     return newAvatar.save();
   }
 }

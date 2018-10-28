@@ -10,11 +10,11 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import CONSTANTS from './constants';
 
 const httpLink = new HttpLink({
-  uri: `${BACKEND_API}/mobile`,
+  uri: BACKEND_API + CONSTANTS.GRAPHQL_ENDPOINT,
 });
 
 const wsLink = new WebSocketLink({
-  uri: `${SUBSCRIPTIONS_API}/subscriptions`,
+  uri: SUBSCRIPTIONS_API + CONSTANTS.GRAPHQL_SUBSCRIPTIONS,
   options: {
     reconnect: true,
   },

@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { BACKEND_API } from 'react-native-dotenv';
+import CONSTANTS from './../../../constants';
 
 const PLAYGROUND_HEIGHT = 175;
 const IMAGE_DIMENSION = 75;
@@ -49,7 +50,7 @@ export class AvatarPlayground extends React.Component<any, any> {
               <Image
                 style={styles.avatar}
                 source={{
-                  uri: `${BACKEND_API}/opt/server/avatars/${
+                  uri: `${BACKEND_API + CONSTANTS.PATH_TO_AVATARS}/${
                     localAvatar
                     ? localAvatar
                     : remoteAvatar

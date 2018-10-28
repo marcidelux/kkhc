@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import { BACKEND_API } from 'react-native-dotenv';
 import { Avatar } from 'react-native-elements';
+import CONSTANTS from './../../constants';
 
 const OFFSET = 10;
 
@@ -49,7 +50,7 @@ const MessageListView = class extends React.Component<any, any> {
 
   async loadAdditionalMessages (offset: number) {
     try {
-        const response = await fetch(`${BACKEND_API}/mobile?query=${rawQuery(offset)}`, {
+        const response = await fetch(`${BACKEND_API + CONSTANTS.GRAPHQL_ENDPOINT}?query=${rawQuery(offset)}`, {
           method: 'GET',
         //   body: JSON.stringify({
         //     text,
@@ -122,14 +123,13 @@ const MessageListView = class extends React.Component<any, any> {
             return <View style={{ height: 2 }}/>
         }}
         renderItem={({item, index}) => {
-          console.log(`${BACKEND_API}/opt/server/avatars/${userDisplayProperties[item.userId].avatar}.png`)
           return(
             <View
             style={{ borderRadius: 10, paddingTop: 10, paddingBottom: 10, marginBottom: 5, marginTop: 5, backgroundColor: '#ABC7FF' }}
             >
             <Avatar
             avatarStyle={{opacity: .7, transform: [{scale: .9}] }}
-            source={{uri: `${BACKEND_API}/opt/server/avatars/${userDisplayProperties[item.userId].avatar}.png` }}
+            source={{uri: `${BACKEND_API + CONSTANTS.PATH_TO_AVATARS}/${userDisplayProperties[item.userId].avatar}.png` }}
             size={'small'}
             rounded
             containerStyle={{backgroundColor: userDisplayProperties[item.userId].color }}
