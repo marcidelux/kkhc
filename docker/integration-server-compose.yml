@@ -14,7 +14,7 @@ services:
       - 7229-7239:7229-7239
     networks:
       - docker_test_kkhc_net
-    links:
+    external_links:
       - test_mongo:test_db
     working_dir: /opt
     command: ./test_startup.sh
