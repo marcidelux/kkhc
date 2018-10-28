@@ -15,7 +15,7 @@ services:
     networks:
       - docker_test_kkhc_net
     links:
-      - test_mongo:test_db
+      - docker_test_mongo:test_db
     working_dir: /opt
     command: ./test_startup.sh
 
