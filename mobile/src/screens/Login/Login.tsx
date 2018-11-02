@@ -62,6 +62,8 @@ export class LoginScreen extends React.Component<any, {
         if (this.state.strokeDashoffset === 0) clearInterval(this.state.initAnimation);
         }, 1),
     });
+    // forceLogin in devenvironment!
+    this.login();
   }
 
   setModalVisible(modalVisible: boolean) {

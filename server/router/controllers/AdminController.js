@@ -7,7 +7,12 @@ const { ADMIN_PASSWORD } = require('./../../environmentConfig');
 const { seedDB } = require('../../database/dbSeed');
 const BaseController = require('./../BaseController');
 const AvatarMapper = require('./../../helpers/AvatarMapper');
-const { SALT_ROUNDS, PATH_TO_AVATARS, PATH_TO_DRIVE } = require('./../../constants');
+const {
+  SALT_ROUNDS,
+  PATH_TO_AVATARS,
+  PATH_TO_DRIVE,
+  LEGACY_FOLDER,
+} = require('./../../constants');
 
 // @todo test this endpoint without jest race-conditions
 class AdminController extends BaseController {
@@ -18,7 +23,7 @@ class AdminController extends BaseController {
     this.utilities = {
       seeder: async (connection, res) => {
         try {
-          await seedDB(connection, path.join(PATH_TO_DRIVE, 'Legacy'));
+          await seedDB(connection, path.join(PATH_TO_DRIVE, LEGACY_FOLDER));
           res.json({ msg: 'Database successfully seeded' });
         } catch (error) {
           res.json({ msg: String(error) });
@@ -46,7 +51,14 @@ class AdminController extends BaseController {
         }
       },
 
-      seedDbWithDriveFiles: (req, res) => this.utilities.seeder(this.connection, res),
+      seedDbWithDriveFiles: async (req, res) => {
+        try {
+          await seedDB(this.connection);
+          res.json({ msg: 'Database successfully seeded' });
+        } catch (error) {
+          res.json({ msg: String(error) });
+        }
+      },
 
       seedAvatars: async (req, res) => {
         const savedInstances = await this.avatarMapper.saveAvatarsToDb();

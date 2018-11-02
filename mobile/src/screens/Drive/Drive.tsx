@@ -50,6 +50,7 @@ export class DriveScreen extends React.Component<any, { rootFolder: {contains: A
     let breadCrumbs: Array<any> = [];
     if (navigation.state.params && navigation.state.params.rootFolder) {
       breadCrumbs = navigation.state.params.rootFolder.path
+      // this might break after /Legacy
         .replace(CONSTANTS.PATH_TO_DRIVE, '')
         .split('/')
         .map((button: string, index: number) => ({ title: button, key: index.toString() }));

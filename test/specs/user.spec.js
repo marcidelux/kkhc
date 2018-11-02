@@ -23,6 +23,7 @@ describe('forgotten password mechanism', () => {
   const unixHalfHour = 1800000;
   let originalDateFunction;
   let token;
+  let superTestWrapper;
   const fakeToken = 'gkcey5vct7e48grkyh';
   const newPassword = 'duckduck';
 
@@ -30,6 +31,13 @@ describe('forgotten password mechanism', () => {
     connection = await connectToDb(config);
     server = new RootServer(1112, connection);
     server.init();
+
+    superTestWrapper = (endpoint, payload) => request(server.app)
+      .put(endpoint)
+      .set('Accept', 'application/json')
+      .set('Content-Type', 'application/json')
+      .send(payload);
+
     const newUser = new connection.models.User({ email });
     await newUser.save();
     return done();
@@ -45,11 +53,7 @@ describe('forgotten password mechanism', () => {
   });
 
   it('forgot password should set token and timestamp', async () => {
-    const req = await request(server.app)
-      .put('/forgotPassword')
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json')
-      .send({ email });
+    const req = await superTestWrapper('/forgotPassword', { email });
 
     const { message } = JSON.parse(req.text);
     expect(message).toBeTruthy();
@@ -68,11 +72,7 @@ describe('forgotten password mechanism', () => {
   it('fake email should not work', async () => {
     jest.clearAllMocks();
 
-    const req = await request(server.app)
-      .put('/forgotPassword')
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json')
-      .send({ email: fakeEmail });
+    const req = await superTestWrapper('/forgotPassword', { email: fakeEmail });
 
     const { error } = JSON.parse(req.text);
     expect(error).toBeTruthy();
@@ -81,11 +81,7 @@ describe('forgotten password mechanism', () => {
   });
 
   it('fake token should not work', async () => {
-    const req = await request(server.app)
-      .put('/resetPassword')
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json')
-      .send({ token: fakeToken, newPassword });
+    const req = await superTestWrapper('/resetPassword', { token: fakeToken, newPassword });
 
     const { error } = JSON.parse(req.text);
     expect(error).toBeTruthy();
@@ -95,11 +91,7 @@ describe('forgotten password mechanism', () => {
     originalDateFunction = Date.now;
     Date.now = jest.fn(() => originalDateFunction() + unixHalfHour * 2);
 
-    const req = await request(server.app)
-      .put('/resetPassword')
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json')
-      .send({ token, newPassword });
+    const req = await superTestWrapper('/resetPassword', { token, newPassword });
 
     const { error } = JSON.parse(req.text);
     expect(error).toBeTruthy();
@@ -108,11 +100,7 @@ describe('forgotten password mechanism', () => {
   it('reset password should work if token is valid & within timestamp', async () => {
     Date.now = originalDateFunction;
 
-    const req = await request(server.app)
-      .put('/resetPassword')
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json')
-      .send({ token, newPassword });
+    const req = await superTestWrapper('/resetPassword', { token, newPassword });
 
     const { message } = JSON.parse(req.text);
     expect(message).toBeTruthy();

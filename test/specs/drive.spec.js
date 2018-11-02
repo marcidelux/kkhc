@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const request = require('supertest');
+const path = require('path');
 
 const fetch = require('node-fetch');
 const { ApolloClient } = require('apollo-client');
@@ -17,6 +18,7 @@ const populate = require('./../../server/database/populate');
 const traverse = require('./../../server/database/traverse');
 const {
   PATH_TO_DRIVE,
+  LEGACY_FOLDER,
   GRAPHQL_ENDPOINT,
   GRAPHQL_SUBSCRIPTIONS,
   DRIVE_FILES: {
@@ -104,6 +106,7 @@ describe('should database seeding work', () => {
 
   let connection;
   let server;
+  let supertestWrapper;
 
   let innerDirectory;
   let imageObjectReferenceHash;
@@ -114,7 +117,12 @@ describe('should database seeding work', () => {
     server = new RootServer(config.EXPRESS_PORT, connection);
     server.init();
 
-    await populate(traverse(PATH_TO_DRIVE), connection);
+    supertestWrapper = payload => request(server.app)
+      .post(GRAPHQL_ENDPOINT)
+      .set('Accept', 'application/json')
+      .send(payload);
+
+    await populate(traverse(path.join(PATH_TO_DRIVE, LEGACY_FOLDER)), connection);
     return done();
   });
 
@@ -134,15 +142,12 @@ describe('should database seeding work', () => {
     const rootFolder = await connection.models.Folder
       .findOne({ hash: 0 }).exec();
 
-    const req = await request(server.app)
-      .post(GRAPHQL_ENDPOINT)
-      .set('Accept', 'application/json')
-      .send({
-        query: folderQuery,
-        variables: { hash: 0 },
-      });
+    const { text } = await supertestWrapper({
+      query: folderQuery,
+      variables: { hash: 0 },
+    });
 
-    const { data: { getFolderContent } } = JSON.parse(req.text);
+    const { data: { getFolderContent } } = JSON.parse(text);
 
     expect(getFolderContent.hash).toEqual(rootFolder.hash);
     expect(getFolderContent.name).toEqual('kkhc');
@@ -154,15 +159,12 @@ describe('should database seeding work', () => {
     const innerDirectoryfromDb = await connection.models.Folder
       .findOne({ hash: innerDirectory.hash }).exec();
 
-    const req = await request(server.app)
-      .post(GRAPHQL_ENDPOINT)
-      .set('Accept', 'application/json')
-      .send({
-        query: folderQuery,
-        variables: { hash: innerDirectory.hash },
-      });
+    const { text } = await supertestWrapper({
+      query: folderQuery,
+      variables: { hash: innerDirectory.hash },
+    });
 
-    const { data: { getFolderContent } } = JSON.parse(req.text);
+    const { data: { getFolderContent } } = JSON.parse(text);
 
     Object.keys(getFolderContent)
       .forEach(property => (
@@ -184,15 +186,12 @@ describe('should database seeding work', () => {
     const imageFromDb = await connection.models.Image
       .findOne({ hash: imageObjectReferenceHash }).exec();
 
-    const req = await request(server.app)
-      .post(GRAPHQL_ENDPOINT)
-      .set('Accept', 'application/json')
-      .send({
-        query: imageQuery,
-        variables: { hash: imageObjectReferenceHash },
-      });
+    const { text } = await supertestWrapper({
+      query: imageQuery,
+      variables: { hash: imageObjectReferenceHash },
+    });
 
-    const { data: { getImage } } = JSON.parse(req.text);
+    const { data: { getImage } } = JSON.parse(text);
 
     Object.keys(getImage)
       .forEach(property => expect(getImage[property]).toEqual(imageFromDb[property]));
@@ -200,21 +199,18 @@ describe('should database seeding work', () => {
 
   it('updateCommentFlow should find proper image and add comment', async () => {
     const userId = '1ab2c3';
-    const text = 'some comment';
-    const req = await request(server.app)
-      .post(GRAPHQL_ENDPOINT)
-      .set('Accept', 'application/json')
-      .send({
-        query: updateCommentFlowMutation,
-        variables: { fileHash: imageObjectReferenceHash, comment: { userId, text } },
-      });
+    const commentText = 'some comment';
+    const { text } = await supertestWrapper({
+      query: updateCommentFlowMutation,
+      variables: { fileHash: imageObjectReferenceHash, comment: { userId, text: commentText } },
+    });
 
-    const { data: { updateCommentFlow: { comments: [commentFromResponse] } } } = JSON.parse(req.text);
+    const { data: { updateCommentFlow: { comments: [commentFromResponse] } } } = JSON.parse(text);
 
     const { comments: [commentFromDb] } = await connection.models.CommentFlow
       .findOne({ belongsTo: imageObjectReferenceHash }).exec();
 
-    expect(commentFromResponse.text).toEqual(text);
+    expect(commentFromResponse.text).toEqual(commentText);
     expect(commentFromResponse.userId).toEqual(userId);
 
     Object.keys(commentFromDb)
@@ -247,28 +243,24 @@ describe('should database seeding work', () => {
     const newTagName = 'ppl on the moon';
     const userId = 'xcv123';
     let updatedTagFlow;
-    let _fileLookup;
+    let fileLookup;
 
     it('creating new Tag to file should work', async () => {
-      const fileLookup = {
+      fileLookup = {
         hash: imageObjectReferenceHash,
         type: IMAGE.TYPE,
       };
-      _fileLookup = fileLookup;
 
-      const req = await request(server.app)
-        .post(GRAPHQL_ENDPOINT)
-        .set('Accept', 'application/json')
-        .send({
-          query: updateTagFlowMutation,
-          variables: {
-            fileLookup,
-            name: newTagName,
-            userId,
-          },
-        });
+      const { text } = await supertestWrapper({
+        query: updateTagFlowMutation,
+        variables: {
+          fileLookup,
+          name: newTagName,
+          userId,
+        },
+      });
 
-      const { data: { updateTagFlow } } = JSON.parse(req.text);
+      const { data: { updateTagFlow } } = JSON.parse(text);
       updatedTagFlow = updateTagFlow;
 
       expect(updateTagFlow.belongsTo).toBe(imageObjectReferenceHash);
@@ -283,37 +275,32 @@ describe('should database seeding work', () => {
     });
 
     it('can\'t add same tag twice', async () => {
-      const req = await request(server.app)
-        .post(GRAPHQL_ENDPOINT)
-        .set('Accept', 'application/json')
-        .send({
-          query: updateTagFlowMutation,
-          variables: {
-            fileLookup: _fileLookup,
-            name: newTagName,
-            userId,
-          },
-        });
-      const { data: { updateTagFlow } } = JSON.parse(req.text);
+      const { text } = await supertestWrapper({
+        query: updateTagFlowMutation,
+        variables: {
+          fileLookup,
+          name: newTagName,
+          userId,
+        },
+      });
+
+      const { data: { updateTagFlow } } = JSON.parse(text);
 
       expect(JSON.stringify(updateTagFlow))
         .toEqual(JSON.stringify(updatedTagFlow));
     });
 
     it('get specific Tag Content', async () => {
-      const req = await request(server.app)
-        .post(GRAPHQL_ENDPOINT)
-        .set('Accept', 'application/json')
-        .send({
-          query: getTagContentQuery,
-          variables: {
-            tagName: newTagName,
-          },
-        });
+      const { text } = await supertestWrapper({
+        query: getTagContentQuery,
+        variables: {
+          tagName: newTagName,
+        },
+      });
 
-      const { data: { getTagContent: [fileFromResponse] } } = JSON.parse(req.text);
-      const fileFromDB = await connection.models[_fileLookup.type]
-        .findOne({ hash: _fileLookup.hash }).exec();
+      const { data: { getTagContent: [fileFromResponse] } } = JSON.parse(text);
+      const fileFromDB = await connection.models[fileLookup.type]
+        .findOne({ hash: fileLookup.hash }).exec();
 
       Object.keys(fileFromResponse)
         .forEach(property => expect(fileFromResponse[property]).toEqual(fileFromDB[property]));
@@ -357,20 +344,17 @@ describe('should database seeding work', () => {
         error: reject,
       }));
 
-      await request(server.app)
-        .post(GRAPHQL_ENDPOINT)
-        .set('Accept', 'application/json')
-        .send({
-          query: updateTagFlowMutation,
-          variables: {
-            fileLookup: {
-              hash: imageObjectReferenceHash,
-              type: IMAGE.TYPE,
-            },
-            name: newTagName,
-            userId,
+      await supertestWrapper({
+        query: updateTagFlowMutation,
+        variables: {
+          fileLookup: {
+            hash: imageObjectReferenceHash,
+            type: IMAGE.TYPE,
           },
-        });
+          name: newTagName,
+          userId,
+        },
+      });
 
       const { data: { newTagAddedToFile } } = await subscriptionPromise;
 
