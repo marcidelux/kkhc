@@ -129,7 +129,7 @@ describe('should database seeding work', () => {
       .set('Accept', 'application/json')
       .send(payload);
 
-    await populate(await traverse(path.join(PATH_TO_DRIVE, LEGACY_FOLDER)), connection);
+    await populate(await traverse(PATH_TO_DRIVE), connection);
     return done();
   });
 
@@ -159,10 +159,14 @@ describe('should database seeding work', () => {
     expect(getFolderContent.hash).toEqual(rootFolder.hash);
     expect(getFolderContent.name).toEqual('kkhc');
 
-    [innerDirectory] = getFolderContent.contains;
+    const [Legacy] = getFolderContent.contains;
+
+    const legacyFolder = await connection.models.Folder
+      .findOne({ hash: Legacy.hash }).exec();
+    [innerDirectory] = legacyFolder.contains;
   });
 
-  it('getFolderContent - innerfolder query', async () => {
+  it('getFolderContent - Legacy - InnerFolder query', async () => {
     const innerDirectoryfromDb = await connection.models.Folder
       .findOne({ hash: innerDirectory.hash }).exec();
 
