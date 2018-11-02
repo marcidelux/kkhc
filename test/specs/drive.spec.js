@@ -19,7 +19,6 @@ const traverse = require('./../../server/database/traverse');
 const {
   PATH_TO_DRIVE,
   ROOT_FOLDER_HASH,
-  LEGACY_FOLDER,
   GRAPHQL_ENDPOINT,
   GRAPHQL_SUBSCRIPTIONS,
   DRIVE_FILES: {

@@ -1,4 +1,3 @@
-const path = require('path');
 const bcrypt = require('bcrypt');
 const R = require('ramda');
 const mongoose = require('mongoose');
@@ -11,7 +10,6 @@ const {
   SALT_ROUNDS,
   PATH_TO_AVATARS,
   PATH_TO_DRIVE,
-  LEGACY_FOLDER,
 } = require('./../../constants');
 
 // @todo test this endpoint without jest race-conditions
@@ -44,7 +42,7 @@ class AdminController extends BaseController {
 
       seedDbWithDriveFiles: async (req, res) => {
         try {
-          await seedDB(this.connection, path.join(PATH_TO_DRIVE, LEGACY_FOLDER));
+          await seedDB(this.connection, PATH_TO_DRIVE);
           res.json({ msg: 'Database successfully seeded' });
         } catch (error) {
           res.json({ msg: String(error) });
