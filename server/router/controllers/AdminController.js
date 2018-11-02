@@ -21,15 +21,6 @@ class AdminController extends BaseController {
     this.avatarMapper = new AvatarMapper(this.connection, PATH_TO_AVATARS);
 
     this.utilities = {
-      seeder: async (connection, res) => {
-        try {
-          await seedDB(connection, path.join(PATH_TO_DRIVE, LEGACY_FOLDER));
-          res.json({ msg: 'Database successfully seeded' });
-        } catch (error) {
-          res.json({ msg: String(error) });
-        }
-      },
-
       formatCollectionInfo: (name, sum) => ({ Name: `${name}  [ ${sum} ]` }),
 
       getCollectionsInfo: async (collectionNames) => {
@@ -53,7 +44,7 @@ class AdminController extends BaseController {
 
       seedDbWithDriveFiles: async (req, res) => {
         try {
-          await seedDB(this.connection);
+          await seedDB(this.connection, path.join(PATH_TO_DRIVE, LEGACY_FOLDER));
           res.json({ msg: 'Database successfully seeded' });
         } catch (error) {
           res.json({ msg: String(error) });

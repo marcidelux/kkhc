@@ -10,7 +10,7 @@ import client from './../../client';
 import CONSTANTS from './../../constants';
 
 const GET_FOLDER_CONTENT = gql`
-query getFolderContent($hash: Int!) {
+query getFolderContent($hash: String!) {
   getFolderContent(hash: $hash) {
     name,
     path,
@@ -29,6 +29,9 @@ query getFolderContent($hash: Int!) {
         name,
         path,
         hash,
+        width,
+        height,
+        sizeInMb,
         type,
         parentHash,
         extension,
@@ -93,7 +96,7 @@ export class DriveScreen extends React.Component<any, { rootFolder: {contains: A
       fetchFolder,
       breadCrumbNavigation,
     } = this;
-    fetchFolder(0);
+    fetchFolder(CONSTANTS.ROOT_FOLDER_HASH);
     this.props.navigation.setParams({
       fetchFolder,
       breadCrumbNavigation,
@@ -109,7 +112,7 @@ export class DriveScreen extends React.Component<any, { rootFolder: {contains: A
   }
 
   @autobind
-  async fetchFolder(hash: number): Promise<void> {
+  async fetchFolder(hash: string): Promise<void> {
     const { data: { getFolderContent } } = await client.query({
       query: GET_FOLDER_CONTENT,
       variables: { hash },

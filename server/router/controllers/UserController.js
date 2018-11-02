@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
-const Promise = require('bluebird');
-const crypto = Promise.promisifyAll(require('crypto'));
+const bluebird = require('bluebird');
+const crypto = bluebird.promisifyAll(require('crypto'));
 const sendGridMail = require('@sendgrid/mail');
 
 const CONSTANTS = require('./../../constants');

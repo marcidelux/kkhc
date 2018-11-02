@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const sharp = require('sharp');
+const bluebird = require('bluebird');
+const uuidv4 = require('uuid/v4');
 const {
+  ROOT_FOLDER_HASH,
   DRIVE_FILES: {
     FOLDER,
     IMAGE,
@@ -8,22 +12,19 @@ const {
   },
 } = require('./../constants');
 
-let indexHash = 0;
+let indexHash = ROOT_FOLDER_HASH;
 let parentHash = indexHash;
 
-const traverse = (dir, result = [], hashPath = [0]) => {
-  fs.readdirSync(dir).forEach((file) => {
+const traverse = async (dir, result = [], hashPath = [ROOT_FOLDER_HASH]) => {
+  await bluebird.each(fs.readdirSync(dir), async (file) => {
     const fullPath = path.resolve(dir, file);
-
-    // @ TODO in pipeline traverse -> seed -> thumbler
-
     const fileStats = {
       name: file,
       path: fullPath,
     };
 
     if (fs.statSync(fullPath).isDirectory()) {
-      indexHash += 1;
+      indexHash = uuidv4();
       parentHash = indexHash;
       const directoryType = {
         type: FOLDER.TYPE,
@@ -36,18 +37,25 @@ const traverse = (dir, result = [], hashPath = [0]) => {
       return traverse(fullPath, fileStats.files, [...hashPath, indexHash]);
     }
 
-    const extension = path.extname(fullPath).substring(1);
+    const extension = path.extname(fullPath).substring(1).toLowerCase();
     let supportedFile;
     if (IMAGE.EXTENSIONS.includes(extension)) {
-      indexHash += 1;
+      const { width, height } = await sharp(fullPath).metadata();
+      const { size } = fs.statSync(fullPath);
+      indexHash = uuidv4();
       supportedFile = {
+        width,
+        height,
+        sizeInMb: Number((size / (1024 ** 2)).toFixed(2)),
         type: IMAGE.TYPE,
         hash: indexHash,
         parentHash,
         extension,
       };
+      // see and del
+      console.log(file, ' ,-name--  ', supportedFile.sizeInMb, '   <-MB  | ', supportedFile.width, ' ', supportedFile.height, '  <-w-h');
     } else if (VIDEO.EXTENSIONS.includes(extension)) {
-      indexHash += 1;
+      indexHash = uuidv4();
       supportedFile = {
         type: VIDEO.TYPE,
         hash: indexHash,

@@ -20,16 +20,19 @@ type Folder {
     name: String,
     path: String,
     contains: [FolderContent]
-    hash: Int,
+    hash: String,
     type: String,
-    hashPath: [Int]!
+    hashPath: [String]!
 }
 
 type Image {
     name: String,
     path: String,
-    hash: Int,
-    parentHash: Int,
+    hash: String,
+    width: Int,
+    height: Int,
+    sizeInMb: Float,
+    parentHash: String,
     type: String,
     extension: String,
 }
@@ -37,8 +40,8 @@ type Image {
 type Video {
     name: String,
     path: String,
-    hash: Int,
-    parentHash: Int,
+    hash: String,
+    parentHash: String,
     type: String,
     extension: String,
 }
@@ -59,21 +62,21 @@ input CommentInput {
 
 type CommentFlow {
     comments: [CommentPayload]!,
-    belongsTo: Int!,
+    belongsTo: String!,
 }
 
 type TagFlow {
     tagPrimitives: [TagPrimitive]!
-    belongsTo: Int!
+    belongsTo: String!
 }
 
 type FileLookup {
-    hash: Int!,
+    hash: String!,
     type: String!,
 }
 
 input FileLookupInput {
-    hash: Int!,
+    hash: String!,
     type: String!, 
 }
 
@@ -117,10 +120,10 @@ type Query {
     usersStatus: [User]!
     getChatMessages(offset: Int): [ChatMessage]
     availableAvatars: [Avatar]
-    getFolderContent(hash: Int!): Folder
-    getImage(hash: Int!): Image
-    getCommentFlow(fileHash: Int!): CommentFlow
-    getTagFlow(fileHash: Int!): TagFlow
+    getFolderContent(hash: String!): Folder
+    getImage(hash: String!): Image
+    getCommentFlow(fileHash: String!): CommentFlow
+    getTagFlow(fileHash: String!): TagFlow
     availableTags: [Tag]
     getTagContent(tagName: String!): [FolderContent]
 }
@@ -130,13 +133,13 @@ type Mutation {
     changePassword(userId: ID!, oldPassword: String, newPassword: String): Boolean!
     updateStatus(user: UserTypeInput): User
     addChatMessage(chatMessage: ChatMessageInput!): ChatMessage
-    updateCommentFlow(fileHash: Int!, comment: CommentInput!): CommentFlow!
+    updateCommentFlow(fileHash: String!, comment: CommentInput!): CommentFlow!
     updateTagFlow(fileLookup: FileLookupInput, name: String!, userId: String!): TagFlow!
 }
 
 type Subscription {
     chatMessageAdded: ChatMessage!
     userUpdated: User!
-    newCommentAddedToFile(fileHash: Int!): CommentPayload!
-    newTagAddedToFile(fileHash: Int!): TagPrimitive!
+    newCommentAddedToFile(fileHash: String!): CommentPayload!
+    newTagAddedToFile(fileHash: String!): TagPrimitive!
 }

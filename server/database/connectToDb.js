@@ -31,8 +31,11 @@ const connectToDb = (config) => {
       name: String,
       path: String,
       type: { type: String, default: IMAGE.TYPE },
-      hash: { type: Number, index: { unique: true } },
-      parentHash: Number,
+      hash: { type: String, index: { unique: true } },
+      width: Number,
+      height: Number,
+      sizeInMb: Number,
+      parentHash: String,
       extension: String,
     }),
 
@@ -40,8 +43,8 @@ const connectToDb = (config) => {
       name: String,
       path: String,
       type: { type: String, default: VIDEO.TYPE },
-      hash: { type: Number, index: { unique: true } },
-      parentHash: Number,
+      hash: { type: String, index: { unique: true } },
+      parentHash: String,
       extension: String,
     }),
 
@@ -50,7 +53,7 @@ const connectToDb = (config) => {
       path: String,
       type: { type: String, default: FOLDER.TYPE },
       contains: Array,
-      hash: { type: Number, index: { unique: true } },
+      hash: { type: String, index: { unique: true } },
       hashPath: Array,
     }),
 
@@ -75,12 +78,12 @@ const connectToDb = (config) => {
 
     CommentFlow: new mongoose.Schema({
       comments: Array,
-      belongsTo: { type: Number, index: { unique: true } },
+      belongsTo: { type: String, index: { unique: true } },
     }),
 
     TagFlow: new mongoose.Schema({
       tagPrimitives: Array,
-      belongsTo: { type: Number, index: { unique: true } },
+      belongsTo: { type: String, index: { unique: true } },
     }),
 
     Tag: new mongoose.Schema({

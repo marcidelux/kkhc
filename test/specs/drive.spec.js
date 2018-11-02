@@ -18,6 +18,7 @@ const populate = require('./../../server/database/populate');
 const traverse = require('./../../server/database/traverse');
 const {
   PATH_TO_DRIVE,
+  ROOT_FOLDER_HASH,
   LEGACY_FOLDER,
   GRAPHQL_ENDPOINT,
   GRAPHQL_SUBSCRIPTIONS,
@@ -33,7 +34,7 @@ Object.assign(config, {
 
 describe('should database seeding work', () => {
   const folderQuery = `
-  query getFolderContent($hash: Int!) {
+  query getFolderContent($hash: String!) {
     getFolderContent(hash: $hash) {
       name,
       path,
@@ -51,6 +52,9 @@ describe('should database seeding work', () => {
         ... on Image {
           name,
           path,
+          width,
+          height,
+          sizeInMb,
           type,
           hash,
           parentHash,
@@ -69,10 +73,13 @@ describe('should database seeding work', () => {
   }`;
 
   const imageQuery = `
-  query getImage($hash: Int!) {
+  query getImage($hash: String!) {
     getImage(hash: $hash) {
       name,
       path,
+      width,
+      height,
+      sizeInMb,
       hash,
       parentHash,
       type,
@@ -81,7 +88,7 @@ describe('should database seeding work', () => {
   }`;
 
   const updateCommentFlowMutation = `
-  mutation updateCommentFlow($fileHash: Int!, $comment: CommentInput!) {
+  mutation updateCommentFlow($fileHash: String!, $comment: CommentInput!) {
     updateCommentFlow(fileHash: $fileHash, comment: $comment) {
       comments {
         id,
@@ -122,7 +129,7 @@ describe('should database seeding work', () => {
       .set('Accept', 'application/json')
       .send(payload);
 
-    await populate(traverse(path.join(PATH_TO_DRIVE, LEGACY_FOLDER)), connection);
+    await populate(await traverse(path.join(PATH_TO_DRIVE, LEGACY_FOLDER)), connection);
     return done();
   });
 
@@ -140,11 +147,11 @@ describe('should database seeding work', () => {
 
   it('getFolderContent - rootFolder query', async () => {
     const rootFolder = await connection.models.Folder
-      .findOne({ hash: 0 }).exec();
+      .findOne({ hash: ROOT_FOLDER_HASH }).exec();
 
     const { text } = await supertestWrapper({
       query: folderQuery,
-      variables: { hash: 0 },
+      variables: { hash: ROOT_FOLDER_HASH },
     });
 
     const { data: { getFolderContent } } = JSON.parse(text);
@@ -225,6 +232,9 @@ describe('should database seeding work', () => {
           name
           path
           hash
+          width,
+          height,
+          sizeInMb,
           parentHash
           type
           extension
@@ -332,7 +342,7 @@ describe('should database seeding work', () => {
       const userId = 'xyz123';
       const subscriptionPromise = new Promise((resolve, reject) => client.subscribe({
         query: gql`
-        subscription newTagAddedToFile($fileHash: Int!) {
+        subscription newTagAddedToFile($fileHash: String!) {
           newTagAddedToFile(fileHash: $fileHash) {
             name,
             userId,

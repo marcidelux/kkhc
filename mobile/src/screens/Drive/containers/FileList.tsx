@@ -12,7 +12,7 @@ import { BACKEND_API } from 'react-native-dotenv';
 import Icon from 'react-native-vector-icons/Feather';
 import CONSTANTS from './../../../constants';
 
-declare type FileObject = { name: string, hash: number, type: string, path: string };
+declare type FileObject = { name: string, hash: string, type: string, path: string };
 
 const screen = Dimensions.get('window');
 const divider = 4;

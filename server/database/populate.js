@@ -1,5 +1,6 @@
 const {
   PATH_TO_DRIVE,
+  ROOT_FOLDER_HASH,
   DRIVE_FILES: {
     FOLDER,
     IMAGE,
@@ -22,6 +23,9 @@ const populate = async (traversedDirectory, dbConnection) => {
     type,
     hash,
     name,
+    width,
+    height,
+    sizeInMb,
     path,
     files,
     parentHash,
@@ -47,6 +51,9 @@ const populate = async (traversedDirectory, dbConnection) => {
           name,
           path,
           hash,
+          width,
+          height,
+          sizeInMb,
           extension,
           parentHash,
         });
@@ -85,7 +92,7 @@ const populate = async (traversedDirectory, dbConnection) => {
     path: PATH_TO_DRIVE,
     contains: traversedDirectory.map(({ files, ...rest }) => rest),
     hashPath: [],
-    hash: 0,
+    hash: ROOT_FOLDER_HASH,
   });
 
   pendingSaves.push(ROOT.save());

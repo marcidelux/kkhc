@@ -19,7 +19,7 @@ import Tags from './Tags';
 import Icon from 'react-native-vector-icons/Feather';
 
 const GET_COMMENTFLOW = gql`
-query getCommentFlow($fileHash: Int!) {
+query getCommentFlow($fileHash: String!) {
   getCommentFlow(fileHash: $fileHash) {
     comments {
       text,
@@ -32,7 +32,7 @@ query getCommentFlow($fileHash: Int!) {
 }`;
 
 const GET_TAGFLOW = gql`
-query getTagFlow($fileHash: Int!) {
+query getTagFlow($fileHash: String!) {
   getTagFlow(fileHash: $fileHash) {
     tagPrimitives {
       name,
@@ -43,7 +43,7 @@ query getTagFlow($fileHash: Int!) {
 }`;
 
 const COMMENTFLOW_SUBSCRIPTION = gql`
-subscription newCommentAddedToFile($fileHash: Int!) {
+subscription newCommentAddedToFile($fileHash: String!) {
   newCommentAddedToFile(fileHash: $fileHash) {
     text,
     userId,
@@ -53,7 +53,7 @@ subscription newCommentAddedToFile($fileHash: Int!) {
 }`;
 
 const TAGFLOW_SUBSCRIPTION = gql`
-subscription newTagAddedToFile($fileHash: Int!) {
+subscription newTagAddedToFile($fileHash: String!) {
   newTagAddedToFile(fileHash: $fileHash) {
     name,
     userId,
