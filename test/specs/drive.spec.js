@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const request = require('supertest');
-const path = require('path');
 
 const fetch = require('node-fetch');
 const { ApolloClient } = require('apollo-client');
