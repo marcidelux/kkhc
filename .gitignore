@@ -1,6 +1,8 @@
 node_modules
 test/coverage
 data/db
+data/test_files/_compressed
+data/test_files/_thumb
 .env
 .DS_Store
 yarn.lock
