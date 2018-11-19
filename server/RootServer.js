@@ -23,7 +23,6 @@ const {
 } = require('./constants');
 const config = require('./environmentConfig');
 const RouterHub = require('./router/RouterHub');
-const resize = require('./helpers/imageResize');
 
 const hbs = exphbs.create({
   extname: 'handlebars',
@@ -71,7 +70,6 @@ class RootServer {
     this.app.use(express.json());
     this.app.use(fileUpload());
     this.app.use(express.static('../www/assets'));
-    // this.app.use(resize);
     this.app.use(
       PATH_TO_DRIVE,
       express.static(path.join(`${__dirname}/../files`)),
