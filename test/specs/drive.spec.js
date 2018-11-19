@@ -30,6 +30,8 @@ Object.assign(config, {
   MONGO_PORT: '27018',
 });
 
+jest.mock('/opt/server/database/resize');
+
 describe('should database seeding work', () => {
   const folderQuery = `
   query getFolderContent($hash: String!) {
