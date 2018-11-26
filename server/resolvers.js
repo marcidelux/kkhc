@@ -1,5 +1,6 @@
 const { PubSub } = require('graphql-subscriptions');
 const bcrypt = require('bcrypt');
+const bluebird = require('bluebird');
 const mongoose = require('mongoose');
 const {
   DRIVE_FILES,
@@ -9,7 +10,7 @@ const {
     USER_UPDATED,
     NEW_CHAT_MESSAGE,
     NEW_COMMENT_ADDED,
-    NEW_TAG_ADDED,
+    NEW_TAGS_ADDED,
   },
 } = require('./constants');
 
@@ -106,42 +107,45 @@ const resolvers = {
       commentFlow.markModified('comments');
       await commentFlow.save();
       pubsub.publish(NEW_COMMENT_ADDED + belongsTo, { newCommentAddedToFile: newComment });
-      // @Todo this can be a lot of traffic ?
       return commentFlow;
     },
-    updateTagFlow: async (_, { fileLookup: { hash: belongsTo, type }, name, userId }, { db }) => {
-      // @todo able to handle multiple tagcreations/taginsert at once
+    updateTagFlow: async (_, { fileLookup: { hash: belongsTo, type }, tags, userId }, { db }) => {
       const tagFlow = await db.models.TagFlow.findOne({ belongsTo }).exec();
+      const tagNames = tagFlow.tagPrimitives.map(t => t.name);
+      const broadcast = [];
 
-      if (tagFlow.tagPrimitives.find(t => t.name === name)) {
-        // escape and validate ...
-        return tagFlow;
+      await bluebird.each(Array.from(new Set(tags)).reverse(), async (name) => {
+        if (!tagNames.includes(name)) {
+          const tagPrimitive = { name, userId };
+          const existingTag = await db.models.Tag.findOne({ name }).exec();
+          let newTag;
+          if (existingTag) {
+            existingTag.fileReferences.unshift({
+              hash: belongsTo,
+              type,
+            });
+          } else {
+            // publish new Tag created !
+            newTag = new db.models.Tag({
+              name,
+              fileReferences: [{
+                hash: belongsTo,
+                type,
+              }],
+              userId,
+            });
+          }
+          tagFlow.tagPrimitives.unshift(tagPrimitive);
+          broadcast.unshift(tagPrimitive);
+          await Promise.all([
+            ...(existingTag ? [existingTag.save()] : [newTag.save()]),
+            tagFlow.save(),
+          ]);
+        }
+      });
+      if (broadcast.length > 0) {
+        pubsub.publish(NEW_TAGS_ADDED + belongsTo, { newTagsAddedToFile: broadcast });
       }
-
-      const tagPrimitive = { name, userId };
-      const existingTag = await db.models.Tag.findOne({ name }).exec();
-      if (existingTag) {
-        existingTag.fileReferences.push({
-          hash: belongsTo,
-          type,
-        });
-        tagFlow.tagPrimitives.push(tagPrimitive);
-        await Promise.all([existingTag.save(), tagFlow.save()]);
-      } else {
-        // publish new Tag created !
-        const newTag = new db.models.Tag({
-          name,
-          fileReferences: [{
-            hash: belongsTo,
-            type,
-          }],
-          userId,
-        });
-        tagFlow.tagPrimitives.push(tagPrimitive);
-        await Promise.all([newTag.save(), tagFlow.save()]);
-      }
-      pubsub.publish(NEW_TAG_ADDED + belongsTo, { newTagAddedToFile: tagPrimitive });
-      // @Todo this can be a lot of traffic ?
       return tagFlow;
     },
   },
@@ -157,9 +161,9 @@ const resolvers = {
         pubsub.asyncIterator(NEW_COMMENT_ADDED + belongsTo)
       ),
     },
-    newTagAddedToFile: {
+    newTagsAddedToFile: {
       subscribe: (_, { fileHash: belongsTo }) => (
-        pubsub.asyncIterator(NEW_TAG_ADDED + belongsTo)
+        pubsub.asyncIterator(NEW_TAGS_ADDED + belongsTo)
       ),
     },
   },

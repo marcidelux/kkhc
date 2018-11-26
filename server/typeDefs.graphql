@@ -134,12 +134,12 @@ type Mutation {
     updateStatus(user: UserTypeInput): User
     addChatMessage(chatMessage: ChatMessageInput!): ChatMessage
     updateCommentFlow(fileHash: String!, comment: CommentInput!): CommentFlow!
-    updateTagFlow(fileLookup: FileLookupInput, name: String!, userId: String!): TagFlow!
+    updateTagFlow(fileLookup: FileLookupInput, tags: [String]!, userId: String!): TagFlow!
 }
 
 type Subscription {
     chatMessageAdded: ChatMessage!
     userUpdated: User!
     newCommentAddedToFile(fileHash: String!): CommentPayload!
-    newTagAddedToFile(fileHash: String!): TagPrimitive!
+    newTagsAddedToFile(fileHash: String!): [TagPrimitive]!
 }

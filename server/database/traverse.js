@@ -65,7 +65,7 @@ const traverse = async (dir, result = [], hashPath = [ROOT_FOLDER_HASH]) => {
           width: 128,
           outputPath: `${[PATH_TO_DRIVE, THUMB_FOLDER, indexHash].join('/')}.png`,
         });
-        if (supportedFile.sizeInMb >= 1) {
+        if (supportedFile.sizeInMb >= 0.5) {
           await resize({
             fullPath,
             width: 500,

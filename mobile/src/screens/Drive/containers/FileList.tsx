@@ -12,7 +12,7 @@ import { BACKEND_API } from 'react-native-dotenv';
 import Icon from 'react-native-vector-icons/Feather';
 import CONSTANTS from './../../../constants';
 
-declare type FileObject = { name: string, hash: string, type: string, path: string };
+declare type FileObject = { name: string, hash: string, type: string, path: string, extension: string };
 
 const screen = Dimensions.get('window');
 const divider = 4;
@@ -38,7 +38,7 @@ export default class FileList extends React.Component<any, any> {
   }
 
   createFile(fileObject: FileObject) {
-    const pathToImage = `${fileObject.name.slice(0, fileObject.name.lastIndexOf('.'))}_thumb.png`;
+    const pathToThumb = [CONSTANTS.PATH_TO_DRIVE, CONSTANTS.THUMB_FOLDER, fileObject.hash].join('/') + '.png';
     if (fileObject.type === CONSTANTS.DRIVE_FILES.IMAGE.TYPE) {
       return (
       <TouchableHighlight
@@ -47,13 +47,12 @@ export default class FileList extends React.Component<any, any> {
         key={fileObject.hash}>
         <Image
           resizeMode={'contain'}
-          source={{
-            uri: `${BACKEND_API + this.props.rootFolder.path}/${pathToImage}`,
-          }}
+          source={{ uri: BACKEND_API + pathToThumb }}
           style={styles.image}/>
       </TouchableHighlight>
       );
     } else if (fileObject.type === CONSTANTS.DRIVE_FILES.VIDEO.TYPE) {
+      // handle VIDEO
       return (
         <TouchableHighlight
           style={{
@@ -69,7 +68,7 @@ export default class FileList extends React.Component<any, any> {
           <Image
             resizeMode={'contain'}
             source={{
-              uri: `${BACKEND_API + this.props.rootFolder.path}/${pathToImage}`,
+              uri: ``,
             }}
             style={styles.image}/>
         </TouchableHighlight>

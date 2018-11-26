@@ -101,8 +101,8 @@ describe('should database seeding work', () => {
   }`;
 
   const updateTagFlowMutation = `
-    mutation updateTagFlow($fileLookup: FileLookupInput, $name: String!, $userId: String!) {
-      updateTagFlow(fileLookup: $fileLookup, name: $name, userId: $userId) {
+    mutation updateTagFlow($fileLookup: FileLookupInput, $tags: [String]!, $userId: String!) {
+      updateTagFlow(fileLookup: $fileLookup, tags: $tags, userId: $userId) {
         tagPrimitives {
           name,
           userId,
@@ -269,7 +269,7 @@ describe('should database seeding work', () => {
         query: updateTagFlowMutation,
         variables: {
           fileLookup,
-          name: newTagName,
+          tags: [newTagName],
           userId,
         },
       });
@@ -293,7 +293,7 @@ describe('should database seeding work', () => {
         query: updateTagFlowMutation,
         variables: {
           fileLookup,
-          name: newTagName,
+          tags: [newTagName],
           userId,
         },
       });
@@ -346,8 +346,8 @@ describe('should database seeding work', () => {
       const userId = 'xyz123';
       const subscriptionPromise = new Promise((resolve, reject) => client.subscribe({
         query: gql`
-        subscription newTagAddedToFile($fileHash: String!) {
-          newTagAddedToFile(fileHash: $fileHash) {
+        subscription newTagsAddedToFile($fileHash: String!) {
+          newTagsAddedToFile(fileHash: $fileHash) {
             name,
             userId,
           }
@@ -365,15 +365,15 @@ describe('should database seeding work', () => {
             hash: imageObjectReferenceHash,
             type: IMAGE.TYPE,
           },
-          name: newTagName,
+          tags: [newTagName],
           userId,
         },
       });
 
-      const { data: { newTagAddedToFile } } = await subscriptionPromise;
+      const { data: { newTagsAddedToFile: [newTag] } } = await subscriptionPromise;
 
-      expect(newTagAddedToFile.name).toBe(newTagName);
-      expect(newTagAddedToFile.userId).toBe(userId);
+      expect(newTag.name).toBe(newTagName);
+      expect(newTag.userId).toBe(userId);
     });
   });
 });
