@@ -1,17 +1,20 @@
 import React from 'react';
-import { Text, TouchableOpacity, View, Dimensions, ScrollView, TextInput, StyleSheet, Animated } from 'react-native';
+import { Text, Keyboard, TouchableOpacity, View, Dimensions, ScrollView, TextInput, StyleSheet, Animated, findNodeHandle } from 'react-native';
 import Image from 'react-native-scalable-image';
 import { BACKEND_API } from 'react-native-dotenv';
 import Comments from './Comments';
 import { NavigationComponent } from 'react-navigation';
-import { observer, renderReporter } from 'mobx-react';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import Tags from './Tags';
 import Icon from 'react-native-vector-icons/Feather';
 import autobind from 'autobind-decorator';
+import { Input } from 'react-native-elements';
+import Lightbox from 'react-native-lightbox';
 
 import CONSTANTS from './../../../constants';
+
+const screen = Dimensions.get('window');
 
 const GET_COMMENTFLOW = gql`
   query getCommentFlow($fileHash: String!) {
@@ -65,11 +68,17 @@ export class FileInspect extends React.Component<
   any,
   {
     text: string;
+    keyboardWillShowSub: any,
     realImageOpacity: any;
     placeholderImageOpacity: any;
     imageLoaded: boolean,
   }
 > {
+  private keyboardHeight: number;
+  private imageHeight: number;
+  private outerScrollViewReference: any;
+  private lightboxScrollResponderReference: any;
+
   static navigationOptions = ({ navigation }: { navigation: NavigationComponent }) => ({
     title: navigation.state.params.fileObject.name,
   })
@@ -78,10 +87,20 @@ export class FileInspect extends React.Component<
     super(props);
     this.state = {
       text: '',
+      keyboardWillShowSub: Keyboard.addListener('keyboardWillShow', this.keyboardWillShow.bind(this)),
       realImageOpacity: new Animated.Value(0),
       placeholderImageOpacity: new Animated.Value(0),
       imageLoaded: false,
     };
+  }
+
+  keyboardWillShow(e) {
+    this.keyboardHeight = e.endCoordinates.screenY;
+    this._handleFocus();
+  }
+
+  componentWillUnmount() {
+    this.state.keyboardWillShowSub.remove();
   }
 
   tagFlowWrapper(fileObject: any, userDisplayProperties: any) {
@@ -90,15 +109,13 @@ export class FileInspect extends React.Component<
         {({ loading, error, data, subscribeToMore }) => {
           if (loading) return 'Loading...';
           if (error) return `Error! ${error.message}`;
-          console.log(data.getTagFlow.tagPrimitives.length)
-
           const subscribeToMoreTags = () => subscribeToMore(this.moreTagsHandler(fileObject));
           return (
             <Tags
-            imageLoaded={this.state.imageLoaded}
-            userStatus={userDisplayProperties}
-            tags={data.getTagFlow.tagPrimitives}
-            more={subscribeToMoreTags} />
+              imageLoaded={this.state.imageLoaded}
+              userStatus={userDisplayProperties}
+              tags={data.getTagFlow.tagPrimitives}
+              more={subscribeToMoreTags} />
           );
         }}
       </Query>
@@ -161,9 +178,14 @@ export class FileInspect extends React.Component<
 
   @autobind
   _realImageOnload() {
-    Animated.spring(this.state.realImageOpacity, {
-      toValue: 1,
-    }).start();
+    Animated.sequence([
+      Animated.spring(this.state.realImageOpacity, {
+        toValue: 1,
+      }),
+      Animated.spring(this.state.placeholderImageOpacity, {
+        toValue: 0,
+      }),
+    ]).start();
     this.setState({
       imageLoaded: true,
     });
@@ -176,11 +198,38 @@ export class FileInspect extends React.Component<
     }).start();
   }
 
-  // renderTags = () => this.props.navigation.state.params.fileObject.tags.length > 0
-  //     ? this.props.navigation.state.params.fileObject.tags.map((tag: {}, index: number) => (
-  //         <Text key={index}>{tag}</Text>
-  //       ))
-  //     : null
+  @autobind
+  setOuterScrollViewReference(node) {
+    if (node) {
+      this.outerScrollViewReference = node.getScrollResponder();
+    }
+  }
+
+  @autobind
+  _handleFocus() {
+    const headerHeight = 64;
+    const screenWithoutHeader = screen.height - headerHeight;
+    const topLeftOver = screenWithoutHeader - this.keyboardHeight;
+    const y = this.imageHeight - topLeftOver;
+    this.outerScrollViewReference.scrollTo({x: 0, y, animated: true});
+  }
+
+  @autobind
+  setZoomReference(node) {
+    if (node) {
+      this.lightboxScrollResponderReference = node.getScrollResponder();
+    }
+  }
+
+  handleResetZoomScale = (width) => {
+    this.lightboxScrollResponderReference.scrollResponderZoomTo({
+       x: 0,
+       y: 0,
+       width,
+       height: 1,
+       animated: true,
+    });
+  }
 
   render() {
     const fileObject = this.props.navigation.state.params.fileObject;
@@ -193,72 +242,75 @@ export class FileInspect extends React.Component<
         ? [CONSTANTS.PATH_TO_DRIVE, CONSTANTS.COMPRESSED_FOLDER, fileObject.hash].join('/') + '.png'
         : fileObject.path;
 
-      const pathToThumb = [CONSTANTS.PATH_TO_DRIVE, CONSTANTS.THUMB_FOLDER, fileObject.hash].join('/') + '.png';
-
-    console.log(fileObject.sizeInMb);
+    const pathToThumb = [CONSTANTS.PATH_TO_DRIVE, CONSTANTS.THUMB_FOLDER, fileObject.hash].join('/') + '.png';
 
     const renderProportion = fileObject.width / width;
 
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ScrollView
+          ref={this.setOuterScrollViewReference}
+          keyboardDismissMode='interactive'
           style={{ width: '100%', height: Dimensions.get('window').height }}
           contentContainerStyle={{
             paddingBottom: 50,
-            // flexDirection: 'row',
-            // flexWrap: 'wrap',
-          }}
-        >
-          <View width={width} height={fileObject.height / renderProportion}>
+          }}>
+          <View
+            width={width}
+            height={fileObject.height / renderProportion}>
             <Animated.View style={{ opacity: this.state.placeholderImageOpacity }}>
               <Image
                 width={width}
                 style={{ position: 'absolute' }}
-                blurRadius={1}
-                // height={fileObject.height / renderProportion}
                 source={{ uri: BACKEND_API + pathToThumb }}
                 onLoad={this._placeholderImageOnload}
               />
             </Animated.View>
-            <Animated.View style={{ opacity: this.state.realImageOpacity }}>
-              <Image
-                width={width}
-                // height={fileObject.height / renderProportion}
-                source={{ uri: BACKEND_API + pathToFile }}
-                onLoad={this._realImageOnload}
-              />
+            <Animated.View
+              onLayout={(event) => {
+                if (event.nativeEvent.layout.height) {
+                  this.imageHeight = event.nativeEvent.layout.height;
+                }
+              }}
+              style={{ opacity: this.state.realImageOpacity }}>
+              <Lightbox
+                swipeToDismiss={false}
+                willClose={() => this.handleResetZoomScale(width) }>
+                <ScrollView
+                  ref={this.setZoomReference}
+                  minimumZoomScale={1}
+                  maximumZoomScale={2}
+                  centerContent>
+                  <Image
+                    width={width}
+                    source={{ uri: BACKEND_API + pathToFile, cache: 'force-cache' }}
+                    onLoad={this._realImageOnload}
+                  />
+                </ScrollView>
+              </Lightbox>
             </Animated.View>
           </View>
           <View style={{ backgroundColor: 'blue', width, flex: 1, alignItems: 'flex-end' }}>
-            <View style={{ flex: 1, flexDirection: 'row', backgroundColor: 'purple', width: 100, justifyContent: 'space-around' }}>
-              <TouchableOpacity>
-                <Icon name='hash' size={25} color='black' />
-              </TouchableOpacity>
+            <View
+            style={{ flex: 1, flexDirection: 'row', backgroundColor: 'purple', justifyContent: 'space-around' }}>
+              {/* <TouchableOpacity> */}
+                <Input
+                  inputContainerStyle={{ borderBottomWidth: 0 }}
+                  leftIcon={<TouchableOpacity><Icon name='hash' size={25} color='black' /></TouchableOpacity>}
+                  onChangeText={(text) => this.setState({ text })}
+                  value={this.state.text}
+                  placeholder='have a tag'
+                  placeholderTextColor='grey'
+                  maxLength={40}
+                />
+              {/* </TouchableOpacity> */}
               <TouchableOpacity>
                 <Icon name='message-circle' size={25} color='black' />
               </TouchableOpacity>
             </View>
           </View>
           {this.tagFlowWrapper(fileObject, userDisplayProperties)}
-          {this.commentFlowWrapper(fileObject, userDisplayProperties)}
-          {/* <TouchableOpacity
-            // onPress={() => this.state.text === ''
-            // ? null
-            // : this.store.addComment(fileObject.hash, this.state.text)}
-            style={{ backgroundColor: 'red' }}
-          >
-            <Text style={{ marginBottom: 50 }}>Sub ur Comment</Text>
-            <TextInput
-              style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-              onChangeText={(text) => this.setState({ text })}
-              value={this.state.text}
-              // onSubmitEditing={this.addComment}
-              placeholder="Have a Comment!"
-              placeholderTextColor="grey"
-              multiline={true}
-              maxLength={250}
-            />
-          </TouchableOpacity> */}
+          {/* {this.commentFlowWrapper(fileObject, userDisplayProperties)} */}
         </ScrollView>
       </View>
     );

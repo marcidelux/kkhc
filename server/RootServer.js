@@ -72,11 +72,11 @@ class RootServer {
     this.app.use(express.static('../www/assets'));
     this.app.use(
       PATH_TO_DRIVE,
-      express.static(path.join(`${__dirname}/../files`)),
+      express.static(path.join(`${__dirname}/../files`), { maxAge: '6h' }),
     );
     this.app.use(
       PATH_TO_AVATARS,
-      express.static('./avatars'),
+      express.static('./avatars', { maxAge: '6h' }),
     );
     this.app.engine('handlebars', hbs.engine);
     this.app.set('view engine', 'handlebars');
