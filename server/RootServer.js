@@ -9,6 +9,7 @@ const session = require('express-session');
 const { createServer } = require('http');
 const MemoryStore = require('memorystore')(session);
 const fileUpload = require('express-fileupload');
+const helmet = require('helmet');
 
 const { ApolloServer } = require('apollo-server-express');
 const { execute, subscribe } = require('graphql');
@@ -55,6 +56,7 @@ class RootServer {
     this.ioHandler = require('./socketIO/ioHandler').handler(this.io);
     /* eslint-enable global-require */
 
+    this.app.use(helmet());
     this.app.use(favicon(path.join(__dirname, '../www/assets', 'favicon.ico')));
     this.app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : ''));
     this.app.use(
