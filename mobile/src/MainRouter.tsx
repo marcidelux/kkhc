@@ -4,12 +4,12 @@ import Icon from 'react-native-vector-icons/Feather';
 import React from 'react';
 
 import { NewsScreen } from './screens/News/News';
-import { FileInspect } from './screens/Drive/components/FileInspect';
-import { SearchScreen } from './screens/Drive/containers/Search';
 import { ChatScreen } from './screens/Chat/Chat';
 import { SettingsScreen } from './screens/Settings';
 import { UploadScreen } from './screens/Upload/Upload';
 import { DriveScreen } from './screens/Drive/Drive';
+import { FileInspect } from './screens/Drive/components/FileInspect';
+import { Comments } from './screens/Drive/components/Comments';
 
 export const MainRouter = createMaterialBottomTabNavigator(
     {
@@ -19,7 +19,8 @@ export const MainRouter = createMaterialBottomTabNavigator(
       Drive: createStackNavigator({
         screen: DriveScreen,
         FileInspect: { screen: FileInspect },
-        Search: { screen: SearchScreen },
+        // Search: { screen: SearchScreen },
+        Comments: { screen: Comments },
       }),
       Chat: {
         screen: ChatScreen,

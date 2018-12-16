@@ -1,8 +1,18 @@
 import React from 'react';
-import { Text, Keyboard, TouchableOpacity, View, Dimensions, ScrollView, TextInput, StyleSheet, Animated, findNodeHandle } from 'react-native';
+import {
+  Text,
+  Keyboard,
+  TouchableOpacity,
+  View,
+  Dimensions,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  Animated,
+  findNodeHandle,
+} from 'react-native';
 import Image from 'react-native-scalable-image';
 import { BACKEND_API } from 'react-native-dotenv';
-import Comments from './Comments';
 import { NavigationComponent } from 'react-navigation';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
@@ -13,6 +23,7 @@ import { Input } from 'react-native-elements';
 import Lightbox from 'react-native-lightbox';
 
 import CONSTANTS from './../../../constants';
+import { CommentsButtonWrapper } from './CommentsButtonWrapper';
 
 const screen = Dimensions.get('window');
 
@@ -68,10 +79,10 @@ export class FileInspect extends React.Component<
   any,
   {
     text: string;
-    keyboardWillShowSub: any,
+    keyboardWillShowSub: any;
     realImageOpacity: any;
     placeholderImageOpacity: any;
-    imageLoaded: boolean,
+    imageLoaded: boolean;
   }
 > {
   private keyboardHeight: number;
@@ -79,9 +90,46 @@ export class FileInspect extends React.Component<
   private outerScrollViewReference: any;
   private lightboxScrollResponderReference: any;
 
-  static navigationOptions = ({ navigation }: { navigation: NavigationComponent }) => ({
-    title: navigation.state.params.fileObject.name,
-  })
+  static navigationOptions = ({ navigation }: { navigation: NavigationComponent }) => {
+    return {
+      title: navigation.state.params.fileObject.name,
+        headerRight: (
+          <Query fetchPolicy={'network-only'} query={GET_COMMENTFLOW} variables={{ fileHash: navigation.state.params.fileObject.hash }}>
+            {({ loading, error, data, subscribeToMore }) => {
+              if (loading) return 'Loading...';
+              if (error) return `Error! ${error.message}`;
+
+              const subscribeToMoreComments = () => subscribeToMore(FileInspect.moreCommentsHandler(navigation.state.params.fileObject));
+              return (
+                <CommentsButtonWrapper
+                  navigation={navigation}
+                  more={subscribeToMoreComments}
+                  comments={data.getCommentFlow.comments}
+                  fileObject={navigation.state.params.fileObject}
+                />
+              );
+            }}
+          </Query>
+        ),
+      };
+  }
+
+  static moreCommentsHandler(fileObject: any) {
+    return {
+      document: COMMENTFLOW_SUBSCRIPTION,
+      variables: { fileHash: fileObject.hash },
+      updateQuery: (previous, { subscriptionData }) => {
+        if (!subscriptionData.data) return previous;
+        const { newCommentAddedToFile } = subscriptionData.data;
+        return Object.assign({}, previous, {
+          getCommentFlow: {
+            ...previous.getCommentFlow,
+            comments: [...previous.getCommentFlow.comments, newCommentAddedToFile],
+          },
+        });
+      },
+    };
+  }
 
   constructor(props: any) {
     super(props);
@@ -115,7 +163,8 @@ export class FileInspect extends React.Component<
               imageLoaded={this.state.imageLoaded}
               userStatus={userDisplayProperties}
               tags={data.getTagFlow.tagPrimitives}
-              more={subscribeToMoreTags} />
+              more={subscribeToMoreTags}
+            />
           );
         }}
       </Query>
@@ -133,43 +182,6 @@ export class FileInspect extends React.Component<
           getTagFlow: {
             ...previous.getTagFlow,
             tagPrimitives: [...newTagsAddedToFile, ...previous.getTagFlow.tagPrimitives],
-          },
-        });
-      },
-    };
-  }
-
-  commentFlowWrapper(fileObject: any, userDisplayProperties: any) {
-    return (
-      <Query query={GET_COMMENTFLOW} variables={{ fileHash: fileObject.hash }}>
-        {({ loading, error, data, subscribeToMore }) => {
-          if (loading) return 'Loading...';
-          if (error) return `Error! ${error.message}`;
-
-          const subscribeToMoreComments = () => subscribeToMore(this.moreCommentsHandler(fileObject));
-          return (
-            <Comments
-              userStatus={userDisplayProperties}
-              comments={data.getCommentFlow.comments}
-              more={subscribeToMoreComments}
-            />
-          );
-        }}
-      </Query>
-    );
-  }
-
-  moreCommentsHandler(fileObject: any) {
-    return {
-      document: COMMENTFLOW_SUBSCRIPTION,
-      variables: { fileHash: fileObject.hash },
-      updateQuery: (previous, { subscriptionData }) => {
-        if (!subscriptionData.data) return previous;
-        const { newCommentAddedToFile } = subscriptionData.data;
-        return Object.assign({}, previous, {
-          getCommentFlow: {
-            ...previous.getCommentFlow,
-            comments: [...previous.getCommentFlow.comments, newCommentAddedToFile],
           },
         });
       },
@@ -211,7 +223,7 @@ export class FileInspect extends React.Component<
     const screenWithoutHeader = screen.height - headerHeight;
     const topLeftOver = screenWithoutHeader - this.keyboardHeight;
     const y = this.imageHeight - topLeftOver;
-    this.outerScrollViewReference.scrollTo({x: 0, y, animated: true});
+    this.outerScrollViewReference.scrollTo({ x: 0, y, animated: true });
   }
 
   @autobind
@@ -223,11 +235,11 @@ export class FileInspect extends React.Component<
 
   handleResetZoomScale = (width) => {
     this.lightboxScrollResponderReference.scrollResponderZoomTo({
-       x: 0,
-       y: 0,
-       width,
-       height: 1,
-       animated: true,
+      x: 0,
+      y: 0,
+      width,
+      height: 1,
+      animated: true,
     });
   }
 
@@ -238,7 +250,8 @@ export class FileInspect extends React.Component<
       return accumulator;
     }, {});
 
-    const pathToFile = fileObject.sizeInMb >= 0.5
+    const pathToFile =
+      fileObject.sizeInMb >= 0.5
         ? [CONSTANTS.PATH_TO_DRIVE, CONSTANTS.COMPRESSED_FOLDER, fileObject.hash].join('/') + '.png'
         : fileObject.path;
 
@@ -255,9 +268,7 @@ export class FileInspect extends React.Component<
           contentContainerStyle={{
             paddingBottom: 50,
           }}>
-          <View
-            width={width}
-            height={fileObject.height / renderProportion}>
+          <View width={width} height={fileObject.height / renderProportion}>
             <Animated.View style={{ opacity: this.state.placeholderImageOpacity }}>
               <Image
                 width={width}
@@ -273,14 +284,8 @@ export class FileInspect extends React.Component<
                 }
               }}
               style={{ opacity: this.state.realImageOpacity }}>
-              <Lightbox
-                swipeToDismiss={false}
-                willClose={() => this.handleResetZoomScale(width) }>
-                <ScrollView
-                  ref={this.setZoomReference}
-                  minimumZoomScale={1}
-                  maximumZoomScale={2}
-                  centerContent>
+              <Lightbox swipeToDismiss={false} willClose={() => this.handleResetZoomScale(width)}>
+                <ScrollView ref={this.setZoomReference} minimumZoomScale={1} maximumZoomScale={2} centerContent>
                   <Image
                     width={width}
                     source={{ uri: BACKEND_API + pathToFile, cache: 'force-cache' }}
@@ -290,27 +295,24 @@ export class FileInspect extends React.Component<
               </Lightbox>
             </Animated.View>
           </View>
-          <View style={{ backgroundColor: 'blue', width, flex: 1, alignItems: 'flex-end' }}>
-            <View
-            style={{ flex: 1, flexDirection: 'row', backgroundColor: 'purple', justifyContent: 'space-around' }}>
-              {/* <TouchableOpacity> */}
-                <Input
-                  inputContainerStyle={{ borderBottomWidth: 0 }}
-                  leftIcon={<TouchableOpacity><Icon name='hash' size={25} color='black' /></TouchableOpacity>}
-                  onChangeText={(text) => this.setState({ text })}
-                  value={this.state.text}
-                  placeholder='have a tag'
-                  placeholderTextColor='grey'
-                  maxLength={40}
-                />
-              {/* </TouchableOpacity> */}
-              <TouchableOpacity>
-                <Icon name='message-circle' size={25} color='black' />
-              </TouchableOpacity>
+          <View style={{ width, flex: 1, alignItems: 'center' }}>
+            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
+              <Input
+                inputContainerStyle={{ borderBottomWidth: 1.5 }}
+                leftIcon={
+                  <TouchableOpacity>
+                    <Icon name='hash' size={25} color='black' />
+                  </TouchableOpacity>
+                }
+                onChangeText={(text) => this.setState({ text })}
+                value={this.state.text}
+                placeholder='have a tag'
+                placeholderTextColor='grey'
+                maxLength={40}
+              />
             </View>
           </View>
           {this.tagFlowWrapper(fileObject, userDisplayProperties)}
-          {/* {this.commentFlowWrapper(fileObject, userDisplayProperties)} */}
         </ScrollView>
       </View>
     );

@@ -17,7 +17,7 @@ class RoutesInitializer {
         const ConstructorRoutes = require(`./routes/${nameSpace}Routes`);
         /* eslint-enable global-require, import/no-dynamic-require */
 
-        this[nameSpace] = new ConstructorRoutes(new ConstructorController(this.dbConnection))
+        this[nameSpace] = new ConstructorRoutes(new ConstructorController(this.dbConnection));
         this.routes.push(...this[nameSpace].routes);
         resolve(this.routes);
       });

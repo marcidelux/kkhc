@@ -71,7 +71,7 @@ export default class Tags extends React.Component<any, any> {
 
   renderTags() {
     if (this.props.tags.length === 0) return null;
-    return this.props.tags.map((tagPrimitive: TagPrimitive, i: number) => {
+    return this.props.tags.map((tagPrimitive: TagPrimitive) => {
       const handleSelection = this._handleSelection.bind(this, tagPrimitive.name);
       return (
         <TouchableOpacity
@@ -132,69 +132,6 @@ export default class Tags extends React.Component<any, any> {
         </TouchableOpacity>
       );
     });
-  }
-
-  _renderItem = ({item: tagPrimitive}, i) => {
-    const handleSelection = this._handleSelection.bind(this, i);
-      return (
-        <TouchableOpacity
-          onPress={handleSelection}
-          key={tagPrimitive.name}
-          style={{}}
-        >
-        <View style={{
-          ...(this.state.selected === i
-            ? {
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 4,
-             },
-              shadowOpacity: 0.30,
-              shadowRadius: 4.65,
-              elevation: 8,
-            }
-            : {}),
-        }}>
-        <Animated.View style={{
-          overflow: 'hidden',
-          margin: 5,
-          paddingVertical: 5,
-          paddingHorizontal: 10,
-          backgroundColor: this.props.userStatus[tagPrimitive.userId].color,
-          borderRadius: 20,
-          height: this.state.selected === i
-          ? this.state.scaleValue.interpolate({
-            inputRange: [1, 1.1],
-            outputRange: [34, 60],
-          })
-          : 34,
-          transform: this.state.selected === i
-              ? [{ scale: this.state.scaleValue }, { translateY: this.state.translateY }]
-              : [],
-              }}>
-          <Text style={{ fontSize: 20 }}># {tagPrimitive.name}</Text>
-          <View style={{ paddingTop: 5, flexDirection: 'row', justifyContent: 'space-evenly' }}>
-          {/* check if tag is added by user */}
-            <TouchableOpacity>
-              <Icon
-                style={}
-                name='trash'
-                size={20}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Icon
-                style={}
-                name='zap'
-                size={20}
-              />
-            </TouchableOpacity>
-          </View>
-          </Animated.View>
-          </View>
-        </TouchableOpacity>
-      );
   }
 
   render() {
