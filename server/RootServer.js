@@ -10,6 +10,8 @@ const { createServer } = require('http');
 const MemoryStore = require('memorystore')(session);
 const fileUpload = require('express-fileupload');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const { ApolloServer } = require('apollo-server-express');
 const { execute, subscribe } = require('graphql');
@@ -57,6 +59,7 @@ class RootServer {
     /* eslint-enable global-require */
 
     this.app.use(helmet());
+    this.app.use(cookieParser());
     this.app.use(favicon(path.join(__dirname, '../www/assets', 'favicon.ico')));
     this.app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : ''));
     this.app.use(
@@ -68,7 +71,12 @@ class RootServer {
         secret: config.EXPRESS_SECRET,
       }),
     );
-    this.app.use(cors());
+    this.app.use(cors({
+      credentials: true,
+      origin: config.NODE_ENV === 'development'
+        ? 'http://localhost:3030'
+        : 'https://kkhc.eu',
+    }));
     this.app.use(express.json());
     this.app.use(fileUpload());
     this.app.use(express.static('../www/assets'));
@@ -102,7 +110,26 @@ class RootServer {
       },
     });
 
-    apollo.applyMiddleware({ app: this.app, path: GRAPHQL_ENDPOINT });
+
+    this.app.use(async (req, res, next) => {
+      try {
+        await jwt.verify(req.cookies.token, config.EXPRESS_SECRET);
+        next();
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    apollo.applyMiddleware({
+      app: this.app,
+      path: GRAPHQL_ENDPOINT,
+      cors: {
+        credentials: true,
+        origin: config.NODE_ENV === 'development'
+          ? 'http://localhost:3030'
+          : 'https://kkhc.eu',
+      },
+    });
 
     this.server = this.http.listen(this.PORT, () => {
       console.log(`KKHC Server running in ${config.NODE_ENV} mode, listening on PORT ${this.PORT}`);
@@ -111,8 +138,16 @@ class RootServer {
         execute,
         subscribe,
         schema,
-        onConnect: (connectionParams, webSocket, context) => {
-          // console.log('connect', connectionParams, webSocket, context);
+        onConnect: async (connectionParams, webSocket, context) => {
+          if (connectionParams.token) {
+            try {
+              await jwt.verify(connectionParams.token, config.EXPRESS_SECRET);
+              return true;
+            } catch (error) {
+              console.log(error);
+            }
+          }
+          return false;
         },
         onDisconnect: (webSocket, context) => {
           // console.log('disconnect', webSocket, context);

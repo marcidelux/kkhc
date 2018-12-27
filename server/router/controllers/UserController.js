@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const bluebird = require('bluebird');
+const jwt = require('jsonwebtoken');
 const crypto = bluebird.promisifyAll(require('crypto'));
 const sendGridMail = require('@sendgrid/mail');
 
@@ -24,6 +25,33 @@ class UserController extends BaseController {
     };
   }
 
+  authenticate() {
+    return async ({ body: { email, password } }, res) => {
+      try {
+        const user = await this.models.User.findOne({ email }).exec();
+        if (user) {
+          const correct = await bcrypt.compare(password, user.password);
+          if (correct) {
+            const payload = { sub: user.id };
+            const token = jwt.sign(
+              payload,
+              config.EXPRESS_SECRET,
+              {
+                expiresIn: '30d',
+              },
+            );
+            return res.cookie('token', token, { httpOnly: true })
+              .status(200)
+              .json({ token });
+          }
+        }
+        res.sendStatus(404);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  }
+
   forgotPassword() {
     return async ({ body: { email } }, res) => {
       if (email) {
@@ -38,7 +66,7 @@ class UserController extends BaseController {
             await this.utilities.sendEmail(email, token);
             res.status(200).json({ message: `send link to email: ${email}` });
           } else {
-            res.status(200).json({ error: `unable to generate link to ${email}` });
+            res.status(400).json({ error: `unable to generate link to ${email}` });
           }
         } catch (error) {
           console.log(error);
@@ -63,7 +91,7 @@ class UserController extends BaseController {
             await searchedUser.save();
             res.status(200).json({ message: 'password have been reseted' });
           } else {
-            res.status(200).json({ error: 'token have been expired' });
+            res.status(400).json({ error: 'token have been expired' });
           }
         } catch (error) {
           console.log(error);
