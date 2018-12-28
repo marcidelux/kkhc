@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const R = require('ramda');
 const mongoose = require('mongoose');
 

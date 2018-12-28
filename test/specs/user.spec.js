@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const request = require('supertest');
 const sendGridMail = require('@sendgrid/mail');
 const RootServer = require('./../../server/RootServer');

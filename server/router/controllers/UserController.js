@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const bluebird = require('bluebird');
 const jwt = require('jsonwebtoken');
 const crypto = bluebird.promisifyAll(require('crypto'));

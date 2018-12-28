@@ -1,5 +1,5 @@
 const { PubSub } = require('graphql-subscriptions');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const bluebird = require('bluebird');
 const mongoose = require('mongoose');
 const {
