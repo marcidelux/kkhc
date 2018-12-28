@@ -45,6 +45,7 @@ class AdminController extends BaseController {
           await seedDB(this.connection, PATH_TO_DRIVE);
           res.json({ msg: 'Database successfully seeded' });
         } catch (error) {
+          console.log(`![seed-error]: ${error}`);
           res.json({ msg: String(error) });
         }
       },
