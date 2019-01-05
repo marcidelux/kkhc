@@ -22,9 +22,7 @@ const connectToDb = (config) => {
     console.log(`${collectionName}.${method}`, JSON.stringify(query), document);
   };
 
-  if (NODE_ENV === 'development') {
-    mongoose.set('debug', logCommand);
-  }
+  mongoose.set('debug', logCommand);
 
   const schemas = {
     [IMAGE.TYPE]: new mongoose.Schema({

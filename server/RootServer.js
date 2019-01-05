@@ -99,7 +99,7 @@ class RootServer {
         // @todo check if this declaration is needed ?
         path: GRAPHQL_SUBSCRIPTIONS,
       },
-      context: ({ req }) => ({
+      context: ({ req, res, connection }) => ({
         db: this.db,
       }),
       playground: {

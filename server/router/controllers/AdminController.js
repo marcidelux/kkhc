@@ -43,6 +43,7 @@ class AdminController extends BaseController {
       seedDbWithDriveFiles: async (req, res) => {
         try {
           await seedDB(this.connection, PATH_TO_DRIVE);
+          console.log('(seed-done)');
           res.json({ msg: 'Database successfully seeded' });
         } catch (error) {
           console.log(`![seed-error]: ${error}`);

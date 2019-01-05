@@ -66,6 +66,7 @@ const populate = async (traversedDirectory, dbConnection) => {
           parentHash,
         });
       }
+      console.log(`creating|> ${newFile}`);
       pendingSaves.push(newFile.save());
     } else if (type === FOLDER.TYPE) {
       const newFolderCollection = new Folder({
@@ -95,6 +96,7 @@ const populate = async (traversedDirectory, dbConnection) => {
     hash: ROOT_FOLDER_HASH,
   });
 
+  console.log('saving ROOT');
   pendingSaves.push(ROOT.save());
   return Promise.all(pendingSaves);
 };
