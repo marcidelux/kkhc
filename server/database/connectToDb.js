@@ -6,7 +6,6 @@ const {
     VIDEO,
   },
 } = require('./../constants');
-const { NODE_ENV } = require('./../environmentConfig');
 
 const connectToDb = (config) => {
   const connection = mongoose.connect(

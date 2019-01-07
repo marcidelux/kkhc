@@ -10,7 +10,6 @@ COPY ./server ./server/
 COPY ./shared ./shared/
 COPY ./test/specs ./test/specs
 COPY ./test/testAvatars ./test/testAvatars
-COPY ./www ./www/
 RUN chmod +x test_startup.sh
 
 RUN npm install

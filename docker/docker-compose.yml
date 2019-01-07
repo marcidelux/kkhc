@@ -26,7 +26,6 @@ services:
     volumes:
       - ./../server:/opt/server/
       - ./../shared:/opt/shared/
-      - ./../www:/opt/www/
       - ./../data/test_files:/opt/files/
     ports:
       - 3099:3099

@@ -5,7 +5,6 @@ class AdminRoutes {
         path: '/admin',
         method: 'post',
         controller: controller.admin(),
-        auth: false,
       },
     ];
   }

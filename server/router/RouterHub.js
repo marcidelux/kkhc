@@ -11,25 +11,12 @@ class RouterHub {
     });
   }
 
-  static redirect(req, res, next) {
-    if (req.session.authenticated) {
-      return next();
-    }
-    req.session.authenticated = false;
-    res.redirect('/');
-    return false;
-  }
-
   getRouter() {
     return this.router;
   }
 
   initializeRoutes() {
-    this.routes.forEach((route) => {
-      route.auth
-        ? this.router[route.method](route.path, this.constructor.redirect, route.controller)
-        : this.router[route.method](route.path, route.controller);
-    });
+    this.routes.forEach(route => this.router[route.method](route.path, route.controller));
   }
 }
 

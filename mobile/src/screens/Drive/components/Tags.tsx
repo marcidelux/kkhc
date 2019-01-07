@@ -98,6 +98,7 @@ export default class Tags extends React.Component<any, any> {
           margin: 5,
           paddingVertical: 5,
           paddingHorizontal: 10,
+          // hextorgb -> n switch to white textcolor if too dark
           backgroundColor: this.props.userStatus[tagPrimitive.userId].color,
           borderRadius: 20,
           height: this.state.selected === tagPrimitive.name
