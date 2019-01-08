@@ -9,6 +9,6 @@ module.exports = (({
   EXPRESS_PORT,
   DB_ALIAS,
   WEB_URL: NODE_ENV === 'development'
-    ? 'http://localhost:3030'
+    ? 'http://192.168.0.16:3030'
     : 'https://kkhc.eu',
 }))(process.env);
