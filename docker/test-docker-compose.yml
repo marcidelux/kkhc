@@ -34,7 +34,6 @@ services:
     volumes:
       - ./../server:/opt/server/
       - ./../shared:/opt/shared/
-      - ./../www:/opt/www/
       - ./../test/coverage/:/opt/test/coverage/
       - ./../test/mocks/__mocks__:/__mocks__/
       - ./../test/specs/:/opt/test/specs/

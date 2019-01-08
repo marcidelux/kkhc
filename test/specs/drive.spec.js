@@ -32,6 +32,10 @@ Object.assign(config, {
 
 jest.mock('/opt/server/database/resize');
 
+jest.mock('jsonwebtoken', () => ({
+  verify: () => {},
+}));
+
 describe('should database seeding work', () => {
   const folderQuery = `
   query getFolderContent($hash: String!) {
@@ -328,7 +332,10 @@ describe('should database seeding work', () => {
       const httpLink = new HttpLink({ uri: `http://localhost:${config.EXPRESS_PORT + GRAPHQL_ENDPOINT}`, fetch });
       const wsLink = new WebSocketLink({
         uri: `ws://localhost:${config.EXPRESS_PORT + GRAPHQL_SUBSCRIPTIONS}`,
-        options: { reconnect: true },
+        options: {
+          reconnect: true,
+          connectionParams: () => ({ token: 'fake_token' }),
+        },
       });
       const link = split(
         ({ query }) => {

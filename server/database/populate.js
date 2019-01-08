@@ -66,7 +66,7 @@ const populate = async (traversedDirectory, dbConnection) => {
           parentHash,
         });
       }
-      console.log(`creating|> ${newFile}`);
+      console.log(`creating|> ${newFile.name}`);
       pendingSaves.push(newFile.save());
     } else if (type === FOLDER.TYPE) {
       const newFolderCollection = new Folder({

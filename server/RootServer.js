@@ -2,12 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const express = require('express');
-const exphbs = require('express-handlebars');
 const morgan = require('morgan');
-const favicon = require('serve-favicon');
-const session = require('express-session');
 const { createServer } = require('http');
-const MemoryStore = require('memorystore')(session);
 const fileUpload = require('express-fileupload');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
@@ -27,15 +23,6 @@ const {
 const config = require('./environmentConfig');
 const RouterHub = require('./router/RouterHub');
 
-const hbs = exphbs.create({
-  extname: 'handlebars',
-  defaultLayout: 'main.handlebars',
-  layoutsDir: './../www/views/layouts',
-  helpers: {
-    WEB_URL: () => config.WEB_URL,
-  },
-});
-
 const schema = makeExecutableSchema({
   typeDefs: [fs.readFileSync('/opt/server/typeDefs.graphql', 'utf-8')],
   // eslint-disable-next-line
@@ -51,35 +38,18 @@ class RootServer {
 
   init() {
     this.app = express();
-
-    /* eslint-disable global-require */
     this.http = createServer(this.app);
-    this.io = require('socket.io')(this.http);
-    this.ioHandler = require('./socketIO/ioHandler').handler(this.io);
-    /* eslint-enable global-require */
 
     this.app.use(helmet());
     this.app.use(cookieParser());
-    this.app.use(favicon(path.join(__dirname, '../www/assets', 'favicon.ico')));
     this.app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : ''));
-    this.app.use(
-      session({
-        name: 'KKHC_Sessions',
-        store: new MemoryStore({
-          checkPeriod: 86400000,
-        }),
-        secret: config.EXPRESS_SECRET,
-      }),
-    );
     this.app.use(cors({
       credentials: true,
-      origin: config.NODE_ENV === 'development'
-        ? 'http://localhost:3030'
-        : 'https://kkhc.eu',
+      origin: config.WEB_URL,
     }));
     this.app.use(express.json());
     this.app.use(fileUpload());
-    this.app.use(express.static('../www/assets'));
+
     this.app.use(
       PATH_TO_DRIVE,
       express.static(path.join(`${__dirname}/../files`), { maxAge: '6h' }),
@@ -88,9 +58,7 @@ class RootServer {
       PATH_TO_AVATARS,
       express.static('./avatars', { maxAge: '6h' }),
     );
-    this.app.engine('handlebars', hbs.engine);
-    this.app.set('view engine', 'handlebars');
-    this.app.set('views', `${__dirname}/../www/views`);
+
     this.app.use('/', this.router.getRouter());
 
     const apollo = new ApolloServer({
@@ -110,7 +78,6 @@ class RootServer {
       },
     });
 
-
     this.app.use(async (req, res, next) => {
       try {
         await jwt.verify(req.cookies.token, config.EXPRESS_SECRET);
@@ -125,9 +92,7 @@ class RootServer {
       path: GRAPHQL_ENDPOINT,
       cors: {
         credentials: true,
-        origin: config.NODE_ENV === 'development'
-          ? 'http://localhost:3030'
-          : 'https://kkhc.eu',
+        origin: config.WEB_URL,
       },
     });
 
