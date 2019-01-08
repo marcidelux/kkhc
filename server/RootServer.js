@@ -45,9 +45,7 @@ class RootServer {
     this.app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : ''));
     this.app.use(cors({
       credentials: true,
-      origin: config.NODE_ENV === 'development'
-        ? 'http://localhost:3030'
-        : 'https://kkhc.eu',
+      origin: config.WEB_URL,
     }));
     this.app.use(express.json());
     this.app.use(fileUpload());
@@ -94,9 +92,7 @@ class RootServer {
       path: GRAPHQL_ENDPOINT,
       cors: {
         credentials: true,
-        origin: config.NODE_ENV === 'development'
-          ? 'http://localhost:3030'
-          : 'https://kkhc.eu',
+        origin: config.WEB_URL,
       },
     });
 
