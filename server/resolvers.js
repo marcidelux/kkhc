@@ -57,16 +57,6 @@ const resolvers = {
     },
   },
   Mutation: {
-    login: async (_, { email, password }, { db }) => {
-      const user = await db.models.User.findOne({ email }).exec();
-      if (user) {
-        const status = await bcrypt.compare(password, user.password);
-        return status
-          ? { status, userId: user.id }
-          : { status };
-      }
-      return { status: false };
-    },
     changePassword: async (_, { userId, oldPassword, newPassword }, { db }) => {
       const user = await db.models.User.findById(userId).exec();
       const status = await bcrypt.compare(oldPassword, user.password);

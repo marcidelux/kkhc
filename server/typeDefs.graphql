@@ -11,11 +11,6 @@ type Avatar {
     extension: String,
 }
 
-type LoginResponse {
-    status: Boolean!,
-    userId: String,
-}
-
 type Folder {
     name: String,
     path: String,
@@ -129,7 +124,6 @@ type Query {
 }
 
 type Mutation {
-    login(email: String!, password: String!): LoginResponse!
     changePassword(userId: ID!, oldPassword: String, newPassword: String): Boolean!
     updateStatus(user: UserTypeInput): User
     addChatMessage(chatMessage: ChatMessageInput!): ChatMessage

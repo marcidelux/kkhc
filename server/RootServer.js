@@ -78,14 +78,14 @@ class RootServer {
       },
     });
 
-    this.app.use(async (req, res, next) => {
-      try {
-        await jwt.verify(req.cookies.token, config.EXPRESS_SECRET);
-        next();
-      } catch (error) {
-        console.log(error);
-      }
-    });
+    // this.app.use(async (req, res, next) => {
+    //   try {
+    //     await jwt.verify(req.cookies.token, config.EXPRESS_SECRET);
+    //     next();
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // });
 
     apollo.applyMiddleware({
       app: this.app,
@@ -104,15 +104,15 @@ class RootServer {
         subscribe,
         schema,
         onConnect: async (connectionParams, webSocket, context) => {
-          if (connectionParams.token) {
-            try {
-              await jwt.verify(connectionParams.token, config.EXPRESS_SECRET);
-              return true;
-            } catch (error) {
-              console.log(error);
-            }
-          }
-          return false;
+          // if (connectionParams.token) {
+          //   try {
+          //     await jwt.verify(connectionParams.token, config.EXPRESS_SECRET);
+          //     return true;
+          //   } catch (error) {
+          //     console.log(error);
+          //   }
+          // }
+          // return false;
         },
         onDisconnect: (webSocket, context) => {
           // console.log('disconnect', webSocket, context);

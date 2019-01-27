@@ -1,3 +1,5 @@
+const currentIp = '192.168.0.16';
+
 module.exports = (({
   NODE_ENV = 'development',
   EXPRESS_PORT = 3000,
@@ -9,6 +11,6 @@ module.exports = (({
   EXPRESS_PORT,
   DB_ALIAS,
   WEB_URL: NODE_ENV === 'development'
-    ? 'http://192.168.0.16:3030'
+    ? `http://${currentIp}:3030`
     : 'https://kkhc.eu',
 }))(process.env);
